@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Edit Profile – LearnTrace</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .profile-page {
+      max-width: 480px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+    .profile-card {
+      background: var(--bg-alt);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      padding: 2rem;
+      border: 1px solid var(--border-subtle);
+    }
+    .profile-avatar-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .profile-avatar-preview {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      border: 2px solid var(--border-subtle);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent-soft);
+    }
+    .profile-avatar-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .profile-avatar-preview .profile-avatar-letter {
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .profile-upload-label {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .profile-back {
+      display: inline-block;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .profile-back:hover {
+      text-decoration: underline;
+    }
+    .profile-email-display {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+    #profileError, .error-message {
+      padding: 0.75rem 0.9rem;
+      border-radius: 12px;
+      background: rgba(249, 73, 115, 0.1);
+      border: 1px solid rgba(249, 73, 115, 0.3);
+      color: var(--danger);
+      font-size: 0.87rem;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="profile-page">
+    <a class="profile-back" href="index.html">← Back to app</a>
+    <div class="profile-card">
+      <h1 style="margin: 0 0 1rem; font-size: 1.35rem;">Edit Profile</h1>
+      <div id="profileError" class="error-message" style="display: none;"></div>
+      <div class="profile-avatar-wrap">
+        <div class="profile-avatar-preview" id="avatarPreview">
+          <span class="profile-avatar-letter" id="avatarLetter">?</span>
+          <img id="avatarImg" alt="" hidden />
+        </div>
+        <label class="profile-upload-label">
+          <input type="file" id="photoInput" accept="image/*" style="display: none;" />
+          <span class="btn btn-secondary" id="uploadBtn">Upload photo</span>
+        </label>
+      </div>
+      <p class="profile-email-display" id="profileEmailDisplay"></p>
+    </div>
+  </div>
+  <script type="module" src="auth-check.js"></script>
+  <script type="module" src="profile.js"></script>
+</body>
+</html>

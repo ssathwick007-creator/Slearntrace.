@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sign In – LearnTrace</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Login page specific styles */
+    .login-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--bg-alt);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      padding: 2rem 2.25rem 2.5rem;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .login-logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: conic-gradient(from 140deg, #4f46e5, #22c55e, #facc15, #4f46e5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #f9fafb;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.25);
+      margin: 0 auto 1rem;
+    }
+
+    [data-theme="dark"] .login-logo {
+      background: linear-gradient(135deg, #111827, #020617);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.6);
+    }
+
+    .login-header h1 {
+      margin: 0 0 0.4rem;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+    }
+
+    .login-header p {
+      margin: 0;
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    [data-theme="dark"] .login-header p {
+      color: rgba(148, 163, 184, 0.75);
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-main);
+      line-height: 1.4;
+    }
+
+    [data-theme="dark"] .form-label {
+      color: rgba(226, 232, 240, 0.9);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.7rem 0.9rem;
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-alt);
+      color: var(--text-main);
+      font-size: 0.95rem;
+      font-family: var(--font-main);
+      line-height: 1.5;
+      outline: none;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+    }
+
+    [data-theme="dark"] .form-input {
+      background: #0f172a;
+    }
+
+    .form-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    [data-theme="dark"] .form-input:focus {
+      box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15);
+    }
+
+    .btn-google {
+      width: 100%;
+      padding: 0.7rem 1.25rem;
+      background: var(--bg-alt);
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
+    }
+
+    [data-theme="dark"] .btn-google {
+      background: #1e293b;
+      border-color: #334155;
+    }
+
+    .btn-google:hover {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    [data-theme="dark"] .btn-google:hover {
+      background: rgba(49, 46, 129, 0.3);
+      border-color: rgba(129, 140, 248, 0.5);
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 0.5rem 0;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    [data-theme="dark"] .divider {
+      color: rgba(148, 163, 184, 0.6);
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-subtle);
+    }
+
+    .error-message {
+      padding: 0.75rem 0.9rem;
+      border-radius: 12px;
+      background: rgba(249, 73, 115, 0.1);
+      border: 1px solid rgba(249, 73, 115, 0.3);
+      color: var(--danger);
+      font-size: 0.87rem;
+      line-height: 1.5;
+      margin-bottom: 0.5rem;
+      display: none;
+    }
+
+    [data-theme="dark"] .error-message {
+      background: rgba(252, 165, 165, 0.1);
+      border-color: rgba(252, 165, 165, 0.2);
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .toggle-mode {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.87rem;
+      color: var(--text-muted);
+    }
+
+    [data-theme="dark"] .toggle-mode {
+      color: rgba(148, 163, 184, 0.7);
+    }
+
+    .toggle-mode button {
+      background: none;
+      border: none;
+      color: var(--accent);
+      cursor: pointer;
+      font-weight: 500;
+      padding: 0;
+      margin-left: 0.25rem;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .toggle-mode button:hover {
+      opacity: 0.8;
+    }
+
+    .login-footer {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-subtle);
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    [data-theme="dark"] .login-footer {
+      color: rgba(148, 163, 184, 0.65);
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-logo">LT</div>
+        <h1>Welcome to LearnTrace</h1>
+        <p>Sign in to track your learning behavior</p>
+      </div>
+
+      <div id="errorMessage" class="error-message" role="alert"></div>
+
+      <form class="login-form" id="loginForm" novalidate>
+        <button type="button" id="googleSignInBtn" class="btn-google">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M17.64 9.2c0-.637-.057-1.25-.164-1.84H9v3.48h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>
+            <path d="M9 18c2.43 0 4.467-.806 5.956-2.185l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" fill="#34A853"/>
+            <path d="M3.964 10.706c-.18-.54-.282-1.117-.282-1.706s.102-1.167.282-1.706V4.852H.957C.348 6.174 0 7.55 0 9s.348 2.826.957 4.148l3.007-2.442z" fill="#FBBC05"/>
+            <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.852L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z" fill="#EA4335"/>
+          </svg>
+          Continue with Google
+        </button>
+
+        <div class="divider">
+          <span>or</span>
+        </div>
+
+        <div class="form-group">
+          <label for="email" class="form-label">Email</label>
+          <input type="email" id="email" class="form-input" placeholder="you@example.com" required />
+        </div>
+
+        <div class="form-group">
+          <label for="password" class="form-label">Password</label>
+          <input type="password" id="password" class="form-input" placeholder="••••••••" required />
+        </div>
+
+        <button type="submit" id="emailSignInBtn" class="btn btn-primary">Sign In</button>
+
+        <div class="toggle-mode">
+          Don't have an account?
+          <button type="button" id="toggleToSignUp">Sign up</button>
+        </div>
+      </form>
+
+      <form class="login-form" id="signUpForm" style="display: none;" novalidate>
+        <button type="button" id="googleSignUpBtn" class="btn-google">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M17.64 9.2c0-.637-.057-1.25-.164-1.84H9v3.48h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>
+            <path d="M9 18c2.43 0 4.467-.806 5.956-2.185l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" fill="#34A853"/>
+            <path d="M3.964 10.706c-.18-.54-.282-1.117-.282-1.706s.102-1.167.282-1.706V4.852H.957C.348 6.174 0 7.55 0 9s.348 2.826.957 4.148l3.007-2.442z" fill="#FBBC05"/>
+            <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.852L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z" fill="#EA4335"/>
+          </svg>
+          Continue with Google
+        </button>
+
+        <div class="divider">
+          <span>or</span>
+        </div>
+
+        <div class="form-group">
+          <label for="signUpEmail" class="form-label">Email</label>
+          <input type="email" id="signUpEmail" class="form-input" placeholder="you@example.com" required />
+        </div>
+
+        <div class="form-group">
+          <label for="signUpPassword" class="form-label">Password</label>
+          <input type="password" id="signUpPassword" class="form-input" placeholder="••••••••" required minlength="6" />
+        </div>
+
+        <button type="submit" id="emailSignUpBtn" class="btn btn-primary">Create Account</button>
+
+        <div class="toggle-mode">
+          Already have an account?
+          <button type="button" id="toggleToSignIn">Sign in</button>
+        </div>
+      </form>
+
+      <div class="login-footer">
+        <p>LearnTrace – Track how you learn, not what you answer.</p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="auth-check.js"></script>
+  <script type="module" src="login.js"></script>
+</body>
+</html>
