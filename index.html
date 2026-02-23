@@ -1,25 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>LearnTrace – Learning Behavior Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="LearnTrace tracks how students learn — effort, behavior, and process — not just whether they got the right answer." />
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
   <div class="app-shell">
     <header class="app-header">
-      <div class="profile-wrap" id="profileWrap" style="display: none;">
-        <button id="profileBtn" class="profile-btn" aria-label="Profile" type="button">
-          <img id="profilePhoto" class="profile-photo" alt="" hidden />
-          <span id="profileLetter" class="profile-letter"></span>
-        </button>
-        <div id="profileDropdown" class="profile-dropdown" hidden>
-          <span id="profileEmail" class="profile-email"></span>
-          <a id="profileEditLink" class="profile-edit-link" href="profile.html">Edit Profile</a>
-          <button id="profileLogoutBtn" class="btn btn-ghost small" type="button">Logout</button>
-        </div>
-      </div>
+      <!-- Profile UI kept but DISABLED for Phase 1 -->
+      <div class="profile-wrap" id="profileWrap" style="display: none;"></div>
+
       <div class="brand">
         <div class="brand-logo">LT</div>
         <div class="brand-text">
@@ -27,6 +23,7 @@
           <p>Understand how students learn, not what they answer.</p>
         </div>
       </div>
+
       <div class="header-actions">
         <button id="themeToggle" class="btn-theme" aria-label="Toggle theme">
           <span class="theme-icon" id="themeIcon">🌙</span>
@@ -36,108 +33,271 @@
 
     <main class="app-main">
       <section class="grid">
-        <!-- Task Card -->
-        <article class="card card-task">
-          <h2>Learning Task</h2>
-          <p class="task-text">
-            Explain how recursion works in your own words.
-          </p>
-          <p class="task-hint">
-            Focus on how you think through the concept. Your process matters more than the final wording.
-          </p>
-        </article>
 
-        <!-- Editor & Controls -->
-        <article class="card card-editor">
-          <header class="card-header-row">
-            <h2>Your Explanation</h2>
-            <div class="pill" id="sessionStatusPill">Session: Not started</div>
-          </header>
+        <div class="left-col">
+          <!-- Task Card -->
+          <article class="card card-task">
+            <h2>Learning Task</h2>
+            <p class="task-text">
+              Explain how recursion works in your own words.
+            </p>
+            <p class="task-hint">
+              Focus on how you think through the concept. Your process matters more than the final wording.
+            </p>
+          </article>
 
-          <textarea
-            id="responseInput"
-            class="editor"
-            placeholder="Start when you're ready. Press &quot;Start Session&quot; to begin tracking your learning process."
-            disabled
-          ></textarea>
+          <!-- Editor -->
+          <article class="card card-editor">
+            <header class="card-header-row">
+              <h2>Your Explanation</h2>
+              <div class="pill" id="sessionStatusPill">Session: Not started</div>
+            </header>
 
-          <div class="controls">
-            <button id="startBtn" class="btn btn-primary">Start Session</button>
-            <button id="submitBtn" class="btn btn-secondary" disabled>Submit Response</button>
+            <textarea id="responseInput" class="editor" placeholder="Press 'Start Session' to begin."
+              disabled></textarea>
+
+            <div class="controls">
+              <button id="startBtn" class="btn btn-primary">Start Session</button>
+              <button id="submitBtn" class="btn btn-secondary" disabled>Submit Response</button>
+            </div>
+
+            <p class="small-note">
+              LearnTrace observes <strong>how</strong> you learn, not correctness.
+            </p>
+          </article>
+
+        </div>
+
+        <div class="right-col">
+          <!-- Metrics -->
+          <article class="card card-metrics">
+            <h2>Live Session Metrics</h2>
+            <div class="metrics-grid">
+              <div class="metric">
+                <div class="metric-label">Time elapsed</div>
+                <div class="metric-value" id="timeSpentDisplay">0s</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Keystrokes</div>
+                <div class="metric-value" id="keystrokesDisplay">0</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Edits</div>
+                <div class="metric-value" id="editsDisplay">0</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Idle time</div>
+                <div class="metric-value" id="idleTimeDisplay">0s</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Submit attempts</div>
+                <div class="metric-value" id="retriesDisplay">0</div>
+              </div>
+            </div>
+          </article>
+          <!-- Tabs: Insights / History (replaces separate Insight and History cards) -->
+          <div class="card card-tabs">
+            <div class="tabs" role="tablist" aria-label="Metrics tabs">
+              <button class="tab" role="tab" aria-selected="true" aria-controls="insightsPanel" id="tab-insights"
+                tabindex="0">Insights</button>
+              <button class="tab" role="tab" aria-selected="false" aria-controls="historyPanel" id="tab-history"
+                tabindex="-1">History</button>
+            </div>
+
+            <div class="tabpanels">
+              <article id="insightsPanel" class="tabpanel" role="tabpanel" aria-labelledby="tab-insights">
+                <h3 class="visually-hidden">Insights</h3>
+                <div class="insight-main">
+                  <div class="insight-label">Learner Pattern</div>
+                  <div class="insight-tag" id="classificationDisplay">No session yet</div>
+                </div>
+                <p class="insight-text" id="feedbackDisplay">
+                  Start a session and submit your explanation to see insights.
+                </p>
+                <!-- ONE concise insight sentence generated per session by script.js -->
+                <p class="insight-sentence" id="insightDisplay"></p>
+              </article>
+
+              <article id="historyPanel" class="tabpanel" role="tabpanel" aria-labelledby="tab-history" hidden>
+                <h3 class="visually-hidden">History</h3>
+                <header class="card-header-row">
+                  <h2>Past Sessions (Local)</h2>
+                  <button id="clearHistoryBtn" class="btn btn-ghost small">Clear History</button>
+                </header>
+                <div id="historyList" class="history-list empty">
+                  <p class="empty-text">No past sessions yet. Your next submission will appear here.</p>
+                </div>
+              </article>
+            </div>
           </div>
 
-          <p class="small-note">
-            LearnTrace does <strong>not</strong> grade correctness. It observes your learning behavior.
-          </p>
-        </article>
+          <!-- Study Assistant moved to a slide-in panel (floating button opens it) -->
 
-        <!-- Live Metrics -->
-        <article class="card card-metrics">
-          <h2>Live Session Metrics</h2>
-          <div class="metrics-grid">
-            <div class="metric">
-              <div class="metric-label">Time elapsed</div>
-              <div class="metric-value" id="timeSpentDisplay">0s</div>
-            </div>
-            <div class="metric">
-              <div class="metric-label">Keystrokes</div>
-              <div class="metric-value" id="keystrokesDisplay">0</div>
-            </div>
-            <div class="metric">
-              <div class="metric-label">Edits (Backspace/Delete)</div>
-              <div class="metric-value" id="editsDisplay">0</div>
-            </div>
-            <div class="metric">
-              <div class="metric-label">Idle time</div>
-              <div class="metric-value" id="idleTimeDisplay">0s</div>
-            </div>
-            <div class="metric">
-              <div class="metric-label">Submit attempts</div>
-              <div class="metric-value" id="retriesDisplay">0</div>
-            </div>
-          </div>
-          <p class="metric-footnote">
-            Idle time is counted when you pause typing. Long stretches of stillness can signal reflection or distraction.
-          </p>
-        </article>
+          <!-- (History moved into tabs) -->
 
-        <!-- Classification & Feedback -->
-        <article class="card card-insights">
-          <h2>Behavior Insight</h2>
-          <div class="insight-main">
-            <div class="insight-label">Learner Pattern</div>
-            <div class="insight-tag" id="classificationDisplay">No session yet</div>
-          </div>
-          <p class="insight-text" id="feedbackDisplay">
-            Start a session, then submit your explanation to see a mentor-style reflection on your learning pattern.
-          </p>
-          <p class="insight-note">
-            These insights are generated locally using simple rules based on your behavior. No data leaves your browser.
-          </p>
-        </article>
+        </div>
 
-        <!-- History -->
-        <article class="card card-history">
-          <header class="card-header-row">
-            <h2>Past Sessions (Local)</h2>
-            <button id="clearHistoryBtn" class="btn btn-ghost small">Clear History</button>
-          </header>
-          <p class="small-note">
-            Stored only in your browser's localStorage. Refreshing won't erase these unless you clear history.
-          </p>
-          <div id="historyList" class="history-list empty">
-            <p class="empty-text">No past sessions yet. Your next submission will appear here.</p>
-          </div>
-        </article>
       </section>
     </main>
 
     <footer class="app-footer">
-      <p>LearnTrace – a simple lens into learning behavior, not correctness.</p>
+      <p>LearnTrace – a simple lens into learning behavior.</p>
+      <div class="anonymous-banner">Anonymous mode – progress stored only in this browser</div>
     </footer>
   </div>
 
-  <script type="module" src="auth-check.js"></script>
-  <script src="script.js"></script>
+  <!-- 🚫 AUTH DISABLED FOR PHASE 1 -->
+  <!-- <script type="module" src="auth-check.js"></script> -->
+
+  <!-- ✅ CORE APP LOGIC ONLY -->
+  <script type="module" src="script.js"></script>
+  <script type="module" src="chatbot.js"></script>
+  <!-- Floating AI Assistant button and slide-in panel -->
+  <button id="aiToggle" class="ai-toggle" aria-label="Open Study Assistant" aria-controls="assistantPanel"
+    aria-expanded="false">
+    <!-- simple chat icon -->
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10z" fill="currentColor" opacity="0.95" />
+    </svg>
+  </button>
+
+  <!-- Mini floating timer (shows elapsed time when session active) -->
+  <div id="miniTimer" class="mini-timer" aria-hidden="true">0s</div>
+
+  <div id="assistantOverlay" class="assistant-overlay" hidden></div>
+
+  <aside id="assistantPanel" class="assistant-panel" role="dialog" aria-label="Study Assistant" aria-hidden="true">
+    <div class="assistant-panel-inner">
+      <div class="assistant-panel-header">
+        <h2>Study Assistant (Preview)</h2>
+        <div class="assistant-header-actions">
+          <button id="assistantExpandBtn" class="assistant-expand-btn" aria-label="Expand assistant"
+            title="Expand / Collapse">&#x26F6;</button>
+          <button id="assistantCloseBtn" class="btn btn-ghost small" aria-label="Close Assistant">Close</button>
+        </div>
+      </div>
+
+      <div class="card card-assistant-panel">
+        <div id="assistantMessages" class="assistant-messages">
+          <p class="assistant-empty">Ask a short question like “What is recursion?”</p>
+        </div>
+
+        <div class="assistant-controls" style="display:flex; gap:8px; margin-top:8px;">
+          <input id="assistantInput" class="input" placeholder="Ask the Study Assistant..." style="flex:1;" />
+          <button id="assistantSendBtn" class="btn btn-primary">Ask</button>
+          <button id="assistantClearBtn" class="btn btn-ghost">Clear</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <script>
+    (function () {
+      const toggle = document.getElementById('aiToggle');
+      const panel = document.getElementById('assistantPanel');
+      const overlay = document.getElementById('assistantOverlay');
+      const closeBtn = document.getElementById('assistantCloseBtn');
+      const expandBtn = document.getElementById('assistantExpandBtn');
+
+      var ICON_EXPAND = '\u26F6';   // ⛶ — four corners / expand
+      var ICON_COLLAPSE = '\u29C5'; // ⧅ — box with slash / collapse
+
+      function openPanel() {
+        if (!panel) return;
+        panel.classList.add('open');
+        panel.setAttribute('aria-hidden', 'false');
+        toggle.setAttribute('aria-expanded', 'true');
+        if (overlay) { overlay.classList.add('show'); overlay.hidden = false; }
+        // move focus into the panel
+        const input = panel.querySelector('#assistantInput');
+        if (input) setTimeout(function () { try { input.focus(); } catch (e) { } }, 50);
+      }
+
+      function closePanel() {
+        if (!panel) return;
+        panel.classList.remove('open', 'expanded');
+        panel.setAttribute('aria-hidden', 'true');
+        toggle.setAttribute('aria-expanded', 'false');
+        if (expandBtn) { expandBtn.textContent = ICON_EXPAND; expandBtn.setAttribute('aria-label', 'Expand assistant'); }
+        if (overlay) {
+          overlay.classList.remove('show');
+          // Reset hidden after the CSS transition (200ms) so overlay is truly inert
+          setTimeout(function () { try { overlay.hidden = true; } catch (e) { } }, 220);
+        }
+        try { toggle.focus(); } catch (e) { }
+      }
+
+      function toggleExpand() {
+        if (!panel) return;
+        var isExpanded = panel.classList.toggle('expanded');
+        if (expandBtn) {
+          expandBtn.textContent = isExpanded ? ICON_COLLAPSE : ICON_EXPAND;
+          expandBtn.setAttribute('aria-label', isExpanded ? 'Collapse assistant' : 'Expand assistant');
+        }
+      }
+
+      // convert close button to a compact × while preserving behavior
+      try { if (closeBtn) { closeBtn.textContent = '\u00D7'; closeBtn.classList.add('assistant-close-x'); closeBtn.setAttribute('aria-label', 'Close Assistant'); } } catch (e) { }
+
+      if (toggle) toggle.addEventListener('click', openPanel);
+      if (closeBtn) closeBtn.addEventListener('click', closePanel);
+      if (expandBtn) expandBtn.addEventListener('click', toggleExpand);
+      if (overlay) overlay.addEventListener('click', closePanel);
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePanel(); });
+    })();
+  </script>
+  <script>
+    // Minimal tab switcher: keyboard + click accessible
+    (function () {
+      function activateTab(tabEl, tabs, panels) {
+        const targetId = tabEl.getAttribute('aria-controls');
+        tabs.forEach(t => {
+          const sel = t === tabEl;
+          t.setAttribute('aria-selected', sel ? 'true' : 'false');
+          t.tabIndex = sel ? 0 : -1;
+        });
+
+        panels.forEach(p => {
+          if (p.id === targetId) {
+            // show immediately and allow CSS transition
+            p.classList.add('active');
+            p.removeAttribute('hidden');
+            p.setAttribute('aria-hidden', 'false');
+          } else {
+            // hide with transition, then set hidden for accessibility
+            p.classList.remove('active');
+            p.setAttribute('aria-hidden', 'true');
+            setTimeout(() => {
+              try { p.setAttribute('hidden', ''); } catch (e) { }
+            }, 300);
+          }
+        });
+
+        tabEl.focus();
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        const tabs = Array.from(document.querySelectorAll('.tabs [role="tab"]'));
+        const panels = Array.from(document.querySelectorAll('.tabpanel'));
+        if (!tabs.length || !panels.length) return;
+
+        tabs.forEach(tab => {
+          tab.addEventListener('click', (e) => { activateTab(tab, tabs, panels); });
+          tab.addEventListener('keydown', (e) => {
+            const idx = tabs.indexOf(tab);
+            if (e.key === 'ArrowRight') { e.preventDefault(); const n = tabs[(idx + 1) % tabs.length]; activateTab(n, tabs, panels); }
+            else if (e.key === 'ArrowLeft') { e.preventDefault(); const n = tabs[(idx - 1 + tabs.length) % tabs.length]; activateTab(n, tabs, panels); }
+            else if (e.key === 'Home') { e.preventDefault(); activateTab(tabs[0], tabs, panels); }
+            else if (e.key === 'End') { e.preventDefault(); activateTab(tabs[tabs.length - 1], tabs, panels); }
+            else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activateTab(tab, tabs, panels); }
+          });
+        });
+        // ensure only the selected tab's panel is visible on load
+        const selected = tabs.find(t => t.getAttribute('aria-selected') === 'true') || tabs[0];
+        activateTab(selected, tabs, panels);
+      });
+    })();
+  </script>
 </body>
+
 </html>

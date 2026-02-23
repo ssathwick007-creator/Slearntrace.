@@ -61,14 +61,11 @@ export async function logout() {
 }
 
 export function onAuthChange(callback) {
-  // Single source of truth flag for other scripts to know auth has been initialized.
-  if (typeof window !== "undefined" && window.__authReady === undefined) {
-    window.__authReady = false;
-  }
+  // Return the unsubscribe function so callers can ensure a single listener.
+  // Keep this function minimal: do not mutate global state here — the central
+  // auth-check.js module is responsible for coordinating page-level flags
+  // and redirects.
   return onAuthStateChanged(auth, (user) => {
-    if (typeof window !== "undefined") {
-      window.__authReady = true;
-    }
     callback(user);
   });
 }

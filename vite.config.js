@@ -6,13 +6,11 @@ export default defineConfig({
     port: 5173,
     open: false
   },
-  // Ensure proper handling of HTML files
+  // Build only the main app; auth pages are disabled
   build: {
     rollupOptions: {
       input: {
-        main: './index.html',
-        login: './login.html',
-        profile: './profile.html'
+        main: './index.html'
       }
     }
   }
