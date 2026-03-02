@@ -219,20 +219,39 @@
     return hint ? `${reply}\n\n💡 ${hint}` : reply;
   }
 
-  // ─── Rendering ────────────────────────────────────────────────────────────
+  // ─── Incremental DOM rendering ────────────────────────────────────────────
   /**
-   * Efficiently re-renders the chat history.
-   * Uses a guard (_renderedLen) to skip full re-renders when nothing changed,
-   * preventing any visual flicker or jitter.
+   * Appends ONLY new messages to the DOM instead of wiping innerHTML.
+   * This eliminates any visual flicker and preserves scroll position.
+   * _renderedCount tracks how many messages have been painted so far.
    */
-  let _renderedLen = 0;
+  let _renderedCount = 0;
 
-  function render() {
-    // Skip re-render if the chat array hasn't grown
-    if (chat.length === _renderedLen && assistantMessages.children.length > 0) return;
-    _renderedLen = chat.length;
+  function scrollToBottom() {
+    requestAnimationFrame(() => {
+      try { assistantMessages.scrollTop = assistantMessages.scrollHeight; } catch (e) { }
+    });
+  }
 
+  function buildMessageEl(entry) {
+    const wrapper = document.createElement('div');
+    wrapper.className = entry.role === 'user' ? 'msg user-msg' : 'msg assistant-msg';
+    wrapper.style.marginBottom = '6px';
+
+    const bubble = document.createElement('div');
+    bubble.style.whiteSpace = 'pre-wrap'; // preserve line breaks in multi-line replies
+    bubble.textContent = entry.text;
+
+    wrapper.appendChild(bubble);
+    // Slide-in animation; fill-mode:both ensures element stays visible after animation
+    requestAnimationFrame(() => { wrapper.classList.add('enter'); });
+    return wrapper;
+  }
+
+  /** Full re-render (used only on clear). */
+  function renderFull() {
     assistantMessages.innerHTML = "";
+    _renderedCount = 0;
 
     if (!chat.length) {
       const p = document.createElement('p');
@@ -243,78 +262,103 @@
     }
 
     chat.forEach(entry => {
-      const wrapper = document.createElement('div');
-      wrapper.className = entry.role === 'user' ? 'msg user-msg' : 'msg assistant-msg';
-      wrapper.style.marginBottom = '6px';
-
-      const bubble = document.createElement('div');
-      bubble.style.whiteSpace = 'pre-wrap'; // preserve line breaks in multi-line replies
-      bubble.textContent = entry.text;
-
-      wrapper.appendChild(bubble);
-      assistantMessages.appendChild(wrapper);
-
-      // Slide-in animation; fill-mode:both ensures element stays visible after animation
-      requestAnimationFrame(() => { wrapper.classList.add('enter'); });
+      assistantMessages.appendChild(buildMessageEl(entry));
     });
+    _renderedCount = chat.length;
+    scrollToBottom();
+  }
 
-    assistantMessages.scrollTop = assistantMessages.scrollHeight;
+  /** Appends any messages in chat[] beyond _renderedCount. No flicker. */
+  function renderAppend() {
+    // If lengths match, nothing to do
+    if (_renderedCount === chat.length) return;
+
+    // Remove empty-state placeholder when first real message arrives
+    if (_renderedCount === 0 && chat.length > 0) {
+      const emptyEl = assistantMessages.querySelector('.assistant-empty');
+      if (emptyEl) emptyEl.remove();
+    }
+
+    for (let i = _renderedCount; i < chat.length; i++) {
+      assistantMessages.appendChild(buildMessageEl(chat[i]));
+    }
+    _renderedCount = chat.length;
+    scrollToBottom();
+  }
+
+  // ─── Typing indicator ────────────────────────────────────────────────────
+  let _typingEl = null;
+
+  function showTypingIndicator() {
+    if (_typingEl) return; // already showing
+    _typingEl = document.createElement('div');
+    _typingEl.className = 'msg assistant-msg typing-indicator';
+    _typingEl.setAttribute('aria-label', 'Assistant is typing');
+    _typingEl.innerHTML = '<div><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>';
+    assistantMessages.appendChild(_typingEl);
+    scrollToBottom();
+  }
+
+  function hideTypingIndicator() {
+    if (_typingEl) {
+      try { assistantMessages.removeChild(_typingEl); } catch (e) { }
+      _typingEl = null;
+    }
   }
 
   // ─── Send logic ────────────────────────────────────────────────────────────
-  // Race-condition guard: if the user sends again before the 110 ms reply fires,
+  // Race-condition guard: if the user sends again before the reply fires,
   // the stale timeout is cancelled. Only the most recent question gets replied to.
   let _pendingReplyTimeout = null;
 
-  function sendQuestion() {
+  function setSendDisabled(disabled) {
+    try { assistantSendBtn.disabled = disabled; } catch (e) { }
+  }
+
+  async function sendQuestion() {
     const q = assistantInput.value && assistantInput.value.trim();
     if (!q) return;
 
-    // Cancel any in-flight reply that hasn't fired yet
+    // Cancel any in-flight static reply (kept for safety with submission events)
     if (_pendingReplyTimeout !== null) {
       clearTimeout(_pendingReplyTimeout);
       _pendingReplyTimeout = null;
+      hideTypingIndicator();
     }
 
     chat.push({ role: 'user', text: q });
-    _renderedLen = 0; // force re-render on next render() call
-    render();
+    renderAppend();
     assistantInput.value = '';
 
-    // Read live metrics produced by script.js (optional — graceful if absent)
-    function readMetrics() {
-      try {
-        const lm = window.__learnTraceLiveMetrics;
-        if (lm) return { idleSeconds: lm.idleSeconds || 0, durationSeconds: lm.durationSeconds || 0, keystrokes: lm.keystrokes || 0, edits: lm.edits || 0 };
-      } catch (e) { /* ignore */ }
-      // DOM fallback (used when live metrics aren't available yet)
-      try {
-        function parseTime(t) {
-          if (!t) return 0;
-          const m = t.match(/(\d+)m(?:\s*(\d+)s)?/);
-          if (m) return parseInt(m[1], 10) * 60 + (parseInt(m[2], 10) || 0);
-          const s = t.match(/(\d+)s/);
-          return s ? parseInt(s[1], 10) : 0;
-        }
-        return {
-          idleSeconds: parseTime((document.getElementById('idleTimeDisplay') || {}).textContent),
-          durationSeconds: parseTime((document.getElementById('timeSpentDisplay') || {}).textContent),
-          keystrokes: parseInt((document.getElementById('keystrokesDisplay') || {}).textContent || '0', 10) || 0,
-          edits: parseInt((document.getElementById('editsDisplay') || {}).textContent || '0', 10) || 0,
-        };
-      } catch (e) { return null; }
-    }
+    // Disable send button while reply is pending
+    setSendDisabled(true);
+    showTypingIndicator();
 
-    const metrics = readMetrics();
-    const ans = getAnswer(q, metrics);
+    try {
+      const response = await fetch('/api/assistant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: q })
+      });
 
-    // Natural reply delay — keeps the interaction feel human, not instant
-    _pendingReplyTimeout = setTimeout(() => {
-      _pendingReplyTimeout = null;
+      if (!response.ok) throw new Error(`Backend Error: ${response.status}`);
+
+      const data = await response.json();
+      let ans = data.reply || "Sorry, I received an empty response.";
+
+      hideTypingIndicator();
       chat.push({ role: 'assistant', text: ans });
-      _renderedLen = 0; // force re-render
-      render();
-    }, 110);
+      renderFull(); // Forces a clean syncing of state to fix vanishing history bugs
+    } catch (e) {
+      // Don't use safeLog here to avoid breaking if it's not universally available
+      console.error('AI Chat Error:', e);
+      hideTypingIndicator();
+      chat.push({ role: 'assistant', text: "Sorry, I had trouble connecting to the AI." });
+      renderFull();
+    } finally {
+      setSendDisabled(false);
+      try { assistantInput.focus(); } catch (e) { }
+    }
   }
 
   // ─── Event listeners ──────────────────────────────────────────────────────
@@ -327,14 +371,15 @@
     assistantClearBtn.addEventListener('click', () => {
       // Cancel any pending reply before clearing
       if (_pendingReplyTimeout !== null) { clearTimeout(_pendingReplyTimeout); _pendingReplyTimeout = null; }
+      hideTypingIndicator();
+      setSendDisabled(false);
       chat.length = 0;
-      _renderedLen = 0;
-      render();
+      renderFull();
     });
   }
 
   // Initial empty state
-  render();
+  renderFull();
 
   // ─── Post-submission personalized feedback ────────────────────────────────
   /**
@@ -357,7 +402,7 @@
         return "Your pauses and revisions suggest deep thinking. 🌱 Try capturing *why* you changed your wording — that metacognition is powerful.";
       if (/revising|persistent/i.test(classification))
         return "Lots of edits — you're actively shaping your understanding. 🔧 Notice what made you revise: confusion, or improving precision?";
-      if (/fast|ai.depend/i.test(classification))
+      if (/quick submitter|fast|ai.depend/i.test(classification))
         return "Quick response! 🏃 Make sure the answer came from *your* thinking. Try explaining it again in one minute without looking.";
       if (/balanced/i.test(classification))
         return "Solid, balanced session. ⚖️ Keep this rhythm — thoughtful pace + steady revisions is what healthy learning looks like.";
@@ -374,8 +419,10 @@
   // Listen for submission events dispatched by script.js
   document.addEventListener('learntrace:submission', (ev) => {
     try {
-      // Cancel any pending question reply to avoid ordering issues
+      // Cancel any pending question reply and clear typing indicator
       if (_pendingReplyTimeout !== null) { clearTimeout(_pendingReplyTimeout); _pendingReplyTimeout = null; }
+      hideTypingIndicator();
+      setSendDisabled(false);
 
       let metrics = null;
       let classification = null;
@@ -400,8 +447,7 @@
 
       const feedback = composePersonalizedFeedback(metrics, classification, insight);
       chat.push({ role: 'assistant', text: feedback });
-      _renderedLen = 0;
-      render();
+      renderAppend();
     } catch (e) {
       // Swallow silently — chatbot feedback is non-critical to the core app
     }

@@ -7,15 +7,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description"
     content="LearnTrace tracks how students learn — effort, behavior, and process — not just whether they got the right answer." />
-  <script type="module" crossorigin src="/assets/main-nZ8n-aJq.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/main-BMd4A8N8.css">
+  <script type="module" crossorigin src="/assets/main-DhpQROS3.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/main-CmjJp1G2.css">
 </head>
 
 <body>
   <div class="app-shell">
     <header class="app-header">
-      <!-- Profile UI kept but DISABLED for Phase 1 -->
-      <div class="profile-wrap" id="profileWrap" style="display: none;"></div>
+      <!-- Profile icon (shown when signed in by auth-check.js) -->
+      <div class="profile-wrap" id="profileWrap" style="display: none;">
+        <button class="profile-btn" id="profileBtn" aria-label="Open profile menu" aria-haspopup="true"
+          aria-expanded="false">
+          <img id="profilePhoto" class="profile-photo" src="" alt="" hidden />
+          <span id="profileLetter" class="profile-letter" aria-hidden="true"></span>
+        </button>
+        <div id="profileDropdown" class="profile-dropdown" hidden>
+          <p id="profileEmail" class="profile-dropdown-email"></p>
+          <a href="profile.html" class="profile-dropdown-link">Edit Profile</a>
+          <button id="profileLogoutBtn" class="profile-dropdown-link profile-dropdown-logout">Sign Out</button>
+        </div>
+      </div>
 
       <div class="brand">
         <div class="brand-logo">LT</div>
@@ -26,6 +37,9 @@
       </div>
 
       <div class="header-actions">
+        <!-- Shown when anonymous (auth-check.js toggles display) -->
+        <a id="signInLink" href="login.html" class="btn btn-ghost small" style="display:none;">Sign in to save your
+          progress</a>
         <button id="themeToggle" class="btn-theme" aria-label="Toggle theme">
           <span class="theme-icon" id="themeIcon">🌙</span>
         </button>
@@ -39,9 +53,8 @@
           <!-- Task Card -->
           <article class="card card-task">
             <h2>Learning Task</h2>
-            <p class="task-text">
-              Explain how recursion works in your own words.
-            </p>
+            <p class="task-type" id="taskType"></p>
+            <p class="task-text" id="taskText"></p>
             <p class="task-hint">
               Focus on how you think through the concept. Your process matters more than the final wording.
             </p>
@@ -124,6 +137,10 @@
                 <header class="card-header-row">
                   <h2>Past Sessions (Local)</h2>
                   <button id="clearHistoryBtn" class="btn btn-ghost small">Clear History</button>
+                  <button id="exportHistoryBtn" class="btn btn-ghost small" title="Export sessions as plain text">↓
+                    TXT</button>
+                  <button id="exportHistoryJsonBtn" class="btn btn-ghost small" title="Export sessions as JSON">↓
+                    JSON</button>
                 </header>
                 <div id="historyList" class="history-list empty">
                   <p class="empty-text">No past sessions yet. Your next submission will appear here.</p>
@@ -144,13 +161,11 @@
     <footer class="app-footer">
       <p>LearnTrace – a simple lens into learning behavior.</p>
       <div class="anonymous-banner">Anonymous mode – progress stored only in this browser</div>
+      <span id="syncStatus" class="sync-status" hidden></span>
     </footer>
   </div>
 
-  <!-- 🚫 AUTH DISABLED FOR PHASE 1 -->
-  <!-- <script type="module" src="auth-check.js"></script> -->
-
-  <!-- ✅ CORE APP LOGIC ONLY -->
+  <!-- Core app + optional auth -->
   <!-- Floating AI Assistant button and slide-in panel -->
   <button id="aiToggle" class="ai-toggle" aria-label="Open Study Assistant" aria-controls="assistantPanel"
     aria-expanded="false">
@@ -201,6 +216,17 @@
       var ICON_EXPAND = '\u26F6';   // ⛶ — four corners / expand
       var ICON_COLLAPSE = '\u29C5'; // ⧅ — box with slash / collapse
 
+      // Debounce flag — prevents rapid double-click from toggling the panel twice
+      var _toggling = false;
+      function withDebounce(fn) {
+        return function () {
+          if (_toggling) return;
+          _toggling = true;
+          setTimeout(function () { _toggling = false; }, 250);
+          fn();
+        };
+      }
+
       function openPanel() {
         if (!panel) return;
         panel.classList.add('open');
@@ -238,11 +264,11 @@
       // convert close button to a compact × while preserving behavior
       try { if (closeBtn) { closeBtn.textContent = '\u00D7'; closeBtn.classList.add('assistant-close-x'); closeBtn.setAttribute('aria-label', 'Close Assistant'); } } catch (e) { }
 
-      if (toggle) toggle.addEventListener('click', openPanel);
-      if (closeBtn) closeBtn.addEventListener('click', closePanel);
+      if (toggle) toggle.addEventListener('click', withDebounce(openPanel));
+      if (closeBtn) closeBtn.addEventListener('click', withDebounce(closePanel));
       if (expandBtn) expandBtn.addEventListener('click', toggleExpand);
-      if (overlay) overlay.addEventListener('click', closePanel);
-      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePanel(); });
+      if (overlay) overlay.addEventListener('click', withDebounce(closePanel));
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePanel(); });
     })();
   </script>
   <script>

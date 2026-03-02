@@ -5,9 +5,10 @@
  * The module pattern (no global leakage) keeps the app safe for
  * future ES-module migration or auth layering.
  *
- * AUTH EXTENSION POINT — see getUserId() near bottom of file.
- * When auth is ready, replace the stub there without touching anything else.
+ * AUTH EXTENSION POINT — see userContext.js.
+ * When auth is ready, only userContext.js needs to change.
  */
+import { getUserId as _getUserIdFromContext } from './userContext.js';
 (function () {
   "use strict";
 
@@ -35,9 +36,26 @@
   const themeToggle = document.getElementById("themeToggle");
   const themeIcon = document.getElementById("themeIcon");
   const miniTimerEl = document.getElementById("miniTimer");
+  const nextQuestionBtn = document.getElementById("nextQuestionBtn");
+  const prevQuestionBtn = document.getElementById("prevQuestionBtn");
 
   const STORAGE_KEY = "learnTraceAttempts";
   const THEME_STORAGE_KEY = "learnTraceTheme";
+  const FALLBACK_QUESTIONS = [
+    { id: "q1", questionText: "If all roses are flowers and some flowers fade quickly, can we say some roses fade quickly? Explain." },
+    { id: "q2", questionText: "A bat and ball cost $1.10. Bat costs $1 more than ball. How much is the ball?" },
+    { id: "q3", questionText: "Three people pay $30 for room, manager refunds $5, bellboy keeps $2 — where is the missing dollar?" }
+  ];
+
+  // ─── Task pool ────────────────────────────────────────────────────────────
+  // (Obsolete - Tasks now loaded from backend)
+
+
+
+  // Current task for this page load — set once in init(), read in submit handler
+  let currentTask = null;
+  let nextQuestionId = null;
+  let prevQuestionId = null;
 
   // ─── Session state ────────────────────────────────────────────────────────
   let sessionActive = false;
@@ -51,6 +69,11 @@
   let timerIntervalId = null;
   // Tracks whether the tab is currently visible; used to pause idle on blur
   let tabVisible = true;
+  // Double-click / rapid-click guards — prevent duplicate session start/submit
+  let _startLocked = false;
+  let _submitLocked = false;
+  // Idempotency flag: prevents endSession running twice in the same tick
+  let _sessionEnding = false;
 
   // Configuration — tweak these thresholds without touching logic
   const IDLE_THRESHOLD_MS = 3000; // user is "idle" after 3 s of no typing
@@ -77,6 +100,94 @@
     return s === 0 ? `${m}m` : `${m}m ${s}s`;
   }
 
+  const BACKEND_URL = window.location.hostname === 'localhost'
+    ? 'http://localhost:5000'
+    : 'https://learntrace-backend.onrender.com';
+
+  // ─── Backend Integration ──────────────────────────────────────────────────
+  async function fetchReflectionQuestion(id = null) {
+    try {
+      const url = id
+        ? `${BACKEND_URL}/api/reflection?currentId=${id}`
+        : `${BACKEND_URL}/api/reflection`;
+
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Failed to fetch question');
+
+      const data = await response.json();
+
+      // If we asked for a specific ID, the backend returns { current, next, prev }
+      if (id && data.current) {
+        currentTask = {
+          id: data.current.id,
+          type: 'Logical Reasoning',
+          text: data.current.questionText
+        };
+        nextQuestionId = data.next ? data.next.id : null;
+        prevQuestionId = data.prev ? data.prev.id : null;
+      } else if (Array.isArray(data) && data.length > 0) {
+        // First load: pick the first one and fetch its full details (next/prev)
+        const first = data[0];
+        return fetchReflectionQuestion(first.id);
+      } else if (data.current) {
+        // Fallback for when backend might return a single object as default
+        currentTask = {
+          id: data.current.id,
+          type: 'Logical Reasoning',
+          text: data.current.questionText
+        };
+        nextQuestionId = data.next ? data.next.id : null;
+        prevQuestionId = data.prev ? data.prev.id : null;
+      }
+
+      updateTaskUI();
+    } catch (e) {
+      safeLog(e, 'fetchReflectionQuestion');
+
+      // FALLBACK LOGIC: Use hardcoded array if backend fails
+      const fallbackList = FALLBACK_QUESTIONS;
+      let q;
+      if (id) {
+        const idx = fallbackList.findIndex(item => item.id === id);
+        if (idx !== -1) {
+          q = fallbackList[idx];
+          nextQuestionId = fallbackList[idx + 1] ? fallbackList[idx + 1].id : null;
+          prevQuestionId = fallbackList[idx - 1] ? fallbackList[idx - 1].id : null;
+        }
+      }
+
+      if (!q && fallbackList.length > 0) {
+        q = fallbackList[0];
+        nextQuestionId = fallbackList[1] ? fallbackList[1].id : null;
+        prevQuestionId = null;
+      }
+
+      if (q) {
+        currentTask = { id: q.id, type: 'Logical Reasoning', text: q.questionText };
+        updateTaskUI();
+      } else {
+        const taskTextEl = document.getElementById('taskText');
+        if (taskTextEl) taskTextEl.textContent = "Unable to load questions. Please check your connection.";
+      }
+    }
+  }
+
+  function updateTaskUI() {
+    if (!currentTask) return;
+    const taskTextEl = document.getElementById('taskText');
+    const taskTypeEl = document.getElementById('taskType');
+    if (taskTextEl) taskTextEl.textContent = currentTask.text;
+    if (taskTypeEl) taskTypeEl.textContent = currentTask.type;
+
+    // Toggle navigation buttons visibility
+    if (nextQuestionBtn) {
+      nextQuestionBtn.style.display = nextQuestionId ? 'flex' : 'none';
+    }
+    if (prevQuestionBtn) {
+      prevQuestionBtn.style.display = prevQuestionId ? 'flex' : 'none';
+    }
+  }
+
   // ─── Live metrics (shared with chatbot.js via window) ─────────────────────
   // chatbot.js reads window.__learnTraceLiveMetrics to give context-aware hints
   try { if (typeof window !== 'undefined') window.__learnTraceLiveMetrics = null; } catch (e) { }
@@ -93,13 +204,12 @@
     } catch (e) { /* non-critical */ }
   }
 
-  // ─── Auth abstraction (Phase 10 hook) ─────────────────────────────────────
-  // AUTH EXTENSION POINT — replace body with real auth lookup when ready.
+  // ─── Auth abstraction ─────────────────────────────────────────────────────
+  // Delegates to userContext.js — that is the ONLY file to edit when adding auth.
   // Do NOT change any call sites; getUserId() is used consistently below.
   function getUserId() {
     try {
-      // Future: return firebase.auth().currentUser?.uid ?? 'anonymous';
-      return 'anonymous';
+      return _getUserIdFromContext();
     } catch (e) { return 'anonymous'; }
   }
 
@@ -133,7 +243,17 @@
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(attempts));
       return true;
-    } catch (e) { return false; }
+    } catch (e) {
+      // QuotaExceededError: drop oldest session and retry once
+      if (e && (e.name === 'QuotaExceededError' || e.code === 22)) {
+        try {
+          const trimmed = attempts.slice(-40); // keep 40 most recent
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
+          return true;
+        } catch (_) { return false; }
+      }
+      return false;
+    }
   }
 
   async function clearAllSessions() {
@@ -164,6 +284,7 @@
 
   function resetSessionState() {
     sessionActive = false;
+    _sessionEnding = false;
     startTimeMs = 0;
     keystrokes = 0;
     edits = 0;
@@ -283,7 +404,8 @@
   }
 
   function endSession() {
-    if (!sessionActive) return;
+    if (!sessionActive || _sessionEnding) return; // idempotency guard
+    _sessionEnding = true;
     sessionActive = false;
     // Stop the interval immediately to prevent further ticks
     if (timerIntervalId !== null) {
@@ -294,6 +416,7 @@
     if (responseInput) responseInput.disabled = true;
     setSessionStatus("Session: Completed", "ended");
     if (startBtn) startBtn.disabled = false;
+    _startLocked = false; // ensure start is re-enabled after session ends
     try { localStorage.removeItem("learnTrace.sessionActive"); } catch (e) { }
     try { exposeLiveMetrics(); } catch (e) { }
     // Hide mini timer
@@ -304,12 +427,14 @@
         miniTimerEl.textContent = '0s';
       }
     } catch (e) { }
+    _sessionEnding = false;
   }
 
   // ─── Classification (rule-based, deterministic, no API) ───────────────────
   /**
    * Returns { label: string, tone: string } from raw session metrics.
    * Rules are intentionally simple and explainable — no ML.
+   * Priority order matters: more specific checks appear first.
    */
   function classifyAttempt({ durationSeconds, totalEdits, totalKeystrokes, idleSeconds, submitAttempts }) {
     const longTime = durationSeconds >= 90;
@@ -334,13 +459,13 @@
     if (highEdits && !shortTime)
       return { label: "Revising Learner", tone: "revising" };
 
-    // Priority 3 — Fast Responder: quick and confident
+    // Priority 3 — Quick Submitter: very fast with minimal effort (checked BEFORE Fast Responder)
+    if (shortTime && fewEdits && veryFewKeys)
+      return { label: "Quick Submitter", tone: "ai_dependency" };
+
+    // Priority 4 — Fast Responder: quick but genuine (has edits)
     if (shortTime && !fewEdits)
       return { label: "Fast Responder", tone: "fast_responder" };
-
-    // Priority 4 — Possible AI Dependency: suspiciously fast with minimal effort
-    if (shortTime && fewEdits && veryFewKeys)
-      return { label: "Possible AI Dependency", tone: "ai_dependency" };
 
     // Priority 5 — Balanced: healthy rhythm
     if (mediumTime && steadyEdits)
@@ -377,7 +502,7 @@
       revising: 'You revised actively — this is where real understanding is built. Notice what you changed each time: that awareness is more valuable than the final wording.',
       fast_responder: 'You answered quickly and with confidence. Great! Make sure it came from your own thinking — try re-explaining it in one minute without looking back.',
       persistent: 'You stayed with it through many revisions. That persistence builds deep understanding — keep refining rather than aiming for perfection on the first try.',
-      ai_dependency: 'This came together very quickly with minimal revision. Try slowing down to put ideas into your own words and make at least one or two genuine revisions.',
+      ai_dependency: 'This session was very brief with minimal revision. Try slowing down to put ideas into your own words and make at least one or two genuine revisions.',
       balanced: 'Good pacing — you gave yourself time to think, revised a few times, then committed. This is a healthy learning rhythm. Keep building on it.',
       reflective: 'Your pauses and resubmissions suggest thoughtful reflection. Make sure that reflection is about your own understanding, not just searching for the right phrasing.',
       slow_careful: 'You took your time carefully. Try adding more small revisions — rewriting is often where deeper understanding surfaces.',
@@ -400,7 +525,7 @@
   function generateInsight(metrics, classificationLabel) {
     const { durationSeconds, totalEdits, totalKeystrokes, idleSeconds, submitAttempts } = metrics;
 
-    // Use the most salient metric to craft the insight
+    // Metric-first checks (most salient signal wins)
     if (totalEdits >= 20 && idleSeconds >= 20)
       return "You paused frequently and revised many times — a strong sign of active, reflective learning.";
     if (totalEdits >= 15)
@@ -413,14 +538,125 @@
       return "Multiple submissions show persistence — notice what changed between each attempt.";
     if (durationSeconds >= 90 && totalEdits < 10)
       return "Long session with few edits suggests careful deliberation — consider externalizing more of that thinking.";
-    if (/balanced/i.test(classificationLabel))
+
+    // Label-based fallbacks — use exact string matching for determinism
+    const lbl = classificationLabel || "";
+    if (lbl === "Balanced Learner")
       return "Balanced effort this session — a healthy mix of writing, pausing, and revising.";
-    if (/fast/i.test(classificationLabel))
+    if (lbl === "Fast Responder")
       return "Quick and confident — make sure the response truly came from your own understanding.";
-    if (/reflective/i.test(classificationLabel))
+    if (lbl === "Quick Submitter")
+      return "Very short session with little revision — try spending more time putting ideas in your own words.";
+    if (lbl === "Reflective Learner" || lbl === "Pause-and-Plan Learner")
       return "Thoughtful pacing — your pauses and revisions reveal genuine engagement with the material.";
+    if (lbl === "Revising Learner")
+      return "Active revision is where real understanding forms — keep refining your explanations.";
+    if (lbl === "Persistent Learner")
+      return "Staying with a task through many revisions builds lasting understanding.";
+    if (lbl === "Slow but Careful Learner")
+      return "Careful and deliberate — try writing smaller ideas as you go to capture your thinking process.";
 
     return "Each session teaches you something about how you think — keep going and patterns will emerge.";
+  }
+
+  // ─── Session auto-label (Task 2) ──────────────────────────────────────────
+  /**
+   * Derives a concise, human-friendly session label from existing metrics.
+   * Uses no new tracking — only the same values already captured.
+   * Priority order: more specific conditions appear first.
+   *
+   * @param {{ durationSeconds:number, totalEdits:number,
+   *            totalKeystrokes:number, idleSeconds:number }} metrics
+   * @returns {string}
+   */
+  function deriveSessionLabel(metrics) {
+    const { durationSeconds, totalEdits, totalKeystrokes, idleSeconds } = metrics;
+
+    // "Fast typing, low idle" — high keystroke rate AND minimal idle
+    const keystrokesPerSec = durationSeconds > 0 ? totalKeystrokes / durationSeconds : 0;
+    if (keystrokesPerSec > 3 && idleSeconds < 10)
+      return 'Fast typing, low idle';
+
+    // "High revision session" — many deletions / corrections
+    if (totalEdits >= 15)
+      return 'High revision session';
+
+    // "Deep focus session" — long session with minimal idle
+    if (durationSeconds >= 90 && idleSeconds < 20)
+      return 'Deep focus session';
+
+    // "Quick reflection" — short and not heavily idle
+    if (durationSeconds < 30 && idleSeconds < 5)
+      return 'Quick reflection';
+
+    return 'General session';
+  }
+
+  // ─── Multi-session comparison (Task 3) ────────────────────────────────────
+  /**
+   * Compares the two most recent sessions and returns ONE concise sentence
+   * describing the most notable change, or null when fewer than 2 sessions exist.
+   *
+   * Reuses already-stored metrics — no new data collection.
+   *
+   * @param {Array} attempts   Raw session records from storage
+   * @returns {string|null}
+   */
+  function computeComparisonSentence(attempts) {
+    if (!Array.isArray(attempts) || attempts.length < 2) return null;
+    try {
+      // Sort oldest → newest, take the last two
+      const sorted = attempts.slice().sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+      const prev = sorted[sorted.length - 2];
+      const curr = sorted[sorted.length - 1];
+
+      function getM(s) {
+        const m = s.metrics || {};
+        return {
+          dur: Number(m.durationSeconds) || 0,
+          idle: Number(m.idleSeconds) || 0,
+          edits: Number(m.edits) || 0,
+          ks: Number(m.keystrokes) || 0,
+        };
+      }
+
+      const p = getM(prev);
+      const c = getM(curr);
+
+      // Helper: percent change, capped to avoid wild numbers on tiny denominators
+      function pct(from, to) {
+        if (from === 0) return null;
+        return Math.round(((to - from) / from) * 100);
+      }
+
+      const idleDelta = pct(p.idle, c.idle);
+      const focusDelta = pct(p.dur, c.dur);
+      const editsDelta = pct(p.edits, c.edits);
+
+      // Pick the most notable signal (largest absolute %)
+      const candidates = [
+        { key: 'idle', delta: idleDelta, label: 'idle time' },
+        { key: 'focus', delta: focusDelta, label: 'focus duration' },
+        { key: 'edits', delta: editsDelta, label: 'editing activity' },
+      ].filter(x => x.delta !== null);
+
+      if (!candidates.length) return null;
+
+      candidates.sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
+      const best = candidates[0];
+
+      // Only surface if change is meaningful (≥ 5%)
+      if (Math.abs(best.delta) < 5) {
+        return 'Your session was similar in pace and effort to the previous one.';
+      }
+
+      const direction = best.delta > 0 ? 'increased' : 'decreased';
+      const absPct = Math.abs(best.delta);
+
+      return `Compared to your previous session, ${best.label} ${direction} by ${absPct}%.`;
+    } catch (e) {
+      return null;
+    }
   }
 
   // ─── History rendering ────────────────────────────────────────────────────
@@ -515,6 +751,17 @@
       header.appendChild(title);
       header.appendChild(tag);
 
+      // Session auto-label (Task 2) — shown as a subtitle below the header row
+      if (attempt.sessionLabel) {
+        const labelEl = document.createElement("div");
+        labelEl.className = "history-session-label";
+        labelEl.textContent = attempt.sessionLabel;
+        item.appendChild(header);
+        item.appendChild(labelEl);
+      } else {
+        item.appendChild(header);
+      }
+
       // Metrics row
       const meta = document.createElement("div");
       meta.className = "history-meta";
@@ -525,15 +772,14 @@
         idleSeconds: attempt.idleSeconds || 0,
         retries: attempt.retries || attempt.submitCount || 0,
       };
-      meta.textContent = `Duration: ${formatSeconds(m.durationSeconds)} • Keystrokes: ${m.keystrokes} • Edits: ${m.edits} • Idle: ${formatSeconds(m.idleSeconds)} • Submits: ${m.retries}`;
+      const taskLabel = attempt.taskType ? ` • ${attempt.taskType}` : '';
+      meta.textContent = `Duration: ${formatSeconds(m.durationSeconds)} • Keystrokes: ${m.keystrokes} • Edits: ${m.edits} • Idle: ${formatSeconds(m.idleSeconds)} • Submits: ${m.retries}${taskLabel}`;
 
       // Response snippet
       const snippet = document.createElement("p");
       snippet.className = "history-snippet";
       snippet.textContent = truncateText(attempt.response, 160);
 
-      // Insight sentence (if stored)
-      item.appendChild(header);
       item.appendChild(meta);
       item.appendChild(snippet);
 
@@ -551,16 +797,47 @@
   // ─── Event: Start ─────────────────────────────────────────────────────────
   if (startBtn) {
     startBtn.addEventListener("click", () => {
-      if (sessionActive) return; // guard against double-start
+      if (sessionActive || _startLocked) return; // guard against double-start
+      _startLocked = true;
+      setTimeout(() => { _startLocked = false; }, 300); // 300ms debounce
       try { localStorage.removeItem("learnTrace.sessionActive"); } catch (e) { }
       startSession();
+    });
+  }
+
+  // ─── Event: Next Question ─────────────────────────────────────────────────
+  if (nextQuestionBtn) {
+    nextQuestionBtn.addEventListener("click", () => {
+      if (nextQuestionId) {
+        fetchReflectionQuestion(nextQuestionId);
+        resetSessionState();
+        resetMetricsDisplay();
+        if (responseInput) responseInput.value = "";
+        if (feedbackDisplay) feedbackDisplay.textContent = "";
+        if (classificationDisplay) classificationDisplay.textContent = "No session yet";
+      }
+    });
+  }
+
+  if (prevQuestionBtn) {
+    prevQuestionBtn.addEventListener("click", () => {
+      if (prevQuestionId) {
+        fetchReflectionQuestion(prevQuestionId);
+        resetSessionState();
+        resetMetricsDisplay();
+        if (responseInput) responseInput.value = "";
+        if (feedbackDisplay) feedbackDisplay.textContent = "";
+        if (classificationDisplay) classificationDisplay.textContent = "No session yet";
+      }
     });
   }
 
   // ─── Event: Submit ────────────────────────────────────────────────────────
   if (submitBtn) {
     submitBtn.addEventListener("click", async () => {
-      if (!sessionActive) return; // guard: session must be active
+      if (!sessionActive || _submitLocked) return; // guard: session must be active
+      _submitLocked = true;
+      setTimeout(() => { _submitLocked = false; }, 800); // 800ms debounce
       const response = responseInput ? responseInput.value.trim() : "";
       if (!response) return; // guard: no empty submissions
 
@@ -596,6 +873,29 @@
         classification = classifyAttempt(metrics);
       }
 
+      // Submit to backend for logical reasoning scoring
+      if (currentTask && currentTask.id.startsWith('q')) {
+        try {
+          const res = await fetch(`${BACKEND_URL}/api/reflection/submit`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              questionId: currentTask.id,
+              userAnswer: response
+            })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (feedbackDisplay) {
+              feedbackDisplay.innerHTML = `<strong>Score: ${data.percentage}%</strong><br>${data.feedback}<br><br><strong>Model Answer:</strong><br>${data.modelAnswer}`;
+            }
+            if (classificationDisplay) classificationDisplay.textContent = "Logic Evaluated";
+          }
+        } catch (e) {
+          safeLog(e, 'submit reflection to backend');
+        }
+      }
+
       const feedback = (tracker && typeof tracker.generateFeedback === 'function')
         ? tracker.generateFeedback(classification, {
           durationSeconds: metrics.durationSeconds,
@@ -606,15 +906,26 @@
         })
         : generateFeedback(classification, metrics);
 
-      // Generate ONE insight sentence for this session
+      // Generate ONE insight sentence + auto-label for this session
       const insight = generateInsight(metrics, classification.label);
+      const sessionLabel = deriveSessionLabel(metrics);
 
       // Update Insights panel
-      if (classificationDisplay) classificationDisplay.textContent = classification.label;
-      if (feedbackDisplay) feedbackDisplay.textContent = feedback;
-      if (insightDisplay) insightDisplay.textContent = `💡 ${insight}`;
+      if (classificationDisplay) {
+        // If reflection, we already set it to "Logic Evaluated"
+        if (!currentTask || !currentTask.id.startsWith('q')) {
+          classificationDisplay.textContent = classification.label;
+        }
+      }
 
-      // Persist session record to localStorage
+      if (feedbackDisplay) {
+        // Only override if NOT a reflection question
+        if (!currentTask || !currentTask.id.startsWith('q')) {
+          feedbackDisplay.textContent = feedback;
+        }
+      }
+
+      // Persist session record to localStorage (cap at 50 to prevent unbounded growth)
       const attempts = await readAttemptsFromStorage();
       const metricsSnapshot = {
         durationSeconds: Math.max(0, Math.round(durationSeconds)),
@@ -624,17 +935,63 @@
         retries,
       };
 
-      attempts.push({
+      // Build the session record (includes new sessionLabel field)
+      const newRecord = {
         timestamp: endTimeMs,
         pattern: classification.label,
+        sessionLabel,
         metrics: metricsSnapshot,
         response,
         insight,
+        taskId: currentTask ? currentTask.id : 'unknown',
+        taskType: currentTask ? currentTask.type : '',
         // AUTH EXTENSION POINT — userId is always 'anonymous' until auth is wired up
         userId: getUserId(),
-      });
+      };
+      attempts.push(newRecord);
 
-      await writeAttemptsToStorage(attempts);
+      // Keep only the 50 most recent sessions to prevent unbounded localStorage growth
+      const capped = attempts.length > 50 ? attempts.slice(-50) : attempts;
+      await writeAttemptsToStorage(capped);
+
+      // Notify cloud sync layer that a new session was saved.
+      // auth-check.js listens for this and triggers Firestore upload when signed in.
+      // script.js has no Firebase dependency — the event is the decoupling point.
+      try {
+        document.dispatchEvent(new CustomEvent('learntrace:session-saved', {
+          detail: { timestamp: endTimeMs },
+        }));
+      } catch (_) { /* non-critical */ }
+
+      // ── Insight display (insight sentence + multi-session comparison sentence) ──
+      try {
+        const compSentence = computeComparisonSentence(capped);
+
+        // Phase 5: Learning Analytics
+        let analyticsText = '';
+        try {
+          const { analyzeSessions } = await import('./src/analytics.js');
+          const analyticsResult = analyzeSessions(capped);
+          if (analyticsResult && analyticsResult.insightText.length > 0) {
+            analyticsText = analyticsResult.insightText.join('\n\n📈 ');
+          }
+        } catch (_) { /* non-critical fallback */ }
+
+        if (insightDisplay) {
+          let insightText = `💡 ${insight}`;
+          if (compSentence) insightText += `\n\n📊 ${compSentence}`;
+
+          if (analyticsText && !insightText.includes(analyticsText)) {
+            insightText += `\n\n📈 ${analyticsText}`;
+          }
+
+          insightDisplay.textContent = insightText;
+        }
+      } catch (e) {
+        // Fallback: just show the insight
+        if (insightDisplay) insightDisplay.textContent = `💡 ${insight}`;
+      }
+
       await renderHistory();
 
       // Notify chatbot of the submission so it can post personalized feedback
@@ -650,6 +1007,8 @@
             response,
             classification: classification.label,
             insight,
+            taskId: currentTask ? currentTask.id : 'unknown',
+            taskType: currentTask ? currentTask.type : '',
           },
         }));
       } catch (e) { safeLog(e, 'dispatch submission event'); }
@@ -715,6 +1074,264 @@
           try { exposeLiveMetrics(); } catch (e) { }
         }
       } catch (e) { /* non-critical */ }
+    });
+  }
+
+  // ─── Export helpers ───────────────────────────────────────────────────────
+
+  /**
+   * Returns a YYYY-MM-DD date string for use in export filenames.
+   * Uses the local date so filenames match what the user sees in their OS.
+   */
+  function exportDateStamp() {
+    const d = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  }
+
+  /**
+   * Sanitizes the attempts array: filters out any records that are not plain
+   * objects with at least a numeric timestamp (guards against corrupt storage).
+   * Returns a new array — never mutates the input.
+   */
+  function sanitizeAttempts(attempts) {
+    if (!Array.isArray(attempts)) return [];
+    return attempts.filter(s => {
+      try { return s && typeof s === 'object' && typeof s.timestamp === 'number'; }
+      catch (e) { return false; }
+    });
+  }
+
+  /**
+   * Builds a downloadable payload from all stored session attempts.
+   *
+   * format: 'text' → clean human-readable learning report (no raw JSON, clear headings)
+   *         'json' → structured JSON envelope suitable for cloud sync / analysis
+   *
+   * Never mutates `attempts`.  `trend` is the optional multi-session trend badge text.
+   */
+  function buildExportPayload(attempts, format, trend) {
+    const clean = sanitizeAttempts(attempts);
+    if (!clean.length) return '';
+
+    // ── Structured JSON export ────────────────────────────────────────────────
+    if (format === 'json') {
+      const sessions = clean.map((s, i) => {
+        const m = s.metrics || {};
+        const taskObj = s.taskId ? TASK_POOL.find(t => t.id === s.taskId) : null;
+        return {
+          sessionId: s.timestamp ? String(s.timestamp) : `session-${i + 1}`,
+          timestamp: s.timestamp || null,
+          task: {
+            id: s.taskId || 'unknown',
+            type: s.taskType || (taskObj ? taskObj.type : 'Unknown'),
+            prompt: taskObj ? taskObj.text : (s.taskType || 'Unknown task'),
+          },
+          metrics: {
+            durationSeconds: Number(m.durationSeconds) || 0,
+            keystrokes: Number(m.keystrokes) || 0,
+            edits: Number(m.edits) || 0,
+            idleSeconds: Number(m.idleSeconds) || 0,
+            submits: Number(m.retries) || 0,
+          },
+          derived: {
+            patternLabel: s.pattern || s.classification || 'Unknown',
+            sessionLabel: s.sessionLabel || null,
+            insight: s.insight || null,
+          },
+          userResponse: s.response || '',
+          userId: s.userId || 'anonymous',
+        };
+      });
+
+      const envelope = {
+        schemaVersion: '1.0',
+        exportedAt: new Date().toISOString(),
+        userId: getUserId(),
+        sessionCount: sessions.length,
+        sessions,
+      };
+      return JSON.stringify(envelope, null, 2);
+    }
+
+    // ── Plain-text learning report ────────────────────────────────────────────
+    const DIVIDER = '='.repeat(52);
+    const MINOR = '-'.repeat(52);
+    const lines = [];
+
+    lines.push('LearnTrace — Learning Report');
+    lines.push(`Exported:    ${new Date().toLocaleString()}`);
+    lines.push(`User ID:     ${getUserId()}`);
+    lines.push(`Sessions:    ${clean.length}`);
+    if (trend) lines.push(`Trend:       ${trend}`);
+    lines.push('');
+    lines.push(DIVIDER);
+    lines.push('');
+
+    // Newest first (matches History panel order)
+    clean.slice().reverse().forEach((s, i) => {
+      const m = s.metrics || {};
+      const taskObj = s.taskId ? TASK_POOL.find(t => t.id === s.taskId) : null;
+      const taskPrompt = taskObj
+        ? taskObj.text
+        : (s.taskType || 'Unknown task');
+      const dateStr = s.timestamp
+        ? new Date(s.timestamp).toLocaleString()
+        : '(no date)';
+      const durationSec = Number(m.durationSeconds) || 0;
+      const idleSec = Number(m.idleSeconds) || 0;
+
+      lines.push(`Session ${i + 1} of ${clean.length}`);
+      lines.push(MINOR);
+      lines.push('');
+
+      lines.push('TASK');
+      lines.push(`  Type:      ${s.taskType || (taskObj ? taskObj.type : 'Unknown')}`);
+      lines.push(`  Prompt:    ${taskPrompt}`);
+      lines.push('');
+
+      lines.push('DATE & TIME');
+      lines.push(`  ${dateStr}`);
+      lines.push('');
+
+      lines.push('SESSION METRICS');
+      lines.push(`  Duration:  ${formatSeconds(durationSec)}`);
+      lines.push(`  Keystrokes:${Number(m.keystrokes) || 0}`);
+      lines.push(`  Edits:     ${Number(m.edits) || 0}`);
+      lines.push(`  Idle time: ${formatSeconds(idleSec)}`);
+      lines.push(`  Submits:   ${Number(m.retries) || 0}`);
+      lines.push('');
+
+      lines.push('LEARNER PROFILE');
+      lines.push(`  Pattern:   ${s.pattern || s.classification || 'Unknown'}`);
+      if (s.sessionLabel) lines.push(`  Label:     ${s.sessionLabel}`);
+      lines.push('');
+
+      if (s.insight) {
+        lines.push('INSIGHT');
+        lines.push(`  ${s.insight}`);
+        lines.push('');
+      }
+
+      if (s.response) {
+        lines.push('FULL EXPLANATION');
+        // Indent each line for readability; preserve paragraph breaks
+        String(s.response).split('\n').forEach(l => lines.push(`  ${l}`));
+        lines.push('');
+      }
+
+      lines.push(DIVIDER);
+      lines.push('');
+    });
+
+    return lines.join('\n');
+  }
+
+  /**
+   * Triggers a file download in the browser — no server, no libs.
+   * Creates a Blob URL, clicks a hidden anchor, then immediately revokes to
+   * avoid memory leaks.  Read-only: never touches stored data.
+   */
+  function triggerDownload(content, filename, mimeType) {
+    try {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        try { document.body.removeChild(a); } catch (_) { /* ignore */ }
+        try { URL.revokeObjectURL(url); } catch (_) { /* ignore */ }
+      }, 300);
+    } catch (e) {
+      safeLog(e, 'triggerDownload');
+    }
+  }
+
+  /**
+   * Returns the current trend string from the badge DOM element (if rendered).
+   * Gracefully returns '' if the element doesn't exist or throws.
+   */
+  function getRenderedTrend() {
+    try {
+      const badge = document.getElementById('historyTrendBadge');
+      return badge ? badge.textContent.trim() : '';
+    } catch (e) { return ''; }
+  }
+
+  // ─── Event: Export history (TXT) ──────────────────────────────────────────
+  const exportHistoryBtn = document.getElementById('exportHistoryBtn');
+  if (exportHistoryBtn) {
+    exportHistoryBtn.addEventListener('click', async () => {
+      try {
+        const attempts = await readAttemptsFromStorage();
+        const clean = sanitizeAttempts(attempts);
+        if (!clean.length) {
+          alert('No sessions to export yet. Complete a session first.');
+          return;
+        }
+
+        let content = '';
+        try {
+          const { buildLearningReport, buildTextReportFromObject } = await import('./src/reportBuilder.js');
+          const reportObj = buildLearningReport(clean);
+          content = buildTextReportFromObject(reportObj);
+        } catch (e) {
+          safeLog(e, 'reportBuilder TXT fallback');
+          const trend = getRenderedTrend();
+          content = buildExportPayload(clean, 'text', trend);
+        }
+        const filename = `learntrace_sessions_${exportDateStamp()}.txt`;
+
+        // Mirror export to cloud if authenticated
+        const uid = getUserId();
+        if (uid && uid !== 'anonymous') {
+          import('./firebase.js').then(({ saveCloudExport }) => {
+            saveCloudExport(uid, 'text', content);
+          }).catch(() => { });
+        }
+
+        triggerDownload(content, filename, 'text/plain;charset=utf-8');
+      } catch (e) { safeLog(e, 'export TXT'); }
+    });
+  }
+
+  // ─── Event: Export history (JSON) ─────────────────────────────────────────
+  const exportHistoryJsonBtn = document.getElementById('exportHistoryJsonBtn');
+  if (exportHistoryJsonBtn) {
+    exportHistoryJsonBtn.addEventListener('click', async () => {
+      try {
+        const attempts = await readAttemptsFromStorage();
+        const clean = sanitizeAttempts(attempts);
+        if (!clean.length) {
+          alert('No sessions to export yet. Complete a session first.');
+          return;
+        }
+
+        let content = '';
+        try {
+          const { buildLearningReport, buildJsonReportFromObject } = await import('./src/reportBuilder.js');
+          const reportObj = buildLearningReport(clean);
+          content = buildJsonReportFromObject(reportObj, clean);
+        } catch (e) {
+          safeLog(e, 'reportBuilder JSON fallback');
+          content = buildExportPayload(clean, 'json', '');
+        }
+        const filename = `learntrace_sessions_${exportDateStamp()}.json`;
+
+        // Mirror export to cloud if authenticated
+        const uid = getUserId();
+        if (uid && uid !== 'anonymous') {
+          import('./firebase.js').then(({ saveCloudExport }) => {
+            saveCloudExport(uid, 'json', content);
+          }).catch(() => { });
+        }
+
+        triggerDownload(content, filename, 'application/json');
+      } catch (e) { safeLog(e, 'export JSON'); }
     });
   }
 
@@ -795,6 +1412,11 @@
       localStorage.removeItem("learnTrace.sessionActive");
     } catch (e) { }
     setSessionStatus("Session: Not started", null);
+
+    // Pick and display reflection task from backend
+    try {
+      await fetchReflectionQuestion();
+    } catch (e) { safeLog(e, 'init: reflection task selection'); }
 
     await renderHistory();
 

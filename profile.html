@@ -1,101 +1,216 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <title>Edit Profile – LearnTrace</title>
+  <title>Your Learning Profile – LearnTrace</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="style.css" />
-  <style>
-    .profile-page {
-      max-width: 480px;
-      margin: 2rem auto;
-      padding: 0 1.5rem;
-    }
-    .profile-card {
-      background: var(--bg-alt);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-soft);
-      padding: 2rem;
-      border: 1px solid var(--border-subtle);
-    }
-    .profile-avatar-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-    .profile-avatar-preview {
-      width: 96px;
-      height: 96px;
-      border-radius: 50%;
-      border: 2px solid var(--border-subtle);
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--accent-soft);
-    }
-    .profile-avatar-preview img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .profile-avatar-preview .profile-avatar-letter {
-      font-size: 2.5rem;
-      font-weight: 600;
-      color: var(--accent);
-    }
-    .profile-upload-label {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-    }
-    .profile-back {
-      display: inline-block;
-      margin-bottom: 1rem;
-      font-size: 0.9rem;
-      color: var(--accent);
-      text-decoration: none;
-    }
-    .profile-back:hover {
-      text-decoration: underline;
-    }
-    .profile-email-display {
-      font-size: 0.95rem;
-      color: var(--text-muted);
-      margin-top: 0.5rem;
-    }
-    #profileError, .error-message {
-      padding: 0.75rem 0.9rem;
-      border-radius: 12px;
-      background: rgba(249, 73, 115, 0.1);
-      border: 1px solid rgba(249, 73, 115, 0.3);
-      color: var(--danger);
-      font-size: 0.87rem;
-      margin-bottom: 1rem;
-    }
-  </style>
+  <link rel="stylesheet" href="profile.css" />
 </head>
-<body>
-  <div class="profile-page">
-    <a class="profile-back" href="index.html">← Back to app</a>
-    <div class="profile-card">
-      <h1 style="margin: 0 0 1rem; font-size: 1.35rem;">Edit Profile</h1>
-      <div id="profileError" class="error-message" style="display: none;"></div>
-      <div class="profile-avatar-wrap">
-        <div class="profile-avatar-preview" id="avatarPreview">
-          <span class="profile-avatar-letter" id="avatarLetter">?</span>
-          <img id="avatarImg" alt="" hidden />
+
+<body class="profile-body">
+  <div class="neural-overlay"></div>
+
+  <div class="insight-container">
+    <header class="profile-header">
+      <div class="header-left">
+        <a class="btn-back-dashboard" href="index.html" aria-label="Back to Dashboard">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
+          <span>Dashboard</span>
+        </a>
+
+        <div class="header-branding-stack">
+          <div class="brand-logo-large">LT</div>
+          <div class="header-avatar-wrap">
+            <div class="header-avatar" id="headerAvatar">
+              <span class="placeholder-icon" id="avatarLetter">🎓</span>
+              <img id="avatarImg" alt="Profile" hidden />
+            </div>
+          </div>
+          <div class="profile-label">Your Profile</div>
         </div>
-        <label class="profile-upload-label">
-          <input type="file" id="photoInput" accept="image/*" style="display: none;" />
-          <span class="btn btn-secondary" id="uploadBtn">Upload photo</span>
-        </label>
       </div>
-      <p class="profile-email-display" id="profileEmailDisplay"></p>
+    </header>
+
+    <div class="hero-section">
+      <!-- Radiating Rays -->
+      <div class="rays-container">
+        <div class="ray ray-1"></div>
+        <div class="ray ray-2"></div>
+        <div class="ray ray-3"></div>
+        <div class="ray ray-4"></div>
+        <div class="ray ray-5"></div>
+        <div class="ray ray-6"></div>
+
+        <!-- Badges at the end of rays -->
+        <div class="ray-badge badge-1" id="badgeStreak">
+          <span class="label">Longest Streak</span>
+          <span class="value" id="longestStreakValue">0 days</span>
+          <span class="sub-text">Consistency King</span>
+        </div>
+
+        <div class="ray-badge badge-2" id="badgeKeystrokes">
+          <span class="label">Total Activity</span>
+          <span class="value" id="totalActivityValue">0 edits</span>
+          <span class="sub-text">High Engagement</span>
+        </div>
+
+        <div class="ray-badge badge-3" id="badgeFocus">
+          <span class="label">Focus Insight</span>
+          <span class="value" id="focusInsightValue">Steady Pacer</span>
+          <span class="sub-text" id="focusSubText">You focus best in short bursts</span>
+        </div>
+
+        <div class="ray-badge badge-4" id="badgePattern">
+          <span class="label">Learner Pattern</span>
+          <span class="value" id="patternValue">Analyzing...</span>
+          <span class="sub-text">Behavioral DNA</span>
+        </div>
+
+        <div class="ray-badge badge-5" id="badgeTopTask">
+          <span class="label">Strongest Skill</span>
+          <span class="value" id="topTaskValue">—</span>
+          <span class="sub-text">Peak Performance</span>
+        </div>
+
+        <div class="ray-badge badge-6" id="badgeMilestone">
+          <span class="label">Next Milestone</span>
+          <span class="value" id="milestoneValue">10 Sessions</span>
+          <span class="sub-text" id="milestoneProgress">0/10 completed</span>
+        </div>
+      </div>
+
+      <!-- The Focal Lens -->
+      <div class="insight-lens">
+        <div class="lens-ring"></div>
+        <div class="lens-content">
+          <div class="lens-stats">
+            <div class="main-stat" id="currentStreakValue">0</div>
+            <div class="stat-label">Day Streak 🔥</div>
+          </div>
+          <div class="lens-sub-stats">
+            <div class="lens-sub-stat">
+              <span class="value" id="totalSessionsValue">0</span>
+              <span class="label">Sessions</span>
+            </div>
+            <div class="lens-sub-stat">
+              <span class="value" id="avgCorrectnessValue">0%</span>
+              <span class="label">Avg Score</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- Scrollable content -->
+    <div class="content-sections">
+
+      <!-- Learning Insight Summary -->
+      <section class="insight-summary-card">
+        <div class="insight-title">Your Learning Persona</div>
+        <div class="insight-text" id="personaSummaryText">
+          Complete more sessions to unlock your unique learning behavior profile and personalized AI insights.
+        </div>
+      </section>
+
+      <!-- Recent Sessions -->
+      <section>
+        <h2 class="section-title">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Recent Learning Sessions
+        </h2>
+        <div class="session-cards" id="recentSessionsGrid">
+          <!-- Injected via profile.js -->
+          <p class="task-hint">No sessions recorded yet.</p>
+        </div>
+      </section>
+
+      <!-- Achievements -->
+      <section>
+        <h2 class="section-title">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="7" />
+            <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
+          </svg>
+          Achievements
+        </h2>
+        <div class="achievements-grid" id="achievementsGrid">
+          <div class="badge-item" id="badge-10sessions">
+            <div class="badge-icon">🎯</div>
+            <div class="badge-name">Pioneer</div>
+            <div class="badge-desc">10 Sessions</div>
+          </div>
+          <div class="badge-item" id="badge-streak5">
+            <div class="badge-icon">🔥</div>
+            <div class="badge-name">On Fire</div>
+            <div class="badge-desc">5 Day Streak</div>
+          </div>
+          <div class="badge-item" id="badge-topscore">
+            <div class="badge-icon">⭐</div>
+            <div class="badge-name">Mastery</div>
+            <div class="badge-desc">90% Avg Score</div>
+          </div>
+          <div class="badge-item" id="badge-focusmax">
+            <div class="badge-icon">🧠</div>
+            <div class="badge-name">Hyperfocus</div>
+            <div class="badge-desc">0s Idle Time</div>
+          </div>
+          <div class="badge-item" id="badge-editor">
+            <div class="badge-icon">✍️</div>
+            <div class="badge-name">Sculptor</div>
+            <div class="badge-desc">1000+ Edits</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Hidden/Secondary Edit Section -->
+      <button id="toggleEditBtn" class="btn btn-secondary small" style="margin-top: 2rem;">Edit Profile Info</button>
+
+      <section id="editProfileSection"
+        style="display: none; margin-top: 2rem; padding: 2rem; border-top: 1px solid var(--border-subtle);">
+        <h2 style="margin-bottom: 1.5rem;">Settings</h2>
+        <div id="profileError" class="pill--ended"
+          style="display: none; padding: 1rem; margin-bottom: 1rem; border-radius: 8px;"></div>
+        <div id="profileSuccess" class="pill--active"
+          style="display: none; padding: 1rem; margin-bottom: 1rem; border-radius: 8px;"></div>
+
+        <div style="display: flex; flex-direction: column; gap: 1.5rem; max-width: 400px;">
+          <div>
+            <label
+              style="display: block; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem;">Display
+              Name</label>
+            <input type="text" id="displayNameInput" class="editor" style="min-height: auto; width: 100%;" />
+          </div>
+          <div>
+            <label
+              style="display: block; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem;">Profile
+              Image</label>
+            <input type="file" id="photoInput" accept="image/*" style="display: none;" />
+            <button id="uploadBtn" class="btn btn-secondary">Change Photo</button>
+          </div>
+          <button id="saveProfileBtn" class="btn btn-primary">Save Changes</button>
+        </div>
+      </section>
+
+    </div>
+
+    <button class="btn btn-primary share-btn" id="shareProgressBtn">Share My Progress</button>
+
+    <footer style="margin-top: 4rem; opacity: 0.6; font-size: 0.8rem;">
+      &copy; 2024 LearnTrace – Cognitive Behavior Profile
+    </footer>
   </div>
+
   <script type="module" src="auth-check.js"></script>
   <script type="module" src="profile.js"></script>
 </body>
+
 </html>

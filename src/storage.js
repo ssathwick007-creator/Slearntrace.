@@ -4,6 +4,9 @@
  * AUTH EXTENSION POINT — when auth is ready, add a `userId` parameter to
  * getSessions() / saveSessions() and filter/namespace by user. Do NOT change
  * the call sites in script.js; just update the implementation here.
+ *
+ * SYNC EXTENSION POINT — markSessionsSynced() is called by cloudSync.js
+ * to flag sessions after they are written to Firestore.
  */
 const STORAGE_KEY = "learnTraceAttempts";
 
@@ -49,4 +52,26 @@ export function saveSession(session) {
   } catch (e) {
     return false;
   }
+}
+
+/**
+ * Marks the given sessions as synced (synced: true) in localStorage.
+ * Called by cloudSync.js after a successful Firestore write.
+ * @param {number[]} timestamps  Array of session timestamps to mark synced
+ */
+export function markSessionsSynced(timestamps) {
+  try {
+    if (!Array.isArray(timestamps) || !timestamps.length) return;
+    const set = new Set(timestamps.map(Number));
+    const sessions = getSessions();
+    let changed = false;
+    const updated = sessions.map(s => {
+      if (s && set.has(Number(s.timestamp)) && !s.synced) {
+        changed = true;
+        return { ...s, synced: true };
+      }
+      return s;
+    });
+    if (changed) saveSessions(updated);
+  } catch (_) { /* non-critical — sync will retry next time */ }
 }

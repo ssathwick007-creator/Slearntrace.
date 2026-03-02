@@ -13,9 +13,6 @@
 <body>
   <div class="app-shell">
     <header class="app-header">
-      <!-- Profile UI kept but DISABLED for Phase 1 -->
-      <div class="profile-wrap" id="profileWrap" style="display: none;"></div>
-
       <div class="brand">
         <div class="brand-logo">LT</div>
         <div class="brand-text">
@@ -24,7 +21,33 @@
         </div>
       </div>
 
+      <!-- Main Navigation -->
+      <nav id="mainNav" class="main-nav" aria-label="Main Navigation" style="display: flex; gap: 0.5rem;">
+        <button class="btn btn-ghost small nav-btn" data-target="dashboardSection"
+          aria-selected="true">ThinkTrace</button>
+        <button class="btn btn-ghost small nav-btn" data-target="learningHubSection" aria-selected="false">Learning
+          Hub</button>
+        <button class="btn btn-ghost small nav-btn" data-target="codingPracticeSection" aria-selected="false">Coding
+          Practice</button>
+      </nav>
+
       <div class="header-actions">
+        <!-- Profile icon (shown when signed in by auth-check.js) -->
+        <div class="profile-wrap" id="profileWrap" style="display: none;">
+          <button class="profile-btn" id="profileBtn" aria-label="Open profile menu" aria-haspopup="true"
+            aria-expanded="false">
+            <img id="profilePhoto" class="profile-photo" src="" alt="" hidden />
+            <span id="profileLetter" class="profile-letter" aria-hidden="true"></span>
+          </button>
+          <div id="profileDropdown" class="profile-dropdown" hidden>
+            <p id="profileEmail" class="profile-dropdown-email"></p>
+            <a href="profile.html" class="profile-dropdown-link">Your Profile</a>
+            <button id="profileLogoutBtn" class="profile-dropdown-link profile-dropdown-logout">Sign Out</button>
+          </div>
+        </div>
+        <!-- Shown when anonymous (auth-check.js toggles display) -->
+        <a id="signInLink" href="login.html" class="btn btn-ghost small" style="display:none;">Sign in to save your
+          progress</a>
         <button id="themeToggle" class="btn-theme" aria-label="Toggle theme">
           <span class="theme-icon" id="themeIcon">🌙</span>
         </button>
@@ -32,126 +55,315 @@
     </header>
 
     <main class="app-main">
-      <section class="grid">
 
-        <div class="left-col">
-          <!-- Task Card -->
-          <article class="card card-task">
-            <h2>Learning Task</h2>
-            <p class="task-text">
-              Explain how recursion works in your own words.
-            </p>
-            <p class="task-hint">
-              Focus on how you think through the concept. Your process matters more than the final wording.
-            </p>
-          </article>
+      <!-- DASHBOARD SECTION (Existing) -->
+      <section id="dashboardSection" class="view-section">
+        <div class="grid">
 
-          <!-- Editor -->
-          <article class="card card-editor">
-            <header class="card-header-row">
-              <h2>Your Explanation</h2>
-              <div class="pill" id="sessionStatusPill">Session: Not started</div>
-            </header>
-
-            <textarea id="responseInput" class="editor" placeholder="Press 'Start Session' to begin."
-              disabled></textarea>
-
-            <div class="controls">
-              <button id="startBtn" class="btn btn-primary">Start Session</button>
-              <button id="submitBtn" class="btn btn-secondary" disabled>Submit Response</button>
-            </div>
-
-            <p class="small-note">
-              LearnTrace observes <strong>how</strong> you learn, not correctness.
-            </p>
-          </article>
-
-        </div>
-
-        <div class="right-col">
-          <!-- Metrics -->
-          <article class="card card-metrics">
-            <h2>Live Session Metrics</h2>
-            <div class="metrics-grid">
-              <div class="metric">
-                <div class="metric-label">Time elapsed</div>
-                <div class="metric-value" id="timeSpentDisplay">0s</div>
-              </div>
-              <div class="metric">
-                <div class="metric-label">Keystrokes</div>
-                <div class="metric-value" id="keystrokesDisplay">0</div>
-              </div>
-              <div class="metric">
-                <div class="metric-label">Edits</div>
-                <div class="metric-value" id="editsDisplay">0</div>
-              </div>
-              <div class="metric">
-                <div class="metric-label">Idle time</div>
-                <div class="metric-value" id="idleTimeDisplay">0s</div>
-              </div>
-              <div class="metric">
-                <div class="metric-label">Submit attempts</div>
-                <div class="metric-value" id="retriesDisplay">0</div>
-              </div>
-            </div>
-          </article>
-          <!-- Tabs: Insights / History (replaces separate Insight and History cards) -->
-          <div class="card card-tabs">
-            <div class="tabs" role="tablist" aria-label="Metrics tabs">
-              <button class="tab" role="tab" aria-selected="true" aria-controls="insightsPanel" id="tab-insights"
-                tabindex="0">Insights</button>
-              <button class="tab" role="tab" aria-selected="false" aria-controls="historyPanel" id="tab-history"
-                tabindex="-1">History</button>
-            </div>
-
-            <div class="tabpanels">
-              <article id="insightsPanel" class="tabpanel" role="tabpanel" aria-labelledby="tab-insights">
-                <h3 class="visually-hidden">Insights</h3>
-                <div class="insight-main">
-                  <div class="insight-label">Learner Pattern</div>
-                  <div class="insight-tag" id="classificationDisplay">No session yet</div>
+          <div class="left-col">
+            <!-- Task Card -->
+            <article class="card card-task">
+              <div class="card-header-row">
+                <h2>Learning Task</h2>
+                <div class="navigation-arrows">
+                  <button id="prevQuestionBtn" class="btn-prev-q" aria-label="Previous Question"
+                    title="Previous Question">
+                    <span class="arrow-icon">←</span>
+                  </button>
+                  <button id="nextQuestionBtn" class="btn-next-q" aria-label="Next Question" title="Next Question">
+                    <span class="arrow-icon">→</span>
+                  </button>
                 </div>
-                <p class="insight-text" id="feedbackDisplay">
-                  Start a session and submit your explanation to see insights.
-                </p>
-                <!-- ONE concise insight sentence generated per session by script.js -->
-                <p class="insight-sentence" id="insightDisplay"></p>
-              </article>
+              </div>
+              <p class="task-type" id="taskType"></p>
+              <p class="task-text" id="taskText"></p>
+              <p class="task-hint">
+                Focus on how you think through the concept. Your process matters more than the final wording.
+              </p>
+            </article>
 
-              <article id="historyPanel" class="tabpanel" role="tabpanel" aria-labelledby="tab-history" hidden>
-                <h3 class="visually-hidden">History</h3>
-                <header class="card-header-row">
-                  <h2>Past Sessions (Local)</h2>
-                  <button id="clearHistoryBtn" class="btn btn-ghost small">Clear History</button>
-                </header>
-                <div id="historyList" class="history-list empty">
-                  <p class="empty-text">No past sessions yet. Your next submission will appear here.</p>
-                </div>
-              </article>
-            </div>
+            <!-- Editor -->
+            <article class="card card-editor">
+              <header class="card-header-row">
+                <h2>Your Explanation</h2>
+                <div class="pill" id="sessionStatusPill">Session: Not started</div>
+              </header>
+
+              <textarea id="responseInput" class="editor" placeholder="Press 'Start Session' to begin."
+                disabled></textarea>
+
+              <div class="controls">
+                <button id="startBtn" class="btn btn-primary">Start Session</button>
+                <button id="submitBtn" class="btn btn-secondary" disabled>Submit Response</button>
+              </div>
+
+              <p class="small-note">
+                LearnTrace observes <strong>how</strong> you learn, not correctness.
+              </p>
+            </article>
+
           </div>
 
-          <!-- Study Assistant moved to a slide-in panel (floating button opens it) -->
+          <div class="right-col">
+            <!-- Metrics -->
+            <article class="card card-metrics">
+              <h2>Live Session Metrics</h2>
+              <div class="metrics-grid">
+                <div class="metric">
+                  <div class="metric-label">Time elapsed</div>
+                  <div class="metric-value" id="timeSpentDisplay">0s</div>
+                </div>
+                <div class="metric">
+                  <div class="metric-label">Keystrokes</div>
+                  <div class="metric-value" id="keystrokesDisplay">0</div>
+                </div>
+                <div class="metric">
+                  <div class="metric-label">Edits</div>
+                  <div class="metric-value" id="editsDisplay">0</div>
+                </div>
+                <div class="metric">
+                  <div class="metric-label">Idle time</div>
+                  <div class="metric-value" id="idleTimeDisplay">0s</div>
+                </div>
+                <div class="metric">
+                  <div class="metric-label">Submit attempts</div>
+                  <div class="metric-value" id="retriesDisplay">0</div>
+                </div>
+              </div>
+            </article>
+            <!-- Tabs: Insights / History (replaces separate Insight and History cards) -->
+            <div class="card card-tabs">
+              <div class="tabs" role="tablist" aria-label="Metrics tabs">
+                <button class="tab" role="tab" aria-selected="true" aria-controls="insightsPanel" id="tab-insights"
+                  tabindex="0">Insights</button>
+                <button class="tab" role="tab" aria-selected="false" aria-controls="historyPanel" id="tab-history"
+                  tabindex="-1">History</button>
+              </div>
 
-          <!-- (History moved into tabs) -->
+              <div class="tabpanels">
+                <article id="insightsPanel" class="tabpanel" role="tabpanel" aria-labelledby="tab-insights">
+                  <h3 class="visually-hidden">Insights</h3>
+                  <div class="insight-main">
+                    <div class="insight-label">Learner Pattern</div>
+                    <div class="insight-tag" id="classificationDisplay">No session yet</div>
+                  </div>
+                  <p class="insight-text" id="feedbackDisplay">
+                    Start a session and submit your explanation to see insights.
+                  </p>
+                  <!-- ONE concise insight sentence generated per session by script.js -->
+                  <p class="insight-sentence" id="insightDisplay"></p>
+                </article>
 
-        </div>
+                <article id="historyPanel" class="tabpanel" role="tabpanel" aria-labelledby="tab-history" hidden>
+                  <h3 class="visually-hidden">History</h3>
+                  <header class="card-header-row">
+                    <h2>Past Sessions (Local)</h2>
+                    <div style="display:flex; gap:0.4rem; align-items:center;">
+                      <button id="clearHistoryBtn" class="btn btn-ghost small history-action-btn">Clear History</button>
+                      <button id="exportHistoryBtn" class="btn btn-ghost small history-action-btn"
+                        title="Export sessions as plain text">↓ TXT</button>
+                      <button id="exportHistoryJsonBtn" class="btn btn-ghost small history-action-btn"
+                        title="Export sessions as JSON">↓ JSON</button>
+                    </div>
+                  </header>
+                  <div id="historyList" class="history-list empty">
+                    <p class="empty-text">No past sessions yet. Your next submission will appear here.</p>
+                  </div>
+                </article>
+              </div>
+            </div>
+
+            <!-- Study Assistant moved to a slide-in panel (floating button opens it) -->
+
+            <!-- (History moved into tabs) -->
+
+          </div>
 
       </section>
+
+      <!-- LEARNING HUB SECTION -->
+      <section id="learningHubSection" class="view-section" style="display: none;">
+        <div class="grid">
+          <div class="left-col" style="flex: 1;">
+            <article class="card">
+              <header class="card-header-row">
+                <h2>Learning Hub: CSE Topics</h2>
+              </header>
+              <p class="task-hint">Select a topic to explore core concepts.</p>
+
+              <!-- Topic Grid -->
+              <div id="learningHubGrid"
+                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
+                <!-- Injected via learning.js -->
+              </div>
+
+              <!-- Topic Detail View -->
+              <div id="learningHubDetail" style="display: none; margin-top: 1.5rem;">
+                <button id="backToLearningGridBtn" class="btn btn-ghost small" style="margin-bottom: 1rem;">← Back to
+                  Topics</button>
+                <h3 id="learningTopicTitle" style="margin-top: 0; font-size: 1.4rem;">Topic Title</h3>
+                <p id="learningTopicContent" class="task-text">Placeholder content. AI generated study materials will
+                  appear here later.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- CODING PRACTICE SECTION -->
+      <section id="codingPracticeSection" class="view-section" style="display: none;">
+        <div class="grid">
+          <div class="left-col" style="flex: 1;">
+            <article class="card">
+              <header class="card-header-row">
+                <h2>Coding Practice</h2>
+              </header>
+              <p class="task-hint">Select a language to practice coding.</p>
+
+              <!-- Language Grid -->
+              <div id="practiceGrid"
+                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
+                <!-- Injected via practice.js -->
+              </div>
+
+              <!-- 1. Practice Mode & Challenge Select -->
+              <div id="practiceModeSelect" style="display: none; margin-top: 1.5rem;">
+                <button id="backFromModeSelectBtn" class="btn btn-ghost small" style="margin-bottom: 1rem;">← Back to
+                  Languages</button>
+                <h3 id="modeSelectLanguageTitle" style="margin-top: 0; font-size: 1.4rem; margin-bottom: 1rem;">Language
+                  Name</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+
+                  <div id="btnPracticeMode" class="card"
+                    style="cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease;">
+                    <h4 style="margin-top: 0;">Freestyle Practice</h4>
+                    <p class="task-hint" style="margin: 0;">Write and run your code freely. No tracking, no
+                      restrictions.</p>
+                  </div>
+
+                  <div id="btnChallengeMode" class="card"
+                    style="cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; border-left: 3px solid var(--accent);">
+                    <h4 style="margin-top: 0;">Challenge Mode</h4>
+                    <p class="task-hint" style="margin: 0;">Solve structured problems mapped to different difficulty
+                      tiers.</p>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- 2. Challenge Tier Select -->
+              <div id="challengeTierSelect" style="display: none; margin-top: 1.5rem;">
+                <button id="backFromTierSelectBtn" class="btn btn-ghost small" style="margin-bottom: 1rem;">←
+                  Back</button>
+                <h3 style="margin-top: 0; font-size: 1.4rem; margin-bottom: 1rem;">Select Difficulty Tier</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+
+                  <div class="card challenge-tier-btn" data-tier="Foundation"
+                    style="cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease;">
+                    <h4 style="margin-top: 0; color: #10b981;">Foundation</h4>
+                    <p class="task-hint" style="margin: 0;">Core syntax and fundamental algorithm concepts.</p>
+                    <div id="progressFoundation"
+                      style="margin-top: 0.5rem; font-size: 0.8rem; font-weight: bold; color: var(--text-muted);">0
+                      Solved</div>
+                  </div>
+
+                  <div class="card challenge-tier-btn" data-tier="Momentum"
+                    style="cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease;">
+                    <h4 style="margin-top: 0; color: #f59e0b;">Momentum</h4>
+                    <p class="task-hint" style="margin: 0;">Intermediate structures, edge cases, and optimization.</p>
+                    <div id="progressMomentum"
+                      style="margin-top: 0.5rem; font-size: 0.8rem; font-weight: bold; color: var(--text-muted);">0
+                      Solved</div>
+                  </div>
+
+                  <div class="card challenge-tier-btn" data-tier="Mastery"
+                    style="cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease;">
+                    <h4 style="margin-top: 0; color: #ef4444;">Mastery</h4>
+                    <p class="task-hint" style="margin: 0;">Advanced architectures and performance-critical operations.
+                    </p>
+                    <div id="progressMastery"
+                      style="margin-top: 0.5rem; font-size: 0.8rem; font-weight: bold; color: var(--text-muted);">0
+                      Solved</div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- 3. Challenge List -->
+              <div id="challengeListSection" style="display: none; margin-top: 1.5rem;">
+                <button id="backFromChallengeListBtn" class="btn btn-ghost small" style="margin-bottom: 1rem;">← Back to
+                  Tiers</button>
+                <h3 id="challengeTierTitle" style="margin-top: 0; font-size: 1.4rem; margin-bottom: 1rem;">Tier Name
+                </h3>
+                <div id="challengeListGrid" style="display: grid; grid-template-columns: 1fr; gap: 0.5rem;">
+                  <!-- Injected dynamically based on selected tier -->
+                </div>
+              </div>
+
+              <!-- Practice Detail View -->
+              <div id="practiceDetail" style="display: none; margin-top: 1.5rem;">
+                <button id="backToPracticeGridBtn" class="btn btn-ghost small" style="margin-bottom: 1rem;">← Back to
+                  Languages</button>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+                  <h3 id="practiceLanguageTitle" style="margin: 0; font-size: 1.4rem;">Language Name</h3>
+                  <div style="display:flex; gap:0.5rem; align-items:center;">
+                    <button id="practiceClearCodeBtn" class="btn btn-ghost chat-action-btn small">Clear Code</button>
+                    <button id="practiceRunBtn" class="btn btn-primary small"
+                      style="padding: 0.4rem 1.2rem; display:flex; gap:0.4rem; align-items:center;">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 3L19 12L5 21V3Z" fill="currentColor" />
+                      </svg>
+                      Run
+                    </button>
+                  </div>
+                </div>
+
+                <div id="practiceEditor" class="editor practice-editor"
+                  style="padding: 0; overflow: hidden; text-align: left; min-height: 250px;"></div>
+
+                <!-- Program Input Section -->
+                <div id="practiceInputContainer" style="margin-top: 1.5rem;">
+                  <h4 style="margin: 0; color:var(--text-main); font-size: 0.95rem; margin-bottom: 0.5rem;">Terminal
+                    Input (Standard In)</h4>
+                  <textarea id="practiceInput" class="execution-terminal"
+                    style="width: 100%; min-height: 100px; resize: vertical; border: 1px solid var(--border-subtle); outline: none; margin: 0; display: block; font-family: 'SF Mono', ui-monospace, Menlo, Monaco, Consolas, monospace;"
+                    spellcheck="false" placeholder="Enter test case inputs here (newline separated)..."></textarea>
+                </div>
+
+                <div
+                  style="display:flex; justify-content:space-between; align-items:baseline; margin-top: 1.5rem; margin-bottom: 0.5rem;">
+                  <h4 style="margin: 0; color:var(--text-main); font-size: 0.95rem;">Terminal Output</h4>
+                  <button id="practiceClearTermBtn" class="btn btn-ghost chat-action-btn small"
+                    style="padding: 0.2rem 0.6rem; font-size: 0.75rem;">Clear Console</button>
+                </div>
+                <div id="practiceTerminal" class="execution-terminal empty">Click "Run" to execute your code.</div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
     </main>
 
     <footer class="app-footer">
       <p>LearnTrace – a simple lens into learning behavior.</p>
       <div class="anonymous-banner">Anonymous mode – progress stored only in this browser</div>
+      <span id="syncStatus" class="sync-status" hidden></span>
     </footer>
   </div>
 
-  <!-- 🚫 AUTH DISABLED FOR PHASE 1 -->
-  <!-- <script type="module" src="auth-check.js"></script> -->
-
-  <!-- ✅ CORE APP LOGIC ONLY -->
+  <!-- Core app + optional auth -->
+  <script type="module" src="auth-check.js"></script>
   <script type="module" src="script.js"></script>
   <script type="module" src="chatbot.js"></script>
+
+  <!-- Navigation & New Modules -->
+  <script type="module" src="src/navigation.js"></script>
+  <script type="module" src="src/learning.js"></script>
+  <!-- Load Monaco Editor -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+  <script type="module" src="src/practice.js"></script>
   <!-- Floating AI Assistant button and slide-in panel -->
   <button id="aiToggle" class="ai-toggle" aria-label="Open Study Assistant" aria-controls="assistantPanel"
     aria-expanded="false">
@@ -185,7 +397,7 @@
         <div class="assistant-controls" style="display:flex; gap:8px; margin-top:8px;">
           <input id="assistantInput" class="input" placeholder="Ask the Study Assistant..." style="flex:1;" />
           <button id="assistantSendBtn" class="btn btn-primary">Ask</button>
-          <button id="assistantClearBtn" class="btn btn-ghost">Clear</button>
+          <button id="assistantClearBtn" class="btn btn-ghost chat-action-btn">Clear</button>
         </div>
       </div>
     </div>
@@ -201,6 +413,17 @@
 
       var ICON_EXPAND = '\u26F6';   // ⛶ — four corners / expand
       var ICON_COLLAPSE = '\u29C5'; // ⧅ — box with slash / collapse
+
+      // Debounce flag — prevents rapid double-click from toggling the panel twice
+      var _toggling = false;
+      function withDebounce(fn) {
+        return function () {
+          if (_toggling) return;
+          _toggling = true;
+          setTimeout(function () { _toggling = false; }, 250);
+          fn();
+        };
+      }
 
       function openPanel() {
         if (!panel) return;
@@ -239,11 +462,11 @@
       // convert close button to a compact × while preserving behavior
       try { if (closeBtn) { closeBtn.textContent = '\u00D7'; closeBtn.classList.add('assistant-close-x'); closeBtn.setAttribute('aria-label', 'Close Assistant'); } } catch (e) { }
 
-      if (toggle) toggle.addEventListener('click', openPanel);
-      if (closeBtn) closeBtn.addEventListener('click', closePanel);
+      if (toggle) toggle.addEventListener('click', withDebounce(openPanel));
+      if (closeBtn) closeBtn.addEventListener('click', withDebounce(closePanel));
       if (expandBtn) expandBtn.addEventListener('click', toggleExpand);
-      if (overlay) overlay.addEventListener('click', closePanel);
-      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePanel(); });
+      if (overlay) overlay.addEventListener('click', withDebounce(closePanel));
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePanel(); });
     })();
   </script>
   <script>
