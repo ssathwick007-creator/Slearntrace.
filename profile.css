@@ -73,6 +73,28 @@
     flex-direction: column;
     align-items: center;
     min-height: 100vh;
+    /* Unique Knowledge Wave Entrance */
+    animation: knowledgeWave 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Knowledge Wave Ripple Overlay */
+.insight-container::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 5;
+    box-shadow:
+        0 0 0 0 rgba(147, 51, 234, 0.4),
+        0 0 0 0 rgba(45, 212, 191, 0.3);
+    animation: knowledgeRipple 1s ease-out forwards;
 }
 
 .profile-header {
@@ -279,6 +301,59 @@
     }
 }
 
+@keyframes profileEntrance {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes knowledgeWave {
+    0% {
+        opacity: 0.9;
+        filter: blur(2px);
+        transform: scale(0.98);
+    }
+
+    60% {
+        filter: blur(1px);
+    }
+
+    100% {
+        opacity: 1;
+        filter: blur(0);
+        transform: scale(1);
+    }
+}
+
+@keyframes knowledgeRipple {
+    0% {
+        opacity: 1;
+        box-shadow:
+            0 0 0 0 rgba(147, 51, 234, 0.6),
+            0 0 0 0 rgba(45, 212, 191, 0.5);
+    }
+
+    70% {
+        opacity: 0.7;
+        box-shadow:
+            0 0 0 300px rgba(147, 51, 234, 0),
+            0 0 0 500px rgba(45, 212, 191, 0);
+    }
+
+    100% {
+        opacity: 0;
+        box-shadow:
+            0 0 0 600px rgba(147, 51, 234, 0),
+            0 0 0 800px rgba(45, 212, 191, 0);
+    }
+}
+
 /* Inside Lens Content (Re-centered after avatar removal) */
 .lens-content {
     display: flex;
@@ -357,7 +432,8 @@
     background: linear-gradient(90deg, transparent, var(--ray-color-1), transparent);
     transform-origin: left center;
     opacity: 0.6;
-    animation: rayFadeIn 1s ease-out forwards;
+    /* Neural connection formation pulse */
+    animation: rayNeuralFormation 1.2s ease-in-out forwards;
 }
 
 .ray::after {
@@ -372,15 +448,23 @@
     box-shadow: 0 0 15px var(--ray-color-1);
 }
 
-@keyframes rayFadeIn {
-    from {
+@keyframes rayNeuralFormation {
+    0% {
         width: 0;
         opacity: 0;
+        filter: brightness(2) drop-shadow(0 0 15px var(--ray-color-1));
     }
 
-    to {
+    50% {
+        width: 320px;
+        opacity: 1;
+        filter: brightness(2.5) drop-shadow(0 0 25px var(--ray-color-1));
+    }
+
+    100% {
         width: 280px;
         opacity: 0.6;
+        filter: brightness(1) drop-shadow(0 0 0 transparent);
     }
 }
 

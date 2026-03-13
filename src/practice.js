@@ -1,3 +1,5 @@
+import { getUserRole } from '../userContext.js';
+
 // Render Programming Languages and handle Practice Detail view executing via Piston API
 document.addEventListener('DOMContentLoaded', () => {
     let currentLanguage = null;
@@ -71,11 +73,47 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentTier = null;
     let isLoadingProblems = false;
 
-    const BACKEND_URL = window.location.hostname === 'localhost'
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || (['localhost', '127.0.0.1'].includes(window.location.hostname)
         ? 'http://localhost:5000'
-        : 'https://learntrace-backend.onrender.com';
+        : 'https://learntrace-backend.onrender.com');
+
+    console.log(`[LearnTrace] Backend URL set to: ${BACKEND_URL}`);
+
+    function applyAuthGating() {
+        const isAnon = getUserRole() === 'anonymous';
+        const cards = document.querySelectorAll('#practiceGrid .card, #challengeListGrid .card, .challenge-tier-btn');
+
+        cards.forEach(card => {
+            card.style.opacity = isAnon ? "0.6" : "1";
+            card.style.cursor = isAnon ? "not-allowed" : "pointer";
+            card.style.pointerEvents = isAnon ? "none" : "auto";
+        });
+
+        if (runBtn) {
+            runBtn.disabled = isAnon;
+            runBtn.style.opacity = isAnon ? "0.5" : "1";
+            runBtn.style.cursor = isAnon ? "not-allowed" : "pointer";
+        }
+
+        if (terminal && isAnon) {
+            terminal.innerHTML = '<span class="term-sys">Please sign in to practice coding.</span>';
+        }
+    }
+
+    window.addEventListener('auth-ready', () => {
+        applyAuthGating();
+        // Clear problems if anonymized
+        if (getUserRole() === 'anonymous') {
+            challenges = { Foundation: [], Momentum: [], Mastery: [] };
+            updateTierProgressUI();
+        }
+    });
+
+    // Run gating check after cards are rendered
+    setTimeout(applyAuthGating, 100);
 
     async function fetchProblems(languageId) {
+        if (getUserRole() === 'anonymous') return;
         isLoadingProblems = true;
         updateTierProgressUI(true); // Show loading state in tiers
 
@@ -192,7 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
     languages.forEach(lang => {
         const card = document.createElement('div');
         card.className = 'card';
-        card.style.cursor = 'pointer';
+        card.style.cursor = getUserRole() === 'anonymous' ? 'not-allowed' : 'pointer';
         card.style.transition = 'transform 0.15s ease, box-shadow 0.15s ease';
         card.style.display = 'flex';
         card.style.alignItems = 'center';
@@ -213,6 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         card.addEventListener('click', () => {
+            if (getUserRole() === 'anonymous') return;
             currentLanguage = lang;
             grid.style.display = 'none';
 
@@ -369,11 +408,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${challenge.difficultyTier} • ${challenge.mode} Mode
                     </p>
                 </div>
-                <button class="btn btn-primary small solve-btn">Solve</button>
+                <button class="btn btn-primary small solve-btn" ${getUserRole() === 'anonymous' ? 'disabled' : ''}>Solve</button>
             `;
 
             const solveBtn = card.querySelector('.solve-btn');
             solveBtn.addEventListener('click', async () => {
+                if (getUserRole() === 'anonymous') return;
                 solveBtn.disabled = true;
                 solveBtn.innerHTML = 'Loading...';
 
@@ -501,88 +541,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (runBtn && editorContainer && terminal) {
         const originalBtnHtml = runBtn.innerHTML;
 
-        // --- ADDED: Pyodide Web Worker Setup ---
-        let pythonWorker = null;
-        const initPythonWorker = () => {
-            if (pythonWorker) return;
-            const workerCode = `
-importScripts("https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js");
-
-async function init() {
-    // Explicitly pass the indexURL so Pyodide knows where to load its core WASM files
-    self.pyodide = await loadPyodide({ indexURL: "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/" });
-}
-let initPromise = init();
-
-self.onmessage = async (e) => {
-    try {
-        await initPromise;
-        const { code, id, inputs } = e.data;
-        let combinedOutput = [];
-        
-        // Parse inputs explicitly (split on strict newlines to match VS Code / competitive programming)
-        let inputTokens = (inputs || '').trim().split('\\n').map(t => t.trim());
-        let currentInputIndex = 0;
-
-        // Capture standard output and error Streams sequentially into a single buffer
-        self.pyodide.setStdout({ batched: (str) => combinedOutput.push({ type: 'stdout', text: str + '\\n' }) });
-        self.pyodide.setStderr({ batched: (str) => combinedOutput.push({ type: 'stderr', text: str + '\\n' }) });
-        
-        // Provide a stub for standard input so that calls to input() pull from textarea tokens sequentially
-        // DO NOT echo to stdout, competitive programming judges do not echo.
-        self.pyodide.setStdin({
-            stdin: () => {
-                if (currentInputIndex < inputTokens.length) {
-                    const val = inputTokens[currentInputIndex++];
-                    return val + '\\n';
-                }
-                throw new Error("EOFError: EOF when reading a line. You called input() but provided no more inputs.");
-            }
-        });
-
-        // Use a fresh dictionary for globals to completely reset interpreter state between runs
-        const namespace = self.pyodide.globals.get("dict")();
-        try {
-            await self.pyodide.runPythonAsync(code, { globals: namespace });
-            self.postMessage({ id, success: true, combinedOutput });
-        } catch (pyErr) {
-            // Simplify Python Tracebacks for beginners
-            let errorStr = pyErr.toString();
-            // Remove the Pyodide 'PythonError: Traceback (most recent call last):' boilerplate
-            if (errorStr.includes('File "<exec>"')) {
-                 const parts = errorStr.split('File "<exec>"');
-                 if (parts.length > 1) {
-                     // Keep everything after the exec file reference to show the actual logic error
-                     errorStr = "Error in your code" + parts[parts.length - 1];
-                 }
-            } else if (errorStr.startsWith('PythonError: ')) {
-                errorStr = errorStr.replace('PythonError: ', '');
-            }
-
-            self.postMessage({ id, success: false, error: errorStr.trim(), combinedOutput });
-        } finally {
-            // Unbind to prevent memory leaks
-            namespace.destroy();
-        }
-    } catch (err) {
-        // Core initialization or WASM loading failure
-        self.postMessage({ id: e.data.id, success: false, error: "Engine Error: " + err.toString(), combinedOutput: [] });
-    }
-};`;
-            const blob = new Blob([workerCode], { type: 'application/javascript' });
-            pythonWorker = new Worker(URL.createObjectURL(blob));
-        };
-        // ---------------------------------------
-
         runBtn.addEventListener('click', async () => {
+            if (getUserRole() === 'anonymous') return;
             const code = monacoEditor ? monacoEditor.getValue().trim() : '';
             if (!code || !currentLanguage) return;
 
-            // 1. CLEAR OUTPUT AND SET UI LOADING STATE
+            // 1. DISABLE BUTTON + SHOW SPINNER
             runBtn.disabled = true;
-            runBtn.innerHTML = '<span class="term-sys">Running...</span>';
+            runBtn.innerHTML = '<svg class="run-spinner" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-dasharray="31.4 31.4" stroke-linecap="round"/></svg> Running\u2026';
             terminal.className = 'execution-terminal';
-            terminal.innerHTML = `<span class="term-sys">&gt; Executing ${currentLanguage.name}...</span>\n`;
+            terminal.innerHTML = `<span class="term-sys">&gt; Executing ${currentLanguage.name}\u2026</span>\n`;
 
             const payload = {
                 language: currentLanguage.id,
@@ -590,13 +558,18 @@ self.onmessage = async (e) => {
                 input: inputArea ? inputArea.value : ""
             };
 
+            // 2. FETCH WITH 15-SECOND TIMEOUT
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
+
             try {
-                // Attempt to fetch from BACKEND_URL (handles localhost or production)
-                const response = await fetch(`${BACKEND_URL}/api/execute`, {
+                const response = await fetch(`${BACKEND_URL}/api/run`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(payload),
+                    signal: controller.signal
                 });
+                clearTimeout(timeoutId);
 
                 let result;
                 try {
@@ -607,40 +580,39 @@ self.onmessage = async (e) => {
 
                 terminal.innerHTML = ''; // Start clean
 
-                if (!response.ok || !result.success) {
-                    const errorMsg = result.error || result.stderr || "Execution Failed";
-                    terminal.innerHTML = `<span class="term-error">${errorMsg.replace(/</g, '&lt;')}</span>`;
+                if (!response.ok || (result.exitCode !== 0 && !result.stdout)) {
+                    // 3. ERROR DISPLAY
+                    const errorMsg = result.stderr || "Execution Failed";
+                    terminal.innerHTML = `<span class="term-error">${errorMsg.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>`;
                 } else {
+                    // 4. SUCCESS OUTPUT
                     let outHtml = '';
 
-                    // Use unified output if available
-                    if (result.combinedOutput && result.combinedOutput.length > 0) {
-                        result.combinedOutput.forEach(line => {
-                            const safeText = line.text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                            outHtml += line.type === 'stderr'
-                                ? `<span class="term-error">${safeText}</span>`
-                                : `<span>${safeText}</span>`;
-                        });
-                    } else {
-                        if (result.output) outHtml += `<span>${result.output.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>`;
-                        if (result.error) outHtml += `<span class="term-error">${result.error.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>`;
+                    if (result.stdout) {
+                        outHtml += `<span class="term-success">${result.stdout.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>`;
+                    }
+                    if (result.stderr) {
+                        outHtml += `<span class="term-error">${result.stderr.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>`;
                     }
 
                     if (!outHtml) {
-                        outHtml = `<span class="term-sys">&gt; Program exited successfully with no output.</span>`;
+                        outHtml = `<span class="term-sys">&gt; Execution finished (no output)</span>`;
+                    } else {
+                        outHtml += `\n\n<span class="term-sys">[Finished with exit code ${result.exitCode || 0}]</span>`;
                     }
+                    terminal.innerHTML = outHtml;
 
                     // Add execution metrics
                     if (result.time !== undefined) {
                         outHtml += `\n<span class="term-sys" style="font-size: 0.8em; opacity: 0.6;">\n[Finished in ${(result.time / 1000).toFixed(2)}s]</span>`;
                     }
 
-                    // --- CHALLENGE TRACKING ---
-                    if (result.success && currentChallenge) {
+                    // CHALLENGE TRACKING
+                    if (result.exitCode === 0 && currentChallenge) {
                         const key = `learntrace_${window.db && window.auth && window.auth.currentUser ? window.auth.currentUser.uid : 'anon'}_${currentLanguage.id}_problem_${currentChallenge.problemId}`;
                         if (localStorage.getItem(key) !== 'solved') {
                             localStorage.setItem(key, 'solved');
-                            outHtml += `\n<span style="color: #10b981; font-weight: bold; margin-top: 0.5rem; display: block;">🏆 Challenge Solved!</span>`;
+                            terminal.innerHTML += `\n<span style="color: #10b981; font-weight: bold; margin-top: 0.5rem; display: block;">\uD83C\uDFC6 Challenge Solved!</span>`;
                             updateTierProgressUI();
                         }
                     }
@@ -648,8 +620,16 @@ self.onmessage = async (e) => {
                     terminal.innerHTML = outHtml;
                 }
             } catch (e) {
+                clearTimeout(timeoutId);
                 console.error("Execution error: ", e);
-                terminal.innerHTML = `<span class="term-error">&gt; Server busy, try again. (Network Error: Could not reach execution server)</span>`;
+
+                let message;
+                if (e.name === 'AbortError') {
+                    message = "&gt; Execution timed out. Please try again.";
+                } else {
+                    message = "&gt; Execution server unavailable. Please try again.";
+                }
+                terminal.innerHTML = `<span class="term-error">${message}</span>`;
             } finally {
                 runBtn.disabled = false;
                 runBtn.innerHTML = originalBtnHtml;

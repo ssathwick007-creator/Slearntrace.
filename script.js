@@ -8,7 +8,7 @@
  * AUTH EXTENSION POINT — see userContext.js.
  * When auth is ready, only userContext.js needs to change.
  */
-import { getUserId as _getUserIdFromContext } from './userContext.js';
+import { getUserId as _getUserIdFromContext, getUserRole } from './userContext.js';
 (function () {
   "use strict";
 
@@ -17,6 +17,17 @@ import { getUserId as _getUserIdFromContext } from './userContext.js';
     if (window.__learnTraceInitialized) return;
     window.__learnTraceInitialized = true;
   } catch (e) { /* ignore */ }
+
+  // Prevent all zoom gestures (pinch-zoom and double-tap zoom)
+  (function preventZoom() {
+    const stopper = (e) => {
+      if (e.touches.length > 1) {
+        e.preventDefault();
+      }
+    };
+    document.addEventListener('touchstart', stopper, { passive: false });
+    document.addEventListener('touchmove', stopper, { passive: false });
+  })();
 
   // ─── DOM refs ─────────────────────────────────────────────────────────────
   const responseInput = document.getElementById("responseInput");
@@ -106,6 +117,11 @@ import { getUserId as _getUserIdFromContext } from './userContext.js';
 
   // ─── Backend Integration ──────────────────────────────────────────────────
   async function fetchReflectionQuestion(id = null) {
+    if (getUserRole() === 'anonymous') {
+      const taskTextEl = document.getElementById('taskText');
+      if (taskTextEl) taskTextEl.textContent = "Please sign in to view and practice reflection questions.";
+      return;
+    }
     try {
       const url = id
         ? `${BACKEND_URL}/api/reflection?currentId=${id}`
@@ -319,6 +335,40 @@ import { getUserId as _getUserIdFromContext } from './userContext.js';
     if (status === "active") sessionStatusPill.classList.add("pill--active");
     if (status === "ended") sessionStatusPill.classList.add("pill--ended");
   }
+
+  function applyAuthGating() {
+    const isAnon = getUserRole() === 'anonymous';
+    const practiceButtons = [startBtn, submitBtn, nextQuestionBtn, prevQuestionBtn, clearHistoryBtn];
+
+    practiceButtons.forEach(btn => {
+      if (btn) {
+        btn.disabled = isAnon;
+        btn.style.opacity = isAnon ? "0.5" : "1";
+        btn.style.cursor = isAnon ? "not-allowed" : "";
+      }
+    });
+
+    if (responseInput) {
+      responseInput.disabled = isAnon;
+      responseInput.placeholder = isAnon ? "Sign in to start a session." : "Press 'Start Session' to begin.";
+    }
+
+    if (isAnon) {
+      if (classificationDisplay) classificationDisplay.textContent = "Sign in required";
+      if (feedbackDisplay) feedbackDisplay.textContent = "Please sign in to see behavioral insights.";
+      if (insightDisplay) insightDisplay.textContent = "";
+      const taskTextEl = document.getElementById('taskText');
+      if (taskTextEl) taskTextEl.textContent = "Please sign in to access practice features.";
+    } else {
+      // If we just signed in, load the question
+      if (!currentTask) fetchReflectionQuestion();
+    }
+  }
+
+  window.addEventListener('auth-ready', () => {
+    applyAuthGating();
+    renderHistory();
+  });
 
   function startSession() {
     // Guard: do nothing if already active (prevents double-start on rapid clicks)
@@ -668,6 +718,13 @@ import { getUserId as _getUserIdFromContext } from './userContext.js';
   }
 
   async function renderHistory() {
+    if (getUserRole() === 'anonymous') {
+      if (historyList) {
+        historyList.classList.add("empty");
+        historyList.innerHTML = `<p class="empty-text">Sign in to view your learning history.</p>`;
+      }
+      return;
+    }
     const attempts = await readAttemptsFromStorage();
 
     // ── Trend badge (above the history list) ──────────────────────────────
@@ -797,6 +854,7 @@ import { getUserId as _getUserIdFromContext } from './userContext.js';
   // ─── Event: Start ─────────────────────────────────────────────────────────
   if (startBtn) {
     startBtn.addEventListener("click", () => {
+      if (getUserRole() === 'anonymous') return;
       if (sessionActive || _startLocked) return; // guard against double-start
       _startLocked = true;
       setTimeout(() => { _startLocked = false; }, 300); // 300ms debounce
@@ -835,6 +893,7 @@ import { getUserId as _getUserIdFromContext } from './userContext.js';
   // ─── Event: Submit ────────────────────────────────────────────────────────
   if (submitBtn) {
     submitBtn.addEventListener("click", async () => {
+      if (getUserRole() === 'anonymous') return;
       if (!sessionActive || _submitLocked) return; // guard: session must be active
       _submitLocked = true;
       setTimeout(() => { _submitLocked = false; }, 800); // 800ms debounce
@@ -1428,6 +1487,9 @@ import { getUserId as _getUserIdFromContext } from './userContext.js';
   }
 
   // Run init immediately if DOM is ready (handles Vite HMR and late script loads)
+  // Final check after all scripts load
+  setTimeout(applyAuthGating, 500);
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {

@@ -4,13 +4,16 @@
 <head>
   <meta charset="UTF-8" />
   <title>LearnTrace – Learning Behavior Tracker</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
   <meta name="description"
     content="LearnTrace tracks how students learn — effort, behavior, and process — not just whether they got the right answer." />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="src/splash.css" />
 </head>
 
 <body>
+  <script type="module" src="src/splash.js"></script>
   <div class="app-shell">
     <header class="app-header">
       <div class="brand">
@@ -186,10 +189,11 @@
         <div class="grid">
           <div class="left-col" style="flex: 1;">
             <article class="card">
-              <header class="card-header-row">
-                <h2>Learning Hub: CSE Topics</h2>
+              <header style="margin-bottom: 8px;">
+                <h2 style="margin: 0; font-size: 28px; font-weight: 700;">Learning Hub: CSE Topics</h2>
               </header>
-              <p class="task-hint">Select a topic to explore core concepts.</p>
+              <p style="font-size: 16px; color: #64748B; margin: 0 0 1.5rem 0;">Select a topic to explore core concepts.
+              </p>
 
               <!-- Topic Grid -->
               <div id="learningHubGrid"
@@ -199,11 +203,16 @@
 
               <!-- Topic Detail View -->
               <div id="learningHubDetail" style="display: none; margin-top: 1.5rem;">
-                <button id="backToLearningGridBtn" class="btn btn-ghost small" style="margin-bottom: 1rem;">← Back to
+                <button id="backToLearningGridBtn"
+                  style="background: #F1F5F9; padding: 8px 16px; border-radius: 999px; font-weight: 500; border: none; cursor: pointer; transition: background 0.2s; margin-bottom: 1rem; color: #0f172a;"
+                  onmouseover="this.style.background='#E2E8F0'" onmouseout="this.style.background='#F1F5F9'">← Back to
                   Topics</button>
-                <h3 id="learningTopicTitle" style="margin-top: 0; font-size: 1.4rem;">Topic Title</h3>
+                <h3 id="learningTopicTitle"
+                  style="font-size: 26px; font-weight: 700; margin-top: 24px; margin-bottom: 20px;">Topic Title</h3>
                 <p id="learningTopicContent" class="task-text">Placeholder content. AI generated study materials will
                   appear here later.</p>
+                <!-- Interactive Array Visualizer Root -->
+                <div id="array-train-root"></div>
               </div>
             </article>
           </div>
