@@ -80,6 +80,10 @@ export default defineConfig({
       '/api/run': {
         target: 'http://localhost:5000',
         changeOrigin: true
+      },
+      '/api/study-assistant': {
+        target: 'http://localhost:5000',
+        changeOrigin: true
       }
     }
   },

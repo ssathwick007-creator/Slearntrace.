@@ -335,16 +335,16 @@
     showTypingIndicator();
 
     try {
-      const response = await fetch('/api/assistant', {
+      const response = await fetch('/api/study-assistant', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: q })
+        body: JSON.stringify({ question: q })
       });
 
       if (!response.ok) throw new Error(`Backend Error: ${response.status}`);
 
       const data = await response.json();
-      let ans = data.reply || "Sorry, I received an empty response.";
+      let ans = data.answer || "Sorry, I received an empty response.";
 
       hideTypingIndicator();
       chat.push({ role: 'assistant', text: ans });
@@ -353,7 +353,7 @@
       // Don't use safeLog here to avoid breaking if it's not universally available
       console.error('AI Chat Error:', e);
       hideTypingIndicator();
-      chat.push({ role: 'assistant', text: "Sorry, I had trouble connecting to the AI." });
+      chat.push({ role: 'assistant', text: "Sorry, the Study Assistant is temporarily unavailable. Please try again." });
       renderFull();
     } finally {
       setSendDisabled(false);
