@@ -52,6 +52,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 await mountArrayTrain();
             } else if (topic.name === 'Algorithms') {
                 await mountAlgorithms();
+            } else if (topic.name === 'Operating Systems') {
+                await mountOperatingSystems();
+            } else if (topic.name === 'Computer Networks') {
+                await mountComputerNetworks();
             } else {
                 const content = document.getElementById('learningTopicContent');
                 content.style.display = 'block';
@@ -106,6 +110,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const root = ReactDOM.createRoot(rootEl);
         root.render(React.createElement(AlgorithmsHub.default));
+
+        document.getElementById('learningTopicContent').style.display = 'none';
+
+        backBtn.addEventListener('click', () => {
+            root.unmount();
+            document.getElementById('learningTopicContent').style.display = 'block';
+            rootEl.innerHTML = '';
+        }, { once: true });
+    }
+
+    async function mountOperatingSystems() {
+        const rootEl = document.getElementById('array-train-root');
+        if (!rootEl) return;
+
+        const [React, ReactDOM, OperatingSystemsHub] = await Promise.all([
+            import('react'),
+            import('react-dom/client'),
+            import('./OperatingSystemsHub.jsx')
+        ]);
+
+        const root = ReactDOM.createRoot(rootEl);
+        root.render(React.createElement(OperatingSystemsHub.default));
+
+        document.getElementById('learningTopicContent').style.display = 'none';
+
+        backBtn.addEventListener('click', () => {
+            root.unmount();
+            document.getElementById('learningTopicContent').style.display = 'block';
+            rootEl.innerHTML = '';
+        }, { once: true });
+    }
+
+    async function mountComputerNetworks() {
+        const rootEl = document.getElementById('array-train-root');
+        if (!rootEl) return;
+
+        const [React, ReactDOM, ComputerNetworksHub] = await Promise.all([
+            import('react'),
+            import('react-dom/client'),
+            import('./ComputerNetworksHub.jsx')
+        ]);
+
+        const root = ReactDOM.createRoot(rootEl);
+        root.render(React.createElement(ComputerNetworksHub.default));
 
         document.getElementById('learningTopicContent').style.display = 'none';
 

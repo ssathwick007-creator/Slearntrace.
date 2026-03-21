@@ -1,4 +1,4 @@
-import { getUserRole } from '../userContext.js';
+import { getUserRole, getUserId } from '../userContext.js';
 
 // Render Programming Languages and handle Practice Detail view executing via Piston API
 document.addEventListener('DOMContentLoaded', () => {
@@ -339,17 +339,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Storage Key Generator explicitly mapping Lang + Auth combinations
     function getStorageKey(type, problemId = null) {
-        let prefix = window.db && window.auth && window.auth.currentUser ? window.auth.currentUser.uid : 'anon';
-        let base = `learntrace_${prefix}_${currentLanguage.id}`;
+        const userId = getUserId();
+        const base = `learntrace_${userId}_${currentLanguage.id}`;
         if (type === 'tier') return `${base}_tier_${currentTier}`;
         if (type === 'problem') return `${base}_problem_${problemId}`;
         return base;
     }
 
     function isProblemSolved(problemId) {
-        // Placeholder for real persistence — check localStorage
-        let prefix = window.db && window.auth && window.auth.currentUser ? window.auth.currentUser.uid : 'anon';
-        let key = `learntrace_${prefix}_${currentLanguage.id}_problem_${problemId}`;
+        const key = getStorageKey('problem', problemId);
         return localStorage.getItem(key) === 'solved';
     }
 
@@ -366,10 +364,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const list = challenges[tier] || [];
-            let solved = 0; // Hardcoded as 0 per user request for now
-            // list.forEach(p => {
-            //     if (isProblemSolved(p.problemId)) solved++;
-            // });
+            let solved = 0; 
+            list.forEach(p => {
+                if (isProblemSolved(p.problemId)) solved++;
+            });
 
             progressDiv.innerHTML = `${solved} / ${list.length} Solved`;
             progressDiv.style.color = solved === list.length && list.length > 0 ? '#10b981' : 'var(--text-muted)';
@@ -609,7 +607,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // CHALLENGE TRACKING
                     if (result.exitCode === 0 && currentChallenge) {
-                        const key = `learntrace_${window.db && window.auth && window.auth.currentUser ? window.auth.currentUser.uid : 'anon'}_${currentLanguage.id}_problem_${currentChallenge.problemId}`;
+                        const key = getStorageKey('problem', currentChallenge.problemId);
                         if (localStorage.getItem(key) !== 'solved') {
                             localStorage.setItem(key, 'solved');
                             terminal.innerHTML += `\n<span style="color: #10b981; font-weight: bold; margin-top: 0.5rem; display: block;">\uD83C\uDFC6 Challenge Solved!</span>`;
