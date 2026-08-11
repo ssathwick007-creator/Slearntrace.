@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useFeedback } from './FeedbackManager.jsx';
 
 const INITIAL_CHARS = [
     { char: 'A', freq: 5 },
@@ -85,6 +86,8 @@ const HuffmanCoding = () => {
     const [codes, setCodes] = useState({});
     const [highlighted, setHighlighted] = useState([]);
     const [isRunning, setIsRunning] = useState(false);
+    const { showFeedback } = useFeedback();
+    const [showHint, setShowHint] = useState(true);
     const [message, setMessage] = useState('Characters with frequencies are ready. Merge the two smallest nodes each step.');
     const [activeLang, setActiveLang] = useState('javascript');
     const [nextId, setNextId] = useState(INITIAL_CHARS.length);
@@ -140,10 +143,12 @@ const HuffmanCoding = () => {
             setMessage(`Merged ${a.isLeaf ? a.char : '(' + a.freq + ')'} (${a.freq}) + ${b.isLeaf ? b.char : '(' + b.freq + ')'} (${b.freq}) → ${merged.freq}. ${newQueue.length === 1 ? 'Done!' : newQueue.length + ' nodes remain.'}`);
 
             if (newQueue.length === 1) {
-                setRoot(merged);
                 setCodes(buildCodes(merged));
                 setIsRunning(false);
                 setHighlighted([]);
+                showFeedback("Success! Huffman tree complete 🌳🎯", "success");
+            } else {
+                showFeedback(`Merged ${a.isLeaf ? a.char : 'node'} and ${b.isLeaf ? b.char : 'node'}! 🔗`);
             }
 
             return newQueue;
@@ -206,7 +211,11 @@ const HuffmanCoding = () => {
                                         borderColor: highlighted.includes(node.id) ? '#FACC15' : '#E2E8F0',
                                     }}
                                     exit={{ scale: 0, opacity: 0 }}
-                                    style={styles.queueNode}
+                                    className={highlighted.includes(node.id) ? 'pulse-glow' : ''}
+                                    style={{
+                                        ...styles.queueNode,
+                                        boxShadow: highlighted.includes(node.id) ? '0 0 15px rgba(250, 204, 21, 0.4)' : 'none'
+                                    }}
                                 >
                                     <span style={{ fontWeight: '900', color: '#1E293B' }}>{node.isLeaf ? node.char : '⊕'}</span>
                                     <span style={{ fontSize: '0.75rem', color: '#64748B' }}>{node.freq}</span>
@@ -263,9 +272,18 @@ const HuffmanCoding = () => {
 
                 {/* Controls */}
                 <div style={styles.controls}>
-                    <button onClick={doMerge} disabled={isRunning || queue.length <= 1} style={{ ...styles.secondaryBtn, opacity: (isRunning || queue.length <= 1) ? 0.5 : 1 }}>Build Next Merge</button>
-                    <button onClick={autoBuild} disabled={isRunning || queue.length <= 1} style={{ ...styles.primaryBtn, opacity: (isRunning || queue.length <= 1) ? 0.5 : 1 }}>Auto Build Tree</button>
-                    <button onClick={reset} style={styles.dangerBtn}>Reset</button>
+                    <div style={{ position: 'relative' }}>
+                        <button onClick={() => { doMerge(); setShowHint(false); }} disabled={isRunning || queue.length <= 1} style={{ ...styles.secondaryBtn, opacity: (isRunning || queue.length <= 1) ? 0.5 : 1 }}>
+                            ▶ Build Next Merge 🔗
+                        </button>
+                        {showHint && !isRunning && queue.length > 1 && (
+                            <div className="tooltip-hint" style={{ bottom: '110%', left: '50%' }}>
+                                Merge the two smallest nodes! ✨
+                            </div>
+                        )}
+                    </div>
+                    <button onClick={() => { autoBuild(); setShowHint(false); }} disabled={isRunning || queue.length <= 1} style={{ ...styles.primaryBtn, opacity: (isRunning || queue.length <= 1) ? 0.5 : 1 }}>⚡ Auto Build Tree</button>
+                    <button onClick={reset} style={styles.dangerBtn}>↺ Reset</button>
                 </div>
             </div>
 

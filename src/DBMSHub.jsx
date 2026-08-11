@@ -1,92 +1,88 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import OSIModel from './OSIModel.jsx';
-import TCPvsUDP from './TCPvsUDP.jsx';
-import IPAddressing from './IPAddressing.jsx';
-import NetworkRouting from './NetworkRouting.jsx';
-import PacketTransfer from './PacketTransfer.jsx';
-import ClientServerRestaurant from './ClientServerRestaurant.jsx';
+import DBTablesLibrary from './DBTablesLibrary.jsx';
+import DBPrimaryKey from './DBPrimaryKey.jsx';
+import DBForeignKey from './DBForeignKey.jsx';
+import DBJoins from './DBJoins.jsx';
+import DBIndexing from './DBIndexing.jsx';
+import DBTransactions from './DBTransactions.jsx';
+import DBNormalization from './DBNormalization.jsx';
+import DBAcidProperties from './DBAcidProperties.jsx';
 
-// Unified background icon data (moved outside to prevent re-randomization on re-renders)
-const bgIconData = Array.from({ length: 12 }).map(() => ({
-    icon: ['🌐', '📡', '💻', '🔌', '📦', '🔑', '📶'][Math.floor(Math.random() * 7)],
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    duration: 25 + Math.random() * 25,
-    delay: Math.random() * -20,
+const tabs = [
+    { id: 'tables', label: '📚 Database & Tables' },
+    { id: 'pk', label: '🪪 Primary Key' },
+    { id: 'fk', label: '🔗 Foreign Key' },
+    { id: 'joins', label: '🔀 Joins' },
+    { id: 'indexing', label: '📇 Indexing' },
+    { id: 'transactions', label: '💰 Transactions' },
+    { id: 'normalization', label: '🗂️ Normalization' },
+    { id: 'acid', label: '🏛️ ACID Properties' },
+];
+
+// Memoize random positions so they never recalculate on re-render
+const bgIconData = ['🗄️', '📊', '🔑', '📋', '💾', '🔗', '📇'].map((icon, i) => ({
+    icon,
+    x: Math.random() * 1000,
+    y: Math.random() * 1000,
+    drift: Math.random() * 200 - 100,
+    dur: 30 + Math.random() * 30,
 }));
 
-const ComputerNetworksHub = () => {
-    const [activeTab, setActiveTab] = useState('osi');
+const contentMap = {
+    tables: DBTablesLibrary,
+    pk: DBPrimaryKey,
+    fk: DBForeignKey,
+    joins: DBJoins,
+    indexing: DBIndexing,
+    transactions: DBTransactions,
+    normalization: DBNormalization,
+    acid: DBAcidProperties,
+};
 
-    const tabs = [
-        { id: 'osi', label: '📦 OSI Model' },
-        { id: 'tcpudp', label: '📞 TCP vs UDP' },
-        { id: 'ip', label: '🏠 IP Addressing' },
-        { id: 'routing', label: '🗺️ Routing' },
-        { id: 'packets', label: '✂️ Packet Transfer' },
-        { id: 'clientserver', label: '🍽️ Client-Server' },
-    ];
+const DBMSHub = () => {
+    const [activeTab, setActiveTab] = useState('tables');
 
-    const renderContent = () => {
-        switch (activeTab) {
-            case 'osi': return <OSIModel />;
-            case 'tcpudp': return <TCPvsUDP />;
-            case 'ip': return <IPAddressing />;
-            case 'routing': return <NetworkRouting />;
-            case 'packets': return <PacketTransfer />;
-            case 'clientserver': return <ClientServerRestaurant />;
-            default: return <OSIModel />;
-        }
-    };
+    const handleTabClick = useCallback((id) => {
+        setActiveTab(id);
+    }, []);
 
-    const bgIcons = ['🌐', '📡', '💻', '🔌', '📦', '🔑', '📶'];
+    const ActiveComponent = contentMap[activeTab] || DBTablesLibrary;
 
     return (
         <div style={styles.shell}>
             <div style={styles.bgContainer}>
-                <div style={styles.gradientGlow}></div>
-                {bgIconData.map((data, i) => (
+                <div style={styles.gradientGlow} />
+                {bgIconData.map((d, i) => (
                     <motion.div
                         key={i}
-                        style={{
-                            ...styles.floatingIcon,
-                            left: `${data.x}%`,
-                            top: `${data.y}%`,
-                        }}
-                        animate={{ 
-                            y: [0, -1000],
-                            opacity: [0.03, 0.05, 0.03]
-                        }}
-                        transition={{ 
-                            duration: data.duration,
-                            repeat: Infinity, 
-                            ease: "linear",
-                            delay: data.delay
-                        }}
+                        style={styles.floatingIcon}
+                        initial={{ x: d.x, y: d.y, opacity: 0.03 }}
+                        animate={{ y: [0, -1200], x: [0, d.drift] }}
+                        transition={{ duration: d.dur, repeat: Infinity, ease: "linear" }}
                     >
-                        {data.icon}
+                        {d.icon}
                     </motion.div>
                 ))}
             </div>
 
             <div style={styles.contentWrapper}>
                 <div style={styles.heroSection}>
-                    <motion.h1 
+                    <motion.h1
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
+                        transition={{ duration: 0.5 }}
                         style={styles.heroTitle}
                     >
-                        Computer Networks
+                        Database Management
                     </motion.h1>
-                    <motion.p 
+                    <motion.p
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.1 }}
+                        transition={{ duration: 0.5, delay: 0.1 }}
                         style={styles.heroSubtitle}
                     >
-                        Learn how your computer thinks, connects, and manages data across the globe.
+                        Learn how data is stored, linked, queried, and protected through interactive visual metaphors.
                     </motion.p>
                 </div>
 
@@ -100,15 +96,16 @@ const ComputerNetworksHub = () => {
                                     color: activeTab === tab.id ? '#0f172a' : '#64748b',
                                     opacity: activeTab === tab.id ? 1 : 0.65,
                                     fontWeight: activeTab === tab.id ? '700' : '500',
+                                    backgroundColor: activeTab === tab.id ? 'rgba(15,23,42,0.04)' : 'transparent',
                                 }}
-                                onClick={() => setActiveTab(tab.id)}
+                                onClick={() => handleTabClick(tab.id)}
                             >
                                 {tab.label}
                                 {activeTab === tab.id && (
                                     <motion.div
-                                        layoutId="activeTabUnderlineCN"
+                                        layoutId="activeTabUnderlineDBMS"
                                         style={styles.activeUnderline}
-                                        transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
+                                        transition={{ type: "spring", bounce: 0.18, duration: 0.5 }}
                                     />
                                 )}
                             </button>
@@ -125,7 +122,7 @@ const ComputerNetworksHub = () => {
                             exit={{ opacity: 0 }}
                             transition={{ duration: 0.2, ease: "easeOut" }}
                         >
-                            {renderContent()}
+                            <ActiveComponent />
                         </motion.div>
                     </AnimatePresence>
                 </div>
@@ -145,26 +142,23 @@ const styles = {
     },
     bgContainer: {
         position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
+        top: 0, left: 0,
+        width: '100%', height: '100%',
         zIndex: 0,
         pointerEvents: 'none',
     },
     gradientGlow: {
         position: 'absolute',
-        top: '0',
-        left: '0',
-        width: '100%',
-        height: '100%',
-        background: 'radial-gradient(circle at 50% 10%, rgba(219, 234, 254, 0.4) 0%, rgba(255, 255, 255, 0) 100%)',
+        top: 0, left: 0,
+        width: '100%', height: '100%',
+        background: 'radial-gradient(circle at 50% 10%, rgba(219,234,254,0.4) 0%, rgba(255,255,255,0) 100%)',
     },
     floatingIcon: {
         position: 'absolute',
         fontSize: '1.8rem',
         filter: 'grayscale(100%) blur(1px)',
-        opacity: 0.05
+        opacity: 0.05,
+        willChange: 'transform',
     },
     contentWrapper: {
         position: 'relative',
@@ -200,7 +194,7 @@ const styles = {
         marginBottom: '1.5rem',
         position: 'sticky',
         top: '72px',
-        backgroundColor: 'rgba(255,255,255,0.85)',
+        backgroundColor: 'rgba(255,255,255,0.88)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
         zIndex: 100,
@@ -209,24 +203,24 @@ const styles = {
     },
     tabs: {
         display: 'flex',
-        gap: '0.5rem',
+        gap: '0.25rem',
         padding: '0 1rem',
         overflowX: 'auto',
         scrollbarWidth: 'none',
         msOverflowStyle: 'none',
-        maskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)',
-        WebkitMaskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)',
+        maskImage: 'linear-gradient(to right, transparent, black 3%, black 97%, transparent)',
+        WebkitMaskImage: 'linear-gradient(to right, transparent, black 3%, black 97%, transparent)',
     },
     tab: {
-        padding: '0.6rem 1.2rem',
+        padding: '0.55rem 1rem',
         background: 'none',
         border: 'none',
-        fontSize: '0.875rem',
+        fontSize: '0.84rem',
         cursor: 'pointer',
-        transition: 'all 0.2s ease',
+        transition: 'color 0.2s ease, opacity 0.2s ease, background-color 0.2s ease',
         display: 'flex',
         alignItems: 'center',
-        gap: '10px',
+        gap: '8px',
         whiteSpace: 'nowrap',
         borderRadius: '8px',
         position: 'relative'
@@ -242,9 +236,8 @@ const styles = {
     },
     content: {
         minHeight: '600px',
-        paddingTop: '0',
-        transition: 'all 0.2s ease'
+        paddingTop: 0,
     }
 };
 
-export default ComputerNetworksHub;
+export default DBMSHub;

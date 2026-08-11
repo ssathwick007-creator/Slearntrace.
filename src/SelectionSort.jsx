@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useFeedback } from './FeedbackManager.jsx';
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -13,6 +14,8 @@ const SelectionSort = () => {
     const [sorted, setSorted] = useState(new Set());// green — sorted boundary
     const [message, setMessage] = useState('');
     const [isRunning, setIsRunning] = useState(false);
+    const { showFeedback } = useFeedback();
+    const [showHint, setShowHint] = useState(true);
     const [stepDone, setStepDone] = useState(false);
     const [activeLang, setActiveLang] = useState('python');
     const stopRef = useRef(false);
@@ -80,6 +83,7 @@ const SelectionSort = () => {
         setSorted(new Set([...sortedSet]));
         setScanning([]); setMinIdx(null); setSwapping([]);
         setMessage('✓ Array is sorted!');
+        showFeedback('Great job! Keep going 🚀', 'success');
         setIsRunning(false); setStepDone(true);
         if (window.AppProgress) window.AppProgress.markMetaphorCompleted('SelectionSort');
     };
@@ -146,8 +150,8 @@ const SelectionSort = () => {
             <div style={s.header}>
                 <h2 style={s.title}>Selection Sort — Choosing the Smallest Card 🃏</h2>
                 <div style={s.desc}>
-                    <p>Imagine sorting playing cards in your hand. You repeatedly look through the unsorted cards, pick the smallest one, and place it at the front.</p>
-                    <p>Selection Sort works the same way — it <strong>selects the smallest element</strong> from the unsorted portion and swaps it into position.</p>
+                    <p>Selection Sort is like picking the smallest card from a messy pile and moving it to the front, one by one!</p>
+                    <p>We'll <strong>find the minimum</strong> and place it in its correct spot until the whole row is perfect.</p>
                 </div>
             </div>
 
@@ -160,8 +164,19 @@ const SelectionSort = () => {
 
                 <div style={s.barsContainer}>
                     {array.map((val, idx) => (
-                        <motion.div key={idx} style={s.barWrap} layout transition={{ type: 'spring', stiffness: 300, damping: 30 }}>
-                            <div style={{ ...s.bar, height: `${(val / maxVal) * 160 + 20}px`, backgroundColor: barColor(idx) }} />
+                        <motion.div 
+                            key={idx} 
+                            style={s.barWrap} 
+                            layout 
+                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                            className={idx === minIdx ? 'pulse-glow' : ''}
+                        >
+                            <div style={{ 
+                                ...s.bar, 
+                                height: `${(val / maxVal) * 160 + 20}px`, 
+                                backgroundColor: barColor(idx),
+                                boxShadow: idx === minIdx ? '0 0 15px rgba(59, 130, 246, 0.5)' : 'none'
+                            }} />
                             <span style={s.barLabel}>{val}</span>
                         </motion.div>
                     ))}
@@ -188,9 +203,22 @@ const SelectionSort = () => {
 
             {/* Controls */}
             <div style={s.controls}>
-                <button onClick={runSort} disabled={isRunning} style={{ ...s.btn, backgroundColor: '#4f46e5' }}>▶ Start Sorting</button>
-                <button onClick={handleNextStep} disabled={isRunning || stepDone} style={{ ...s.btn, backgroundColor: '#0891b2' }}>⏭ Next Step</button>
-                <button onClick={resetAll} style={{ ...s.btn, backgroundColor: '#ef4444' }}>↺ Reset</button>
+                <div style={{ position: 'relative' }}>
+                    <button onClick={() => { runSort(); setShowHint(false); }} disabled={isRunning} style={{ ...s.btn, backgroundColor: '#4f46e5' }}>
+                        ▶ Let's Sort it! 🃏
+                    </button>
+                    {showHint && !isRunning && (
+                        <div className="tooltip-hint" style={{ bottom: '110%', left: '50%' }}>
+                            Click 'Start' to find the smallest! ✨
+                        </div>
+                    )}
+                </div>
+                <button onClick={() => { handleNextStep(); setShowHint(false); }} disabled={isRunning || stepDone} style={{ ...s.btn, backgroundColor: '#0891b2' }}>
+                    ⏭ Take a Step
+                </button>
+                <button onClick={resetAll} style={{ ...s.btn, backgroundColor: '#ef4444' }}>
+                    ↺ Reset Everything
+                </button>
             </div>
 
             {/* Code Section */}

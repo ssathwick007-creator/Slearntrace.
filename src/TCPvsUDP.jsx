@@ -3,376 +3,282 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const TCPvsUDP = () => {
     const [mode, setMode] = useState(null); // 'tcp' or 'udp'
-    const [status, setStatus] = useState('idle'); // 'idle', 'sending', 'ack', 'done'
+    const [status, setStatus] = useState('idle'); // 'idle', 'handshake1', 'handshake2', 'handshake3', 'data', 'ack', 'done', 'blasting'
     const [stepMode, setStepMode] = useState(false);
     const [stepIndex, setStepIndex] = useState(0);
 
-    const stepsByMode = {
-        tcp: [
-            'Packet leaves source',
-            'Destination acknowledges (ACK)',
-            'Transfer completed'
-        ],
-        udp: [
-            'Packet leaves source',
-            'Destination receives packet'
-        ]
+    const tcpSteps = [
+        { status: 'handshake1', label: '1. SYN', desc: 'Client asks: "Are you there? I want to connect."' },
+        { status: 'handshake2', label: '2. SYN-ACK', desc: 'Server says: "Yes, I am here! I am ready too."' },
+        { status: 'handshake3', label: '3. ACK', desc: 'Client says: "Great! Connection established."' },
+        { status: 'data', label: '4. DATA', desc: 'Client sends data packets safely.' },
+        { status: 'ack', label: '5. ACK', desc: 'Server confirms: "Packet 1 received correctly."' },
+        { status: 'done', label: '6. DONE', desc: 'Transaction complete and verified.' }
+    ];
+
+    const udpSteps = [
+        { status: 'blasting', label: '1. SEND', desc: 'Client blasts data: "Sending now, good luck!"' },
+        { status: 'done', label: '2. DONE', desc: 'Data sent. No confirmation needed.' }
+    ];
+
+    const handleRunSim = (type) => {
+        setMode(type);
+        setStepMode(false);
+        if (type === 'tcp') runTCPAuto(); else runUDPAuto();
     };
 
-    const startSim = (type) => {
+    const runTCPAuto = async () => {
+        setStatus('handshake1'); await wait(1000);
+        setStatus('handshake2'); await wait(1000);
+        setStatus('handshake3'); await wait(800);
+        setStatus('data'); await wait(1200);
+        setStatus('ack'); await wait(800);
+        setStatus('done');
+    };
+
+    const runUDPAuto = async () => {
+        setStatus('blasting'); await wait(1500);
+        setStatus('done');
+    };
+
+    const wait = (ms) => new Promise(res => setTimeout(res, ms));
+
+    const handleStepStart = (type) => {
         setMode(type);
-        setStatus('sending');
+        setStepMode(true);
         setStepIndex(0);
-        
-        if (type === 'tcp') {
-            setTimeout(() => {
-                setStatus('ack');
-                setStepIndex(1);
-            }, 1200);
-            setTimeout(() => {
-                setStatus('done');
-                setStepIndex(2);
-            }, 2400);
-        } else {
-            setTimeout(() => {
-                setStatus('done');
-                setStepIndex(1);
-            }, 1200);
+        setStatus(type === 'tcp' ? tcpSteps[0].status : udpSteps[0].status);
+    };
+
+    const handleNextStep = () => {
+        const steps = mode === 'tcp' ? tcpSteps : udpSteps;
+        if (stepIndex < steps.length - 1) {
+            const next = stepIndex + 1;
+            setStepIndex(next);
+            setStatus(steps[next].status);
         }
     };
 
-    const reset = () => {
+    const handleReset = () => {
         setMode(null);
         setStatus('idle');
+        setStepMode(false);
         setStepIndex(0);
+    };
+
+    const handleReplay = () => {
+        if (!mode) return;
+        setStepMode(false);
+        if (mode === 'tcp') runTCPAuto(); else runUDPAuto();
     };
 
     return (
         <div style={styles.container}>
-            <div style={styles.contentHeader}>
-                <h2 style={styles.contentTitle}>TCP vs UDP — Delivery Guarantees</h2>
-                <p style={styles.contentSubtitle}>Compare the reliable, slow "Phone Call" (TCP) with the fast, risky "Voice Message" (UDP).</p>
-                <p style={styles.quickLine}>In 10 seconds: TCP waits for ACK (safe), UDP sends once (fast).</p>
+            <div style={styles.headerArea}>
+                <h2 style={styles.hubTitle}>TCP vs UDP</h2>
+                <p style={styles.hubSubtitle}>Two ways to move data. One is safe and slow; the other is fast and risky.</p>
+                <div style={styles.metaphorRow}>
+                    <div style={styles.metaphorCard}>
+                        <span style={styles.metaphorLabel}>TCP Metaphor</span>
+                        <p style={styles.metaphorText}>Like a <strong>Phone Call</strong>. You wait for "Hello" before talking, and confirm "Did you hear that?" constantly.</p>
+                    </div>
+                    <div style={{...styles.metaphorCard, borderLeftColor: '#3b82f6'}}>
+                        <span style={{...styles.metaphorLabel, backgroundColor: '#3b82f6'}}>UDP Metaphor</span>
+                        <p style={styles.metaphorText}>Like a <strong>Megaphone</strong>. You yell the message out once. It's fast, but some people might miss a word.</p>
+                    </div>
+                </div>
             </div>
 
             <div style={styles.card}>
-                <div style={styles.controls}>
-                    <motion.button 
-                        whileHover={{ scale: 1.02, y: -2 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => startSim('tcp')} 
-                        style={{...styles.mainBtn, backgroundColor: '#0f172a'}}
-                        disabled={status !== 'idle'}
-                    >
-                        Simulate TCP (Reliable)
-                    </motion.button>
-                    <motion.button 
-                        whileHover={{ scale: 1.02, y: -2 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => startSim('udp')} 
-                        style={{...styles.mainBtn, backgroundColor: '#3b82f6'}}
-                        disabled={status !== 'idle'}
-                    >
-                        Simulate UDP (Fast)
-                    </motion.button>
-                    <motion.button 
-                        whileHover={{ backgroundColor: '#f1f5f9' }}
-                        onClick={reset} 
-                        style={styles.resetBtn}
-                    >
-                        Try Again
-                    </motion.button>
-                    <button onClick={() => setStepMode(v => !v)} style={styles.stepBtn}>
-                        {stepMode ? 'Disable Step Mode' : '▶ Step Mode'}
-                    </button>
-                    <button onClick={() => mode && startSim(mode)} style={styles.resetBtn} disabled={!mode || status !== 'done'}>
-                        Replay Animation
-                    </button>
+                <div style={styles.mainControls}>
+                    {!mode ? (
+                        <div style={styles.initialBtns}>
+                            <button style={styles.tcpPrimary} onClick={() => handleRunSim('tcp')}>Simulate TCP</button>
+                            <button style={styles.udpPrimary} onClick={() => handleRunSim('udp')}>Simulate UDP</button>
+                            <span style={styles.divider}>or</span>
+                            <button style={styles.stepToggle} onClick={() => handleStepStart('tcp')}>▶ Start Step Mode (TCP)</button>
+                        </div>
+                    ) : (
+                        <div style={styles.activeControls}>
+                            {stepMode && (
+                                <button 
+                                    style={{...styles.nextBtn, opacity: (mode === 'tcp' ? stepIndex === 5 : stepIndex === 1) ? 0.5 : 1}}
+                                    onClick={handleNextStep}
+                                    disabled={(mode === 'tcp' ? stepIndex === 5 : stepIndex === 1)}
+                                >
+                                    Next Step →
+                                </button>
+                            )}
+                            <button style={styles.ghostBtn} onClick={handleReplay}>↺ Replay</button>
+                            <button style={styles.ghostBtn} onClick={handleReset}>✕ Reset</button>
+                        </div>
+                    )}
                 </div>
 
-                <div style={styles.simArea}>
+                <div style={styles.simBox}>
                     <div style={styles.node}>
-                        <div style={styles.nodeIcon}>💻</div>
-                        <div style={styles.nodeLabel}>Client</div>
+                        <div style={styles.nodeCircle}>💻</div>
+                        <span style={styles.nodeName}>Client</span>
                     </div>
-                    
-                    <div style={styles.track}>
-                        <div style={styles.line}></div>
-                        <div style={styles.arrow}>→</div>
-                        <div style={{ ...styles.arrow, right: 0, left: 'auto' }}>←</div>
+
+                    <div style={styles.wire}>
                         <AnimatePresence>
-                            {status === 'sending' && (
-                                <motion.div
-                                    initial={{ left: '0%' }}
-                                    animate={{ left: '100%' }}
-                                    transition={{ duration: 1.2, ease: "linear" }}
-                                    style={{...styles.packet, backgroundColor: mode === 'tcp' ? '#0f172a' : '#3b82f6'}}
-                                >
-                                    {mode === 'tcp' ? 'SYN' : 'DATA'}
-                                </motion.div>
+                            {/* TCP Handshake / Data */}
+                            {mode === 'tcp' && (
+                                <>
+                                    {status === 'handshake1' && <Packet label="SYN" color="#0f172a" direction="right" />}
+                                    {status === 'handshake2' && <Packet label="SYN-ACK" color="#3b82f6" direction="left" />}
+                                    {status === 'handshake3' && <Packet label="ACK" color="#0f172a" direction="right" />}
+                                    {status === 'data' && <Packet label="DATA" color="#0f172a" direction="right" isLarge />}
+                                    {status === 'ack' && <Packet label="ACK" color="#10b981" direction="left" />}
+                                </>
                             )}
-                            {status === 'ack' && mode === 'tcp' && (
-                                <motion.div
-                                    initial={{ right: '0%' }}
-                                    animate={{ right: '100%' }}
-                                    transition={{ duration: 1.2, ease: "linear" }}
-                                    style={{...styles.packet, backgroundColor: '#10b981', left: 'auto', right: 0}}
-                                >
-                                    ACK
-                                </motion.div>
+                            {/* UDP Blasting */}
+                            {mode === 'udp' && status === 'blasting' && (
+                                <>
+                                    <Packet label="DATA" color="#3b82f6" direction="right" delay={0} />
+                                    <Packet label="DATA" color="#3b82f6" direction="right" delay={0.2} />
+                                    <Packet label="DATA" color="#3b82f6" direction="right" delay={0.4} />
+                                </>
                             )}
                         </AnimatePresence>
                     </div>
 
                     <div style={styles.node}>
-                        <div style={styles.nodeIcon}>🖥️</div>
-                        <div style={styles.nodeLabel}>Server</div>
+                        <div style={{...styles.nodeCircle, backgroundColor: '#f8fafc'}}>🖥️</div>
+                        <span style={styles.nodeName}>Server</span>
                     </div>
                 </div>
 
-                <div style={styles.infoBox}>
+                <div style={styles.explanationArea}>
                     <AnimatePresence mode="wait">
-                        {mode === 'tcp' ? (
-                            <motion.div key="tcp" initial={{opacity:0, y: 5}} animate={{opacity:1, y: 0}} exit={{opacity:0, y: -5}} style={styles.protocolInfo}>
-                                <div style={{...styles.protocolBadge, backgroundColor: '#f1f5f9', color: '#0f172a'}}>TCP: The Reliable Handshake</div>
-                                <p style={styles.protocolText}>Like a <strong>Phone Call</strong>, TCP ensures both sides are ready. If a packet is lost, it's resent automatically. Used for web and email.</p>
-                                <div style={styles.statusText}>
-                                    {status === 'sending' && "🛠️ Establishing connection (SYN)..."}
-                                    {status === 'ack' && "✅ Server acknowledged! Sending data..."}
-                                    {status === 'done' && "🎉 Transaction complete & secured."}
+                        {mode ? (
+                            <motion.div
+                                key={status}
+                                initial={{ opacity: 0, y: 5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                style={styles.statusCard}
+                            >
+                                <div style={styles.statusHeader}>
+                                    <span style={{
+                                        ...styles.statusDot, 
+                                        backgroundColor: status === 'done' ? '#10b981' : (mode === 'tcp' ? '#0f172a' : '#3b82f6')
+                                    }} />
+                                    <span style={styles.statusTitle}>
+                                        {stepMode ? (mode === 'tcp' ? tcpSteps[stepIndex].label : udpSteps[stepIndex].label) : "Simulation Running..."}
+                                    </span>
                                 </div>
-                                <p style={styles.realHint}>💡 In real systems, TCP tracks sequence numbers and retransmits missing packets.</p>
-                            </motion.div>
-                        ) : mode === 'udp' ? (
-                            <motion.div key="udp" initial={{opacity:0, y: 5}} animate={{opacity:1, y: 0}} exit={{opacity:0, y: -5}} style={styles.protocolInfo}>
-                                <div style={{...styles.protocolBadge, backgroundColor: '#eff6ff', color: '#1d4ed8'}}>UDP: The Fast Messenger</div>
-                                <p style={styles.protocolText}>Like a <strong>Voice Message</strong>, UDP sends data immediately without checking if the receiver is ready. Used for video calls and gaming.</p>
-                                <div style={{...styles.statusText, color: '#1d4ed8', backgroundColor: '#eff6ff'}}>
-                                    {status === 'sending' && "⚡ Blasting data at high speed..."}
-                                    {status === 'done' && "💨 Delivered. No overhead, no waiting."}
-                                </div>
-                                <p style={styles.realHint}>💡 In real systems, UDP powers live media where speed matters more than perfection.</p>
+                                <p style={styles.statusDesc}>
+                                    {stepMode ? (mode === 'tcp' ? tcpSteps[stepIndex].desc : udpSteps[stepIndex].desc) : 
+                                        (status === 'done' ? "Transfer complete!" : "Watch the data packets move...")}
+                                </p>
                             </motion.div>
                         ) : (
-                            <div style={styles.placeholder}>Pick a protocol to start the simulation.</div>
+                            <div style={styles.emptyPrompt}>Pick a protocol to see how data travels across the wire.</div>
                         )}
                     </AnimatePresence>
                 </div>
-                {stepMode && mode && (
-                    <div style={styles.stepPanel}>
-                        <strong>Step {stepIndex + 1}:</strong> {stepsByMode[mode][stepIndex]}
-                    </div>
-                )}
-                {status === 'done' && (
-                    <div style={styles.successPill}>Packet Delivered Successfully 🚀</div>
-                )}
+
+                <div style={styles.tableArea}>
+                    <h4 style={styles.tableTitle}>Quick Comparison</h4>
+                    <table style={styles.table}>
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th style={{color: '#0f172a'}}>TCP</th>
+                                <th style={{color: '#3b82f6'}}>UDP</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Reliability</td>
+                                <td>Guaranteed (Retries)</td>
+                                <td>Best Effort (No Retries)</td>
+                            </tr>
+                            <tr>
+                                <td>Speed</td>
+                                <td>Slower (Handshake)</td>
+                                <td>Blazing Fast (No overhead)</td>
+                            </tr>
+                            <tr>
+                                <td>Best For</td>
+                                <td>Websites, Email, Files</td>
+                                <td>Gaming, Video, Streaming</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     );
 };
 
+const Packet = ({ label, color, direction, delay = 0, isLarge = false }) => (
+    <motion.div
+        initial={{ left: direction === 'right' ? '0%' : '100%', opacity: 0 }}
+        animate={{ left: direction === 'right' ? '100%' : '0%', opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 1, delay, ease: "easeInOut" }}
+        style={{
+            ...styles.packet,
+            backgroundColor: color,
+            padding: isLarge ? '6px 16px' : '4px 10px',
+            boxShadow: `0 4px 10px ${color}40`,
+            left: direction === 'right' ? '0%' : '100%',
+            transform: direction === 'right' ? 'translateX(-50%)' : 'translateX(50%)'
+        }}
+    >
+        {label}
+    </motion.div>
+);
+
 const styles = {
-    container: {
-        maxWidth: '1000px',
-        margin: '0 auto',
-        padding: '1rem 0'
+    container: { maxWidth: '1000px', margin: '0 auto', padding: '0.5rem 0' },
+    headerArea: { marginBottom: '2rem', textAlign: 'left' },
+    hubTitle: { fontSize: '1.75rem', fontWeight: '900', color: '#0f172a', marginBottom: '0.4rem', letterSpacing: '-0.5px' },
+    hubSubtitle: { fontSize: '1rem', color: '#64748b', marginBottom: '1.25rem' },
+    metaphorRow: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' },
+    metaphorCard: { 
+        backgroundColor: '#f8fafc', padding: '1.25rem', borderRadius: '16px', borderLeft: '4px solid #0f172a',
+        display: 'flex', flexDirection: 'column', gap: '0.5rem' 
     },
-    contentHeader: {
-        marginBottom: '2rem',
-        textAlign: 'left'
+    metaphorLabel: { width: 'fit-content', fontSize: '0.7rem', fontWeight: '800', backgroundColor: '#0f172a', color: '#fff', padding: '2px 8px', borderRadius: '6px', textTransform: 'uppercase' },
+    metaphorText: { margin: 0, fontSize: '0.95rem', color: '#334155', lineHeight: '1.5' },
+
+    card: { backgroundColor: '#fff', borderRadius: '24px', border: '1px solid #f1f5f9', boxShadow: '0 10px 30px -10px rgba(0,0,0,0.05)', padding: '2.5rem', minHeight: '520px' },
+    mainControls: { marginBottom: '2.5rem', display: 'flex', justifyContent: 'center' },
+    initialBtns: { display: 'flex', gap: '1rem', alignItems: 'center' },
+    divider: { fontSize: '0.9rem', color: '#94a3b8', fontWeight: '600' },
+    tcpPrimary: { border: 'none', backgroundColor: '#0f172a', color: '#fff', borderRadius: '12px', padding: '0.75rem 1.5rem', cursor: 'pointer', fontWeight: '700', boxShadow: '0 4px 12px rgba(15, 23, 42, 0.2)' },
+    udpPrimary: { border: 'none', backgroundColor: '#3b82f6', color: '#fff', borderRadius: '12px', padding: '0.75rem 1.5rem', cursor: 'pointer', fontWeight: '700', boxShadow: '0 4px 12px rgba(59, 130, 246, 0.2)' },
+    stepToggle: { background: 'none', border: '1px dashed #cbd5e1', color: '#64748b', borderRadius: '12px', padding: '0.75rem 1.5rem', cursor: 'pointer', fontWeight: '600' },
+    activeControls: { display: 'flex', gap: '0.75rem', alignItems: 'center' },
+    nextBtn: { border: 'none', backgroundColor: '#10b981', color: '#fff', borderRadius: '12px', padding: '0.7rem 1.4rem', cursor: 'pointer', fontWeight: '700' },
+    ghostBtn: { background: 'none', border: '1px solid #e2e8f0', color: '#64748b', borderRadius: '12px', padding: '0.7rem 1.2rem', cursor: 'pointer', fontWeight: '600' },
+
+    simBox: { 
+        height: '160px', backgroundColor: '#f8fafc', borderRadius: '24px', border: '1px solid #f1f5f9', 
+        marginBottom: '2.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 3rem' 
     },
-    contentTitle: {
-        fontSize: '1.75rem',
-        fontWeight: '800',
-        color: '#0f172a',
-        marginBottom: '0.5rem'
-    },
-    contentSubtitle: {
-        fontSize: '1rem',
-        color: '#64748b',
-        fontWeight: '400'
-    },
-    quickLine: {
-        marginTop: '0.5rem',
-        fontSize: '0.92rem',
-        color: '#334155'
-    },
-    card: {
-        backgroundColor: '#fff',
-        borderRadius: '20px',
-        border: '1px solid #f1f5f9',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
-        padding: '2.5rem',
-        minHeight: '480px'
-    },
-    controls: {
-        display: 'flex',
-        gap: '1rem',
-        justifyContent: 'center',
-        marginBottom: '2rem',
-        flexWrap: 'wrap'
-    },
-    mainBtn: {
-        padding: '0.75rem 1.5rem',
-        color: '#fff',
-        border: 'none',
-        borderRadius: '12px',
-        cursor: 'pointer',
-        fontWeight: '700',
-        fontSize: '0.875rem',
-        transition: 'all 0.2s ease',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-    },
-    resetBtn: {
-        padding: '0.75rem 1.5rem',
-        backgroundColor: '#fff',
-        color: '#64748b',
-        border: '1px solid #e2e8f0',
-        borderRadius: '12px',
-        cursor: 'pointer',
-        fontWeight: '600',
-        fontSize: '0.875rem'
-    },
-    stepBtn: {
-        padding: '0.75rem 1rem',
-        backgroundColor: '#0f172a',
-        color: '#fff',
-        border: 'none',
-        borderRadius: '12px',
-        cursor: 'pointer',
-        fontWeight: '700',
-        fontSize: '0.82rem'
-    },
-    simArea: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 2rem',
-        height: '140px',
-        backgroundColor: '#f8fafc',
-        borderRadius: '16px',
-        marginBottom: '2.5rem',
-        position: 'relative',
-        border: '1px solid #f1f5f9'
-    },
-    node: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        zIndex: 2
-    },
-    nodeIcon: {
-        fontSize: '2rem',
-        marginBottom: '0.5rem'
-    },
-    nodeLabel: {
-        fontSize: '0.875rem',
-        fontWeight: '700',
-        color: '#1e293b'
-    },
-    track: {
-        flex: 1,
-        height: '4px',
-        margin: '0 3rem',
-        position: 'relative'
-    },
-    line: {
-        position: 'absolute',
-        top: '50%',
-        left: 0,
-        right: 0,
-        height: '2px',
-        backgroundColor: '#e2e8f0',
-        transform: 'translateY(-50%)'
-    },
-    arrow: {
-        position: 'absolute',
-        top: '-20px',
-        left: 0,
-        color: '#94a3b8',
-        fontSize: '0.8rem',
-        fontWeight: '700'
-    },
-    packet: {
-        position: 'absolute',
-        top: '50%',
-        transform: 'translateY(-50%)',
-        padding: '4px 12px',
-        color: '#fff',
-        borderRadius: '6px',
-        fontSize: '0.7rem',
-        fontWeight: '800',
-        whiteSpace: 'nowrap',
-        boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
-    },
-    infoBox: {
-        minHeight: '120px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    protocolInfo: {
-        width: '100%',
-        textAlign: 'center'
-    },
-    protocolBadge: {
-        display: 'inline-block',
-        padding: '0.35rem 0.85rem',
-        borderRadius: '99px',
-        fontSize: '0.825rem',
-        fontWeight: '700',
-        marginBottom: '1rem'
-    },
-    protocolText: {
-        fontSize: '1rem',
-        color: '#475569',
-        lineHeight: '1.6',
-        marginBottom: '1rem',
-        maxWidth: '700px',
-        margin: '0 auto 1rem auto'
-    },
-    statusText: {
-        padding: '0.75rem',
-        backgroundColor: '#f1f5f9',
-        color: '#475569',
-        borderRadius: '10px',
-        fontWeight: '600',
-        fontSize: '0.9rem',
-        display: 'inline-block'
-    },
-    placeholder: {
-        color: '#94a3b8',
-        fontSize: '1rem',
-        fontWeight: '500',
-        fontStyle: 'italic'
-    },
-    stepPanel: {
-        marginTop: '1rem',
-        backgroundColor: '#eff6ff',
-        border: '1px solid #bfdbfe',
-        color: '#1d4ed8',
-        borderRadius: '10px',
-        padding: '0.65rem 0.85rem',
-        fontSize: '0.9rem'
-    },
-    realHint: {
-        marginTop: '0.8rem',
-        fontSize: '0.88rem',
-        color: '#0f766e',
-        backgroundColor: '#ecfeff',
-        borderRadius: '8px',
-        padding: '0.5rem 0.7rem',
-        display: 'inline-block'
-    },
-    successPill: {
-        marginTop: '0.8rem',
-        backgroundColor: '#dcfce7',
-        color: '#166534',
-        borderRadius: '10px',
-        padding: '0.6rem 0.8rem',
-        fontWeight: '700',
-        textAlign: 'center'
-    }
+    node: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' },
+    nodeCircle: { width: '64px', height: '64px', backgroundColor: '#fff', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' },
+    nodeName: { fontSize: '0.85rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' },
+    wire: { flex: 1, height: '2px', backgroundColor: '#e2e8f0', margin: '0 2rem', position: 'relative' },
+    packet: { position: 'absolute', top: '50%', transform: 'translateY(-50%)', borderRadius: '8px', color: '#fff', fontSize: '0.75rem', fontWeight: '800', whiteSpace: 'nowrap' },
+
+    explanationArea: { minHeight: '100px', marginBottom: '3rem' },
+    statusCard: { backgroundColor: '#fff', padding: '1.5rem', borderRadius: '20px', border: '1.5px solid #f1f5f9', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' },
+    statusHeader: { display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' },
+    statusDot: { width: '8px', height: '8px', borderRadius: '50%' },
+    statusTitle: { fontWeight: '800', fontSize: '1rem', color: '#0f172a' },
+    statusDesc: { margin: 0, color: '#64748b', lineHeight: '1.5', fontSize: '0.95rem' },
+    emptyPrompt: { textAlign: 'center', color: '#94a3b8', fontStyle: 'italic' },
+
+    tableArea: { borderTop: '1px solid #f1f5f9', paddingTop: '2rem' },
+    tableTitle: { fontSize: '1.1rem', fontWeight: '800', color: '#0f172a', marginBottom: '1rem' },
+    table: { width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.95rem' },
+    tableHeadRow: { borderBottom: '2px solid #f1f5f9' },
+    tableCell: { padding: '1rem 0', borderBottom: '1px solid #f8fafc', color: '#475569' }
 };
 
 export default TCPvsUDP;

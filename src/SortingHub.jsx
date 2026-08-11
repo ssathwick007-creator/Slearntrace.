@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import BubbleSort from './BubbleSort.jsx';
 import SelectionSort from './SelectionSort.jsx';
 import InsertionSort from './InsertionSort.jsx';
@@ -27,7 +28,6 @@ const ComingSoon = ({ name }) => (
 
 const SortingHub = () => {
     const [activeTab, setActiveTab] = useState('bubble');
-    const [hoveredTab, setHoveredTab] = useState(null);
 
     const renderContent = () => {
         switch (activeTab) {
@@ -44,50 +44,142 @@ const SortingHub = () => {
 
     return (
         <div style={styles.shell}>
-            {/* Header */}
-            <div style={styles.header}>
-                <h2 style={styles.title}>Sorting Algorithms</h2>
-                <p style={styles.subtitle}>Sorting algorithms arrange elements in a specific order, usually ascending or descending. Efficient sorting is essential for searching, databases, and many algorithmic tasks.</p>
-            </div>
-
-            {/* Tabs */}
-            <div style={styles.tabBar}>
-                <div style={styles.tabScroll}>
-                    {sortingTabs.map(t => (
-                        <button
-                            key={t.id}
-                            onClick={() => setActiveTab(t.id)}
-                            onMouseEnter={() => setHoveredTab(t.id)}
-                            onMouseLeave={() => setHoveredTab(null)}
-                            style={{
-                                ...styles.tab,
-                                borderBottom: activeTab === t.id ? '3px solid #4f46e5' : '3px solid transparent',
-                                color: activeTab === t.id ? '#4f46e5' : (hoveredTab === t.id ? '#1e293b' : '#64748b'),
-                            }}
-                        >
-                            {t.label}
-                        </button>
-                    ))}
+            <div style={styles.contentWrapper}>
+                <div style={styles.heroSection}>
+                    <h1 style={styles.heroTitle}>Sorting Algorithms</h1>
+                    <p style={styles.heroSubtitle}>
+                        Sorting algorithms arrange elements in a specific order, usually ascending or descending. 
+                        Efficient sorting is essential for searching, databases, and many algorithmic tasks.
+                    </p>
                 </div>
-            </div>
 
-            {/* Content */}
-            <div style={styles.content}>
-                {renderContent()}
+                <div style={styles.topBar}>
+                    <div style={styles.tabs}>
+                        {sortingTabs.map((tab) => (
+                            <button
+                                key={tab.id}
+                                style={{
+                                    ...styles.tab,
+                                    color: activeTab === tab.id ? '#0f172a' : '#64748b',
+                                    opacity: activeTab === tab.id ? 1 : 0.65,
+                                    fontWeight: activeTab === tab.id ? '700' : '500',
+                                }}
+                                onClick={() => setActiveTab(tab.id)}
+                            >
+                                {tab.label}
+                                {activeTab === tab.id && (
+                                    <motion.div
+                                        layoutId="activeTabUnderlineSorting"
+                                        style={styles.activeUnderline}
+                                        transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
+                                    />
+                                )}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <div style={styles.content}>
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={activeTab}
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.2, ease: "easeOut" }}
+                        >
+                            {renderContent()}
+                        </motion.div>
+                    </AnimatePresence>
+                </div>
             </div>
         </div>
     );
 };
 
 const styles = {
-    shell: { width: '100%', maxWidth: '1000px', margin: '0 auto', fontFamily: 'system-ui, sans-serif' },
-    header: { textAlign: 'center', padding: '1.5rem 1rem 0.5rem', marginBottom: '1rem' },
-    title: { fontSize: '36px', fontWeight: '700', color: '#1e293b', marginBottom: '12px' },
-    subtitle: { fontSize: '16px', color: '#64748b', lineHeight: '1.6', maxWidth: '720px', margin: '0 auto' },
-    tabBar: { width: '100%', borderBottom: '2px solid #E2E8F0', paddingBottom: '10px', marginTop: '20px', marginBottom: '1.5rem' },
-    tabScroll: { display: 'flex', gap: '24px', overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none', padding: '0 0.5rem' },
-    tab: { padding: '0.8rem 0', background: 'none', border: 'none', fontSize: '1rem', fontWeight: '500', cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap' },
-    content: {},
+    shell: {
+        width: '100%',
+        minHeight: '100vh',
+        backgroundColor: '#fff',
+        fontFamily: "'Inter', system-ui, -apple-system, sans-serif"
+    },
+    contentWrapper: {
+        maxWidth: '1100px',
+        margin: '0 auto',
+        padding: '0 1.5rem'
+    },
+    heroSection: {
+        textAlign: 'center',
+        padding: '2.5rem 0 1.5rem 0',
+    },
+    heroTitle: {
+        fontSize: '2.75rem',
+        fontWeight: '900',
+        color: '#0f172a',
+        marginBottom: '0.5rem',
+        letterSpacing: '-1.5px',
+        lineHeight: '1.1'
+    },
+    heroSubtitle: {
+        fontSize: '1.1rem',
+        color: '#475569',
+        maxWidth: '700px',
+        margin: '0 auto',
+        lineHeight: '1.6',
+        opacity: 0.8
+    },
+    topBar: {
+        display: 'flex',
+        justifyContent: 'center',
+        borderBottom: '1px solid #f1f5f9',
+        marginBottom: '1.5rem',
+        position: 'sticky',
+        top: '72px',
+        backgroundColor: 'rgba(255,255,255,0.85)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        zIndex: 100,
+        padding: '0.5rem 0',
+        scrollMarginTop: '80px',
+    },
+    tabs: {
+        display: 'flex',
+        gap: '0.5rem',
+        padding: '0 1rem',
+        overflowX: 'auto',
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none',
+        maskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)',
+        WebkitMaskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)',
+    },
+    tab: {
+        padding: '0.6rem 1.2rem',
+        background: 'none',
+        border: 'none',
+        fontSize: '0.875rem',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        whiteSpace: 'nowrap',
+        borderRadius: '8px',
+        position: 'relative'
+    },
+    activeUnderline: {
+        position: 'absolute',
+        bottom: '-0.5rem',
+        left: '20%',
+        right: '20%',
+        height: '2px',
+        backgroundColor: '#3b82f6',
+        borderRadius: '2px',
+    },
+    content: {
+        minHeight: '600px',
+        marginBottom: '2rem'
+    },
 };
 
 export default SortingHub;

@@ -39,7 +39,6 @@ const cs = {
 
 const AlgorithmsHub = () => {
     const [activeTopic, setActiveTopic] = useState(null);
-    const [hoveredTab, setHoveredTab] = useState(null);
 
     // If a topic is selected show its content
     if (activeTopic) {
@@ -50,19 +49,17 @@ const AlgorithmsHub = () => {
                 <button
                     onClick={() => setActiveTopic(null)}
                     style={styles.backBtn}
-                    onMouseEnter={e => e.currentTarget.style.background = '#E2E8F0'}
-                    onMouseLeave={e => e.currentTarget.style.background = '#F1F5F9'}
                 >
-                    ← Back to Algorithms
+                    <span style={{ fontSize: '1.1rem' }}>←</span> Back to Algorithms
                 </button>
 
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={activeTopic}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.25 }}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.25, ease: 'easeOut' }}
                     >
                         {activeTopic === 'sorting' ? <SortingHub /> :
                             activeTopic === 'searching' ? <SearchingHub /> :
@@ -79,11 +76,11 @@ const AlgorithmsHub = () => {
 
     const getBadgeStyle = (diff) => {
         switch (diff) {
-            case 'Beginner': return { backgroundColor: '#DCFCE7', color: '#166534' };
-            case 'Beginner–Advanced': return { backgroundColor: '#EDE9FE', color: '#5B21B6' };
-            case 'Intermediate': return { backgroundColor: '#FEF3C7', color: '#92400E' };
-            case 'Advanced': return { backgroundColor: '#FEE2E2', color: '#991B1B' };
-            default: return { backgroundColor: '#F1F5F9', color: '#64748B' };
+            case 'Beginner': return { backgroundColor: '#f0fdf4', color: '#166534', border: '1px solid #dcfce7' };
+            case 'Beginner–Advanced': return { backgroundColor: '#f5f3ff', color: '#5b21b6', border: '1px solid #ede9fe' };
+            case 'Intermediate': return { backgroundColor: '#fffcf0', color: '#92400e', border: '1px solid #fef9c3' };
+            case 'Advanced': return { backgroundColor: '#fef2f2', color: '#991b1b', border: '1px solid #fee2e2' };
+            default: return { backgroundColor: '#f8fafc', color: '#64748b', border: '1px solid #e2e8f0' };
         }
     };
 
@@ -91,22 +88,31 @@ const AlgorithmsHub = () => {
         <div style={styles.container}>
             <div style={styles.header}>
                 <h2 style={styles.mainTitle}>Algorithms Learning Path</h2>
-                <p style={styles.mainSub}>Explore essential algorithm families — from sorting and searching to dynamic programming, greedy strategies, and beyond.</p>
+                <p style={styles.mainSub}>
+                    Master the foundational building blocks of efficient software. 
+                    Explore essential algorithm families with interactive visualizations and step-by-step logic.
+                </p>
             </div>
 
             <div style={styles.grid}>
                 {algoTopics.map(t => (
                     <motion.div
                         key={t.id}
-                        whileHover={{ translateY: -4, boxShadow: '0 16px 28px rgba(0,0,0,0.08)' }}
-                        transition={{ duration: 0.25 }}
+                        whileHover={{ y: -4, boxShadow: '0 12px 24px -10px rgba(15, 23, 42, 0.1)' }}
+                        whileTap={{ scale: 0.98 }}
+                        transition={{ duration: 0.25, cubicBezier: [0.4, 0, 0.2, 1] }}
                         style={styles.topicCard}
                         onClick={() => setActiveTopic(t.id)}
                     >
-                        <span style={styles.topicIcon}>{t.icon}</span>
+                        <div style={styles.cardHeader}>
+                            <span style={styles.topicIcon}>{t.icon}</span>
+                            <span style={{ ...styles.diffBadge, ...getBadgeStyle(t.difficulty) }}>{t.difficulty}</span>
+                        </div>
                         <h3 style={styles.topicName}>{t.label}</h3>
                         <p style={styles.topicDesc}>{t.description}</p>
-                        <span style={{ ...styles.diffBadge, ...getBadgeStyle(t.difficulty) }}>{t.difficulty}</span>
+                        <div style={styles.cardFooter}>
+                            <span style={styles.learnMore}>Explore Module →</span>
+                        </div>
                     </motion.div>
                 ))}
             </div>
@@ -115,17 +121,106 @@ const AlgorithmsHub = () => {
 };
 
 const styles = {
-    container: { width: '100%', maxWidth: '1200px', margin: '0 auto', padding: '40px 20px', fontFamily: 'system-ui, sans-serif' },
-    header: { textAlign: 'center', marginBottom: '30px' },
-    mainTitle: { fontSize: '36px', fontWeight: '700', color: '#1e293b', marginBottom: '12px' },
-    mainSub: { fontSize: '16px', color: '#64748b', lineHeight: '1.6', maxWidth: '700px', margin: '0 auto' },
-    grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginTop: '30px' },
-    topicCard: { backgroundColor: '#fff', borderRadius: '18px', padding: '26px', border: '1px solid #E5E7EB', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '6px', boxShadow: '0 10px 24px rgba(0,0,0,0.06)', transition: 'all 0.25s ease' },
-    topicIcon: { fontSize: '40px', marginBottom: '14px' },
-    topicName: { fontSize: '22px', fontWeight: '700', color: '#1e293b', margin: '0 0 8px 0' },
-    topicDesc: { fontSize: '15px', color: '#64748b', lineHeight: '1.6', margin: '0 0 16px 0' },
-    diffBadge: { display: 'inline-block', padding: '6px 14px', borderRadius: '999px', fontWeight: '600', fontSize: '13px', alignSelf: 'flex-start' },
-    backBtn: { background: '#F1F5F9', padding: '10px 20px', borderRadius: '999px', fontWeight: '600', border: 'none', cursor: 'pointer', transition: 'background 0.2s', fontSize: '0.95rem', color: '#0f172a', marginBottom: '1.5rem', display: 'inline-block' },
+    container: { 
+        width: '100%', 
+        maxWidth: '1240px', 
+        margin: '0 auto', 
+        padding: '3rem 1.5rem', 
+        fontFamily: '"Outfit", "Inter", system-ui, sans-serif' 
+    },
+    header: { 
+        textAlign: 'center', 
+        marginBottom: '4rem',
+        animation: 'fadeInDown 0.8s ease-out'
+    },
+    mainTitle: { 
+        fontSize: '2.75rem', 
+        fontWeight: '900', 
+        color: '#0f172a', 
+        marginBottom: '1rem',
+        letterSpacing: '-0.025em'
+    },
+    mainSub: { 
+        fontSize: '1.125rem', 
+        color: '#64748b', 
+        lineHeight: '1.7', 
+        maxWidth: '800px', 
+        margin: '0 auto' 
+    },
+    grid: { 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
+        gap: '1.75rem' 
+    },
+    topicCard: { 
+        backgroundColor: '#fff', 
+        borderRadius: '24px', 
+        padding: '2.25rem', 
+        border: '1px solid #f1f5f9', 
+        cursor: 'pointer', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: '0.75rem', 
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)', 
+        position: 'relative',
+        overflow: 'hidden'
+    },
+    cardHeader: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        marginBottom: '1rem'
+    },
+    topicIcon: { 
+        fontSize: '2.5rem',
+        filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))'
+    },
+    topicName: { 
+        fontSize: '1.5rem', 
+        fontWeight: '800', 
+        color: '#0f172a', 
+        margin: '0' 
+    },
+    topicDesc: { 
+        fontSize: '0.975rem', 
+        color: '#64748b', 
+        lineHeight: '1.6', 
+        margin: '0 0 1rem 0' 
+    },
+    diffBadge: { 
+        padding: '4px 12px', 
+        borderRadius: '12px', 
+        fontWeight: '700', 
+        fontSize: '0.75rem',
+        textTransform: 'uppercase',
+        letterSpacing: '0.025em'
+    },
+    cardFooter: {
+        marginTop: 'auto',
+        paddingTop: '1rem'
+    },
+    learnMore: {
+        fontSize: '0.9rem',
+        fontWeight: '700',
+        color: '#3b82f6',
+        transition: 'all 0.2s ease'
+    },
+    backBtn: { 
+        background: '#0f172a', 
+        color: '#fff',
+        padding: '0.75rem 1.5rem', 
+        borderRadius: '16px', 
+        fontWeight: '700', 
+        border: 'none', 
+        cursor: 'pointer', 
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', 
+        fontSize: '0.95rem', 
+        marginBottom: '2.5rem', 
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '10px',
+        boxShadow: '0 10px 15px -3px rgba(15, 23, 42, 0.3)'
+    },
 };
 
 export default AlgorithmsHub;

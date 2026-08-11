@@ -2,76 +2,164 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const IPAddressing = () => {
-    const [packetPos, setPacketPos] = useState(null); // {x, y} of target house
-    const [packetTick, setPacketTick] = useState(0);
-    const [status, setStatus] = useState('Select a destination house to send a packet!');
+    const [selectedHouse, setSelectedHouse] = useState(null);
     const [stepMode, setStepMode] = useState(false);
-    const [stepText, setStepText] = useState('');
+    const [stepIndex, setStepIndex] = useState(-1);
+    const [simStatus, setSimStatus] = useState('idle'); // 'idle', 'source', 'router', 'destination'
 
     const houses = [
-        { id: 1, ip: '192.168.1.1', label: 'My House', x: 50, y: 50 },
-        { id: 2, ip: '142.250.1.1', label: 'Google.com', x: 400, y: 50 },
-        { id: 3, ip: '157.240.1.1', label: 'Facebook.com', x: 50, y: 200 },
-        { id: 4, ip: '13.224.1.1', label: 'Amazon.com', x: 400, y: 200 },
+        { id: 'source', label: 'You (Source)', ip: '192.168.1.1', icon: '🏠', x: 50, y: 120 },
+        { id: 'google', label: 'Google.com', ip: '142.250.31.100', icon: '🔍', x: 450, y: 30 },
+        { id: 'netflix', label: 'Netflix.com', ip: '54.237.226.164', icon: '🎬', x: 450, y: 120 },
+        { id: 'wikipedia', label: 'Wikipedia.org', ip: '103.102.166.224', icon: '📚', x: 450, y: 210 },
     ];
 
-    const sendPacket = (house) => {
-        if (house.id === 1) return;
-        setPacketPos({ x: house.x, y: house.y });
-        setPacketTick(prev => prev + 1);
-        setStepText('Step 1: Packet leaves source address');
-        setStatus(`Sending packet to ${house.ip} (${house.label})...`);
-        setTimeout(() => {
-            setStepText('Step 2: Router forwards packet to destination');
-            setStatus(`Packet delivered to ${house.label}! ✅`);
-        }, 1000);
+    const routerPos = { x: 250, y: 120 };
+
+    const steps = [
+        { status: 'source', desc: '1. Source prepares packet with destination IP.' },
+        { status: 'router', desc: '2. Router reads IP and finds the best path.' },
+        { status: 'destination', desc: '3. Data delivered to the correct house!' }
+    ];
+
+    const handleRunSim = (house) => {
+        if (house.id === 'source') return;
+        setSelectedHouse(house);
+        setStepMode(false);
+        runAuto(house);
     };
 
-    const reset = () => {
-        setPacketPos(null);
-        setStatus('Select a destination house to send a packet!');
+    const runAuto = async (house) => {
+        setSimStatus('source'); await wait(800);
+        setSimStatus('router'); await wait(1000);
+        setSimStatus('destination');
+    };
+
+    const wait = (ms) => new Promise(res => setTimeout(res, ms));
+
+    const handleStepStart = () => {
+        if (!selectedHouse || selectedHouse.id === 'source') {
+            setSelectedHouse(houses[1]);
+        }
+        setStepMode(true);
+        setStepIndex(0);
+        setSimStatus('source');
+    };
+
+    const handleNextStep = () => {
+        if (stepIndex < 2) {
+            const next = stepIndex + 1;
+            setStepIndex(next);
+            setSimStatus(steps[next].status);
+        }
+    };
+
+    const handleReset = () => {
+        setSelectedHouse(null);
+        setStepMode(false);
+        setStepIndex(-1);
+        setSimStatus('idle');
+    };
+
+    const handleReplay = () => {
+        if (!selectedHouse) return;
+        setStepMode(false);
+        runAuto(selectedHouse);
     };
 
     return (
         <div style={styles.container}>
-            <div style={styles.contentHeader}>
-                <h2 style={styles.contentTitle}>IP Addressing — The Home Address System</h2>
-                <p style={styles.contentSubtitle}>Learn how every device on the internet has a unique address to receive data, just like a physical house.</p>
-                <p style={styles.quickLine}>In 10 seconds: IP address tells routers exactly where to deliver a packet.</p>
+            <div style={styles.headerArea}>
+                <h2 style={styles.hubTitle}>IP Addressing</h2>
+                <p style={styles.hubSubtitle}>Every device on the internet has a unique address, just like your house.</p>
+                <div style={styles.metaphorBox}>
+                    <span style={styles.metaphorTag}>Metaphor</span>
+                    <p style={styles.metaphorText}>The <strong>Internet City</strong>: IP addresses are house numbers. Without them, the mailman (Router) wouldn't know where to drop the letter.</p>
+                </div>
             </div>
 
             <div style={styles.card}>
-                <div style={styles.cityGrid}>
-                    <div style={styles.gridOverlay}></div>
+                <div style={styles.controlsBar}>
+                    {!stepMode ? (
+                        <div style={styles.initialBtns}>
+                            <button style={styles.primaryBtn} onClick={handleStepStart}>▶ Start Step Mode</button>
+                            <span style={styles.btnHint}>or click a house to send data</span>
+                        </div>
+                    ) : (
+                        <div style={styles.stepControls}>
+                            <button 
+                                style={{...styles.nextBtn, opacity: stepIndex === 2 ? 0.5 : 1}} 
+                                onClick={handleNextStep} 
+                                disabled={stepIndex === 2}
+                            >
+                                Next Step →
+                            </button>
+                            <button style={styles.ghostBtn} onClick={handleReplay}>↺ Replay</button>
+                            <button style={styles.ghostBtn} onClick={handleReset}>✕ Reset</button>
+                        </div>
+                    )}
+                </div>
+
+                <div style={styles.cityMap}>
+                    {/* Connection Lines */}
+                    <svg style={styles.svgLayer}>
+                        {houses.slice(1).map(h => (
+                            <line 
+                                key={h.id}
+                                x1={routerPos.x + 40} y1={routerPos.y + 40} 
+                                x2={h.x + 40} y2={h.y + 40} 
+                                stroke="#e2e8f0" strokeWidth="2" strokeDasharray="4 4" 
+                            />
+                        ))}
+                        <line 
+                            x1={houses[0].x + 40} y1={houses[0].y + 40} 
+                            x2={routerPos.x + 40} y2={routerPos.y + 40} 
+                            stroke="#e2e8f0" strokeWidth="2"
+                        />
+                    </svg>
+
+                    {/* Router */}
+                    <motion.div 
+                        style={{...styles.routerNode, left: routerPos.x, top: routerPos.y}}
+                        animate={{ scale: simStatus === 'router' ? 1.1 : 1, backgroundColor: simStatus === 'router' ? '#0f172a' : '#fff' }}
+                    >
+                        <span style={{fontSize: '1.5rem'}}>🚦</span>
+                        <span style={styles.routerLabel}>Router</span>
+                    </motion.div>
+
+                    {/* Houses */}
                     {houses.map((house) => (
                         <motion.div
                             key={house.id}
-                            onClick={() => sendPacket(house)}
-                            whileHover={house.id !== 1 ? { scale: 1.05, y: -5 } : {}}
-                            whileTap={house.id !== 1 ? { scale: 0.95 } : {}}
+                            onClick={() => handleRunSim(house)}
+                            whileHover={house.id !== 'source' ? { scale: 1.05 } : {}}
                             style={{
-                                ...styles.house,
+                                ...styles.houseCard,
                                 left: house.x,
                                 top: house.y,
-                                cursor: house.id === 1 ? 'default' : 'pointer',
-                                backgroundColor: house.id === 1 ? '#f8fafc' : '#fff',
-                                borderColor: house.id === 1 ? '#cbd5e1' : '#e2e8f0'
+                                borderColor: selectedHouse?.id === house.id ? '#3b82f6' : '#e2e8f0',
+                                backgroundColor: house.id === 'source' ? '#f8fafc' : '#fff',
+                                boxShadow: selectedHouse?.id === house.id ? '0 0 15px rgba(59, 130, 246, 0.2)' : '0 4px 6px rgba(0,0,0,0.02)'
                             }}
                         >
-                            <div style={styles.houseIcon}>{house.id === 1 ? '🏠' : '🏢'}</div>
-                            <div style={styles.houseLabel}>{house.label}</div>
-                            <div style={styles.ipTag}>{house.ip}</div>
+                            <span style={styles.houseIcon}>{house.icon}</span>
+                            <span style={styles.houseName}>{house.label}</span>
+                            <span style={styles.houseIp}>{house.ip}</span>
                         </motion.div>
                     ))}
 
+                    {/* Packet Animation */}
                     <AnimatePresence>
-                        {packetPos && (
+                        {simStatus !== 'idle' && selectedHouse && (
                             <motion.div
-                                key={packetTick}
-                                initial={{ left: 100, top: 100, opacity: 0, scale: 0.5 }}
-                                animate={{ left: packetPos.x + 40, top: packetPos.y + 40, opacity: 1, scale: 1 }}
+                                initial={{ left: houses[0].x + 30, top: houses[0].y + 30, opacity: 0 }}
+                                animate={
+                                    simStatus === 'source' ? { left: houses[0].x + 30, top: houses[0].y + 30, opacity: 1 } :
+                                    simStatus === 'router' ? { left: routerPos.x + 30, top: routerPos.y + 30, opacity: 1 } :
+                                    { left: selectedHouse.x + 30, top: selectedHouse.y + 30, opacity: 1 }
+                                }
                                 exit={{ opacity: 0, scale: 0.5 }}
-                                transition={{ duration: 0.8, ease: "easeInOut" }}
+                                transition={{ duration: 0.6, ease: "easeInOut" }}
                                 style={styles.packet}
                             >
                                 ✉️
@@ -80,33 +168,32 @@ const IPAddressing = () => {
                     </AnimatePresence>
                 </div>
 
-                <div style={styles.infoArea}>
-                    <div style={styles.infoContent}>
-                        <h4 style={styles.infoTitle}>Why IP Addresses Matter</h4>
-                        <p style={styles.infoText}>
-                            Without an address, the post office wouldn't know where to deliver your mail. 
-                            Similarly, the **IP Address** ensures the internet backbone knows exactly 
-                            which device should receive your request.
-                        </p>
+                <div style={styles.infoRow}>
+                    <div style={styles.descPanel}>
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={simStatus}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                style={styles.statusBox}
+                            >
+                                <span style={styles.statusTag}>Status</span>
+                                <p style={styles.statusText}>
+                                    {simStatus === 'idle' ? "Click a destination house to send your first packet!" :
+                                     simStatus === 'source' ? "Source (192.168.1.1) is packing the data with a destination stamp." :
+                                     simStatus === 'router' ? `The Router found ${selectedHouse?.label} at ${selectedHouse?.ip}.` :
+                                     "Delivered! Destination received and verified the unique IP."
+                                    }
+                                </p>
+                            </motion.div>
+                        </AnimatePresence>
                     </div>
-                    <div style={styles.interactionPanel}>
-                        <div style={styles.statusDisplay}>{status}</div>
-                        {stepMode && stepText && <div style={styles.stepBox}>{stepText}</div>}
-                        <p style={styles.realHint}>💡 In real systems, DNS translates names like google.com into IP addresses.</p>
-                        <button style={styles.resetBtn} onClick={() => setStepMode(v => !v)}>
-                            {stepMode ? 'Disable Step Mode' : '▶ Step Mode'}
-                        </button>
-                        <button style={styles.resetBtn} onClick={() => packetPos && setPacketTick(prev => prev + 1)} disabled={!packetPos}>
-                            Replay Animation
-                        </button>
-                        <motion.button 
-                            whileHover={{ backgroundColor: '#f1f5f9' }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={reset} 
-                            style={styles.resetBtn}
-                        >
-                            Reset
-                        </motion.button>
+
+                    <div style={styles.hintPanel}>
+                        <div style={styles.hintCard}>
+                            <span style={styles.hintTitle}>Did you know?</span>
+                            <p style={styles.hintText}>IPv4 (like 192.168.1.1) only allows 4.3 billion addresses. We're now switching to <strong>IPv6</strong> which allows 340 undecillion addresses! 🚀</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -115,153 +202,55 @@ const IPAddressing = () => {
 };
 
 const styles = {
-    container: {
-        maxWidth: '1000px',
-        margin: '0 auto',
-        padding: '1rem 0'
+    container: { maxWidth: '1000px', margin: '0 auto', padding: '0.5rem 0' },
+    headerArea: { marginBottom: '2rem', textAlign: 'left' },
+    hubTitle: { fontSize: '1.75rem', fontWeight: '900', color: '#0f172a', marginBottom: '0.4rem', letterSpacing: '-0.5px' },
+    hubSubtitle: { fontSize: '1rem', color: '#64748b', marginBottom: '1.25rem' },
+    metaphorBox: { 
+        backgroundColor: '#f8fafc', padding: '1.25rem', borderRadius: '16px', borderLeft: '4px solid #3b82f6',
+        display: 'flex', alignItems: 'center', gap: '1rem' 
     },
-    contentHeader: {
-        marginBottom: '2rem',
-        textAlign: 'left'
+    metaphorTag: { fontSize: '0.75rem', fontWeight: '800', backgroundColor: '#3b82f6', color: '#fff', padding: '2px 8px', borderRadius: '6px', textTransform: 'uppercase' },
+    metaphorText: { margin: 0, fontSize: '1rem', color: '#334155', lineHeight: '1.5' },
+
+    card: { backgroundColor: '#fff', borderRadius: '24px', border: '1px solid #f1f5f9', boxShadow: '0 10px 30px -10px rgba(0,0,0,0.05)', padding: '2.5rem' },
+    controlsBar: { marginBottom: '2rem', display: 'flex', justifyContent: 'flex-start' },
+    initialBtns: { display: 'flex', alignItems: 'center', gap: '1rem' },
+    primaryBtn: { border: 'none', backgroundColor: '#3b82f6', color: '#fff', borderRadius: '12px', padding: '0.7rem 1.4rem', cursor: 'pointer', fontWeight: '700', boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)' },
+    btnHint: { fontSize: '0.9rem', color: '#94a3b8', fontStyle: 'italic' },
+    stepControls: { display: 'flex', gap: '0.75rem', alignItems: 'center' },
+    nextBtn: { border: 'none', backgroundColor: '#0f172a', color: '#fff', borderRadius: '12px', padding: '0.7rem 1.4rem', cursor: 'pointer', fontWeight: '700' },
+    ghostBtn: { background: 'none', border: '1px solid #e2e8f0', color: '#64748b', borderRadius: '12px', padding: '0.7rem 1.2rem', cursor: 'pointer', fontWeight: '600' },
+
+    cityMap: { 
+        height: '320px', backgroundColor: '#f8fafc', borderRadius: '24px', position: 'relative', 
+        border: '1px solid #f1f5f9', marginBottom: '2.5rem', overflow: 'hidden' 
     },
-    contentTitle: {
-        fontSize: '1.75rem',
-        fontWeight: '800',
-        color: '#0f172a',
-        marginBottom: '0.5rem'
+    svgLayer: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1 },
+    routerNode: { 
+        position: 'absolute', width: '80px', height: '80px', borderRadius: '20px', border: '2px solid #e2e8f0',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', 
+        zIndex: 5, backgroundColor: '#fff', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' 
     },
-    contentSubtitle: {
-        fontSize: '1rem',
-        color: '#64748b',
-        fontWeight: '400'
+    routerLabel: { fontSize: '0.7rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', marginTop: '4px' },
+    houseCard: { 
+        position: 'absolute', width: '110px', height: '80px', borderRadius: '18px', border: '2px solid #e2e8f0',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', 
+        zIndex: 10, cursor: 'pointer', transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)' 
     },
-    quickLine: {
-        marginTop: '0.5rem',
-        fontSize: '0.92rem',
-        color: '#334155'
-    },
-    card: {
-        backgroundColor: '#fff',
-        borderRadius: '20px',
-        border: '1px solid #f1f5f9',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
-        padding: '2rem',
-        overflow: 'hidden'
-    },
-    cityGrid: {
-        width: '100%',
-        height: '320px',
-        backgroundColor: '#f8fafc',
-        borderRadius: '16px',
-        position: 'relative',
-        overflow: 'hidden',
-        border: '1px solid #f1f5f9',
-        marginBottom: '2rem'
-    },
-    gridOverlay: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundImage: 'radial-gradient(#e2e8f0 1px, transparent 1px)',
-        backgroundSize: '24px 24px',
-        opacity: 0.4
-    },
-    house: {
-        position: 'absolute',
-        width: '130px',
-        padding: '12px',
-        borderRadius: '16px',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-        textAlign: 'center',
-        border: '1px solid #e2e8f0',
-        zIndex: 5,
-        transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
-    },
-    houseIcon: {
-        fontSize: '2.2rem',
-        marginBottom: '4px'
-    },
-    houseLabel: {
-        fontSize: '0.875rem',
-        fontWeight: '700',
-        color: '#1e293b',
-        marginBottom: '2px'
-    },
-    ipTag: {
-        fontSize: '0.75rem',
-        color: '#64748b',
-        fontFamily: "'JetBrains Mono', monospace",
-        opacity: 0.8
-    },
-    packet: {
-        position: 'absolute',
-        fontSize: '1.8rem',
-        zIndex: 10,
-        filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))'
-    },
-    infoArea: {
-        display: 'grid',
-        gridTemplateColumns: '1.2fr 1fr',
-        gap: '2rem',
-        alignItems: 'center',
-        padding: '1rem'
-    },
-    infoTitle: {
-        fontSize: '1.25rem',
-        color: '#0f172a',
-        marginBottom: '0.75rem',
-        fontWeight: '800'
-    },
-    infoText: {
-        fontSize: '1rem',
-        color: '#475569',
-        lineHeight: '1.6',
-        margin: 0
-    },
-    interactionPanel: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1rem'
-    },
-    statusDisplay: {
-        padding: '1rem',
-        backgroundColor: '#f1f5f9',
-        borderRadius: '12px',
-        textAlign: 'center',
-        fontWeight: '700',
-        color: '#0f172a',
-        fontSize: '0.9rem',
-        border: '1px solid #e2e8f0'
-    },
-    resetBtn: {
-        padding: '0.75rem 1.5rem',
-        backgroundColor: '#fff',
-        color: '#64748b',
-        border: '1px solid #e2e8f0',
-        borderRadius: '12px',
-        cursor: 'pointer',
-        fontSize: '0.875rem',
-        fontWeight: '600',
-        transition: 'all 0.2s ease'
-    },
-    stepBox: {
-        padding: '0.65rem 0.75rem',
-        borderRadius: '10px',
-        backgroundColor: '#eff6ff',
-        color: '#1d4ed8',
-        border: '1px solid #bfdbfe',
-        fontSize: '0.86rem'
-    },
-    realHint: {
-        fontSize: '0.84rem',
-        color: '#0f766e',
-        backgroundColor: '#ecfeff',
-        padding: '0.45rem 0.6rem',
-        borderRadius: '8px',
-        margin: 0
-    }
+    houseIcon: { fontSize: '1.5rem', marginBottom: '4px' },
+    houseName: { fontSize: '0.8rem', fontWeight: '800', color: '#0f172a' },
+    houseIp: { fontSize: '0.65rem', color: '#94a3b8', fontFamily: 'monospace' },
+    packet: { position: 'absolute', fontSize: '1.5rem', zIndex: 20, pointerEvents: 'none' },
+
+    infoRow: { display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '2rem' },
+    statusBox: { backgroundColor: '#fff', padding: '1.5rem', borderRadius: '20px', border: '1.5px solid #f1f5f9', height: '100%' },
+    statusTag: { fontSize: '0.7rem', fontWeight: '800', color: '#3b82f6', textTransform: 'uppercase', display: 'block', marginBottom: '0.5rem' },
+    statusText: { fontSize: '1rem', color: '#475569', lineHeight: '1.6', margin: 0 },
+    hintPanel: { display: 'flex', alignItems: 'center' },
+    hintCard: { backgroundColor: '#f0fdf4', padding: '1.25rem', borderRadius: '16px', border: '1px solid #dcfce7' },
+    hintTitle: { fontSize: '0.75rem', fontWeight: '800', color: '#166534', textTransform: 'uppercase', display: 'block', marginBottom: '0.25rem' },
+    hintText: { fontSize: '0.9rem', color: '#166534', margin: 0, lineHeight: '1.5' }
 };
 
 export default IPAddressing;

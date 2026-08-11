@@ -14,76 +14,30 @@ const HashTablesExplorer = () => {
         <div style={styles.shell}>
             <div style={styles.topBar}>
                 <div style={styles.tabs}>
-                    <button
-                        style={{
-                            ...styles.tab,
-                            borderBottom: activeTab === 'smart-locker' ? '3px solid #10b981' : 'none',
-                            color: activeTab === 'smart-locker' ? '#10b981' : '#64748b'
-                        }}
-                        onClick={() => setActiveTab('smart-locker')}
-                    >
-                        🔐 Hash Tables — Smart Locker Storage
-                    </button>
-                    <button
-                        style={{
-                            ...styles.tab,
-                            borderBottom: activeTab === 'collision' ? '3px solid #10b981' : 'none',
-                            color: activeTab === 'collision' ? '#10b981' : '#64748b'
-                        }}
-                        onClick={() => setActiveTab('collision')}
-                    >
-                        💥 Collision Handling — Locker Conflict
-                    </button>
-                    <button
-                        style={{
-                            ...styles.tab,
-                            borderBottom: activeTab === 'chaining' ? '3px solid #10b981' : 'none',
-                            color: activeTab === 'chaining' ? '#10b981' : '#64748b'
-                        }}
-                        onClick={() => setActiveTab('chaining')}
-                    >
-                        🔗 Separate Chaining — Locker Shelves
-                    </button>
-                    <button
-                        style={{
-                            ...styles.tab,
-                            borderBottom: activeTab === 'open-addressing' ? '3px solid #10b981' : 'none',
-                            color: activeTab === 'open-addressing' ? '#10b981' : '#64748b'
-                        }}
-                        onClick={() => setActiveTab('open-addressing')}
-                    >
-                        🔍 Open Addressing
-                    </button>
-                    <button
-                        style={{
-                            ...styles.tab,
-                            borderBottom: activeTab === 'linear-probing' ? '3px solid #10b981' : 'none',
-                            color: activeTab === 'linear-probing' ? '#10b981' : '#64748b'
-                        }}
-                        onClick={() => setActiveTab('linear-probing')}
-                    >
-                        🚶 Linear Probing — Next Locker Walk
-                    </button>
-                    <button
-                        style={{
-                            ...styles.tab,
-                            borderBottom: activeTab === 'double-hashing' ? '3px solid #10b981' : 'none',
-                            color: activeTab === 'double-hashing' ? '#10b981' : '#64748b'
-                        }}
-                        onClick={() => setActiveTab('double-hashing')}
-                    >
-                        🦘 Double Hashing — Smart Jump Probing
-                    </button>
-                    <button
-                        style={{
-                            ...styles.tab,
-                            borderBottom: activeTab === 'practice' ? '3px solid #10b981' : 'none',
-                            color: activeTab === 'practice' ? '#10b981' : '#64748b'
-                        }}
-                        onClick={() => setActiveTab('practice')}
-                    >
-                        📝 Practice Problems
-                    </button>
+                    {[
+                        { id: 'smart-locker', label: '🔐 Smart Locker' },
+                        { id: 'collision', label: '💥 Locker Conflict' },
+                        { id: 'chaining', label: '🔗 Separate Chaining' },
+                        { id: 'open-addressing', label: '🔍 Open Addressing' },
+                        { id: 'linear-probing', label: '🚶 Linear Probing' },
+                        { id: 'double-hashing', label: '🦘 Double Hashing' },
+                        { id: 'practice', label: '📝 Practice Problems' }
+                    ].map(tab => (
+                        <button
+                            key={tab.id}
+                            style={{
+                                ...styles.tab,
+                                backgroundColor: activeTab === tab.id ? '#0f172a' : 'transparent',
+                                color: activeTab === tab.id ? '#fff' : '#64748b',
+                                fontWeight: activeTab === tab.id ? '700' : '500',
+                                boxShadow: activeTab === tab.id ? '0 10px 15px -3px rgba(15, 23, 42, 0.1), 0 4px 6px -2px rgba(15, 23, 42, 0.05)' : 'none',
+                                borderBottom: activeTab === tab.id ? '2px solid #3b82f6' : '2px solid transparent'
+                            }}
+                            onClick={() => setActiveTab(tab.id)}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
                 </div>
             </div>
 
@@ -110,25 +64,35 @@ const styles = {
     topBar: {
         display: 'flex',
         justifyContent: 'center',
-        borderBottom: '1px solid #e2e8f0',
-        marginBottom: '1rem'
+        borderBottom: '1px solid #f1f5f9',
+        marginBottom: '2rem',
+        position: 'sticky',
+        top: '56px',
+        backgroundColor: 'rgba(255,255,255,0.95)',
+        backdropFilter: 'blur(16px)',
+        zIndex: 90,
+        padding: '0.75rem 0'
     },
     tabs: {
         display: 'flex',
-        gap: '2rem',
-        padding: '0 1rem'
+        gap: '0.5rem',
+        padding: '0 1rem',
+        overflowX: 'auto',
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none'
     },
     tab: {
-        padding: '1rem 0',
+        padding: '0.6rem 1.1rem',
         background: 'none',
         border: 'none',
-        fontSize: '1rem',
-        fontWeight: '700',
+        fontSize: '0.875rem',
         cursor: 'pointer',
-        transition: 'all 0.2s',
+        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
         display: 'flex',
         alignItems: 'center',
-        gap: '8px'
+        gap: '8px',
+        whiteSpace: 'nowrap',
+        borderRadius: '10px'
     },
     content: {
         animation: 'fadeIn 0.5s ease'

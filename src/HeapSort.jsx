@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useFeedback } from './FeedbackManager.jsx';
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const INIT = [6, 3, 8, 2, 7, 1, 5, 4];
@@ -14,6 +15,8 @@ const HeapSort = () => {
     const [isRunning, setIsRunning] = useState(false);
     const [stepDone, setStepDone] = useState(false);
     const [activeLang, setActiveLang] = useState('python');
+    const { showFeedback } = useFeedback();
+    const [showHint, setShowHint] = useState(true);
     const stopRef = useRef(false);
     const maxVal = Math.max(...INIT);
 
@@ -61,6 +64,7 @@ const HeapSort = () => {
             await sleep(300);
         }
         setMessage('Max heap built! Now extracting elements...');
+        showFeedback("Max heap built! High-priority items at the top 🏔️");
         await sleep(500);
 
         const sortedSet = new Set();
@@ -83,6 +87,7 @@ const HeapSort = () => {
         setSorted(new Set([...sortedSet]));
         setRootIdx(null); setHeapNodes([]); setSwapping([]);
         setMessage('✓ Array is sorted!');
+        showFeedback("Heap Sort complete! Efficiency at its peak 🏆", "success");
         setIsRunning(false); setStepDone(true);
     };
 
@@ -103,7 +108,7 @@ const HeapSort = () => {
             <div style={s.header}>
                 <h2 style={s.title}>Heap Sort — Priority Heap Organizer 🏔</h2>
                 <div style={s.desc}>
-                    <p>Heap Sort uses a <strong>binary max heap</strong> to repeatedly extract the largest element and place it at the end of the array, building a sorted result.</p>
+                    <p>Heap Sort is like organizing a mountain of tasks. We build a <strong>Priority Heap</strong> where the biggest items float to the top, then move them to their final spot!</p>
                 </div>
             </div>
 
@@ -113,7 +118,12 @@ const HeapSort = () => {
                 <div style={s.treeWrap}>
                     {/* Level 0 */}
                     <div style={s.treeRow}>
-                        <div style={{ ...s.treeNode, background: barColor(0) }}>{array[0]}</div>
+                        <div style={{ 
+                            ...s.treeNode, 
+                            background: barColor(0),
+                            boxShadow: rootIdx === 0 ? '0 0 15px rgba(168, 85, 247, 0.5)' : 'none'
+                        }} 
+                        className={rootIdx === 0 ? 'pulse-glow' : ''}>{array[0]}</div>
                     </div>
                     {/* Level 1 */}
                     <div style={s.treeRow}>
@@ -139,8 +149,19 @@ const HeapSort = () => {
                 <div style={s.vizLabel}>Array Representation</div>
                 <div style={s.barsContainer}>
                     {array.map((val, idx) => (
-                        <motion.div key={idx} style={s.barWrap} layout transition={{ type: 'spring', stiffness: 300, damping: 30 }}>
-                            <div style={{ ...s.bar, height: `${(val / maxVal) * 140 + 20}px`, backgroundColor: barColor(idx) }} />
+                        <motion.div 
+                            key={idx} 
+                            style={s.barWrap} 
+                            layout 
+                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                            className={swapping.includes(idx) || idx === rootIdx ? 'pulse-glow' : ''}
+                        >
+                            <div style={{ 
+                                ...s.bar, 
+                                height: `${(val / maxVal) * 140 + 20}px`, 
+                                backgroundColor: barColor(idx),
+                                boxShadow: swapping.includes(idx) ? '0 0 15px rgba(239, 68, 68, 0.4)' : (idx === rootIdx ? '0 0 15px rgba(168, 85, 247, 0.4)' : 'none')
+                            }} />
                             <span style={s.barLabel}>{val}</span>
                         </motion.div>
                     ))}
@@ -156,9 +177,22 @@ const HeapSort = () => {
             </div>
 
             <div style={s.controls}>
-                <button onClick={runSort} disabled={isRunning} style={{ ...s.btn, backgroundColor: '#4f46e5' }}>▶ Start Sorting</button>
-                <button onClick={() => { if (!stepDone) runSort(); }} disabled={isRunning || stepDone} style={{ ...s.btn, backgroundColor: '#0891b2' }}>⏭ Next Step</button>
-                <button onClick={resetAll} style={{ ...s.btn, backgroundColor: '#ef4444' }}>↺ Reset</button>
+                <div style={{ position: 'relative' }}>
+                    <button onClick={() => { runSort(); setShowHint(false); }} disabled={isRunning} style={{ ...s.btn, backgroundColor: '#4f46e5' }}>
+                        ▶ Build & Sort Heap! 🏔️
+                    </button>
+                    {showHint && !isRunning && (
+                        <div className="tooltip-hint" style={{ bottom: '110%', left: '50%' }}>
+                            Build the mountain to start! ✨
+                        </div>
+                    )}
+                </div>
+                <button onClick={() => { if (!stepDone) { runSort(); setShowHint(false); } }} disabled={isRunning || stepDone} style={{ ...s.btn, backgroundColor: '#0891b2' }}>
+                    ⏭ Take a Step
+                </button>
+                <button onClick={resetAll} style={{ ...s.btn, backgroundColor: '#ef4444' }}>
+                    ↺ Reset Everything
+                </button>
             </div>
 
             <div style={s.codeSection}>

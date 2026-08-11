@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useFeedback } from './FeedbackManager.jsx';
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const INIT = [8, 3, 5, 2, 7, 4, 6, 1];
@@ -14,6 +15,8 @@ const MergeSort = () => {
     const [stepDone, setStepDone] = useState(false);
     const [activeLang, setActiveLang] = useState('python');
     const [splitView, setSplitView] = useState(null); // show divide step
+    const { showFeedback } = useFeedback();
+    const [showHint, setShowHint] = useState(true);
     const stopRef = useRef(false);
 
     const maxVal = Math.max(...INIT);
@@ -81,6 +84,7 @@ const MergeSort = () => {
             setSorted(new Set(Array.from({ length: arr.length }, (_, i) => i)));
             setDividing([]); setMerging([]);
             setMessage('✓ Array is sorted!');
+            showFeedback("Merge Sort complete! Divided and Conquered 🏗️", "success");
             setIsRunning(false); setStepDone(true);
         }
     };
@@ -102,10 +106,9 @@ const MergeSort = () => {
     return (
         <div style={s.container}>
             <div style={s.header}>
-                <h2 style={s.title}>Merge Sort — Divide and Combine Factory 🏭</h2>
+                <h2 style={s.title}>Merge Sort — Divide and Combine 🏗️</h2>
                 <div style={s.desc}>
-                    <p>Merge Sort works by <strong>dividing</strong> the array into smaller halves, sorting each independently, then <strong>merging</strong> them back together in order.</p>
-                    <p>It follows the classic <strong>Divide and Conquer</strong> strategy.</p>
+                    <p>Merge Sort is like a giant puzzle: we <strong>divide</strong> the pieces until they are tiny, sort them, and then <strong>merge</strong> them back into a perfect picture!</p>
                 </div>
             </div>
 
@@ -128,8 +131,19 @@ const MergeSort = () => {
             <div style={s.visualizer}>
                 <div style={s.barsContainer}>
                     {array.map((val, idx) => (
-                        <motion.div key={idx} style={s.barWrap} layout transition={{ type: 'spring', stiffness: 300, damping: 30 }}>
-                            <div style={{ ...s.bar, height: `${(val / maxVal) * 160 + 20}px`, backgroundColor: barColor(idx) }} />
+                        <motion.div 
+                            key={idx} 
+                            style={s.barWrap} 
+                            layout 
+                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                            className={merging.includes(idx) ? 'pulse-glow' : ''}
+                        >
+                            <div style={{ 
+                                ...s.bar, 
+                                height: `${(val / maxVal) * 160 + 20}px`, 
+                                backgroundColor: barColor(idx),
+                                boxShadow: merging.includes(idx) ? '0 0 15px rgba(59, 130, 246, 0.4)' : 'none'
+                            }} />
                             <span style={s.barLabel}>{val}</span>
                         </motion.div>
                     ))}
@@ -145,9 +159,22 @@ const MergeSort = () => {
             </div>
 
             <div style={s.controls}>
-                <button onClick={runSort} disabled={isRunning} style={{ ...s.btn, backgroundColor: '#4f46e5' }}>▶ Start Sorting</button>
-                <button onClick={handleNextStep} disabled={isRunning || stepDone} style={{ ...s.btn, backgroundColor: '#0891b2' }}>⏭ Next Step</button>
-                <button onClick={resetAll} style={{ ...s.btn, backgroundColor: '#ef4444' }}>↺ Reset</button>
+                <div style={{ position: 'relative' }}>
+                    <button onClick={() => { runSort(); setShowHint(false); }} disabled={isRunning} style={{ ...s.btn, backgroundColor: '#4f46e5' }}>
+                        ▶ Divide & Conquer! 🏗️
+                    </button>
+                    {showHint && !isRunning && (
+                        <div className="tooltip-hint" style={{ bottom: '110%', left: '50%' }}>
+                            Let's split this array! ✨
+                        </div>
+                    )}
+                </div>
+                <button onClick={() => { handleNextStep(); setShowHint(false); }} disabled={isRunning || stepDone} style={{ ...s.btn, backgroundColor: '#0891b2' }}>
+                    ⏭ Take a Step
+                </button>
+                <button onClick={resetAll} style={{ ...s.btn, backgroundColor: '#ef4444' }}>
+                    ↺ Reset All
+                </button>
             </div>
 
             <div style={s.codeSection}>

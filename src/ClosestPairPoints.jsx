@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { useFeedback } from './FeedbackManager.jsx';
 
 const INITIAL_POINTS = [
     { x: 50, y: 180 }, { x: 120, y: 60 }, { x: 180, y: 200 },
@@ -16,6 +17,8 @@ const ClosestPairPoints = () => {
     const [isRunning, setIsRunning] = useState(false);
     const [message, setMessage] = useState('A radar system scanning aircraft positions. Find the closest pair using divide-and-conquer.');
     const [activeLang, setActiveLang] = useState('javascript');
+    const { showFeedback } = useFeedback();
+    const [showHint, setShowHint] = useState(true);
     const stopRef = useRef(false);
 
     const W = 400, H = 260;
@@ -31,7 +34,7 @@ const ClosestPairPoints = () => {
                 for (let i = 0; i < n; i++) {
                     for (let j = i + 1; j < n; j++) {
                         const d = dist(points[i], points[j]);
-                        result.push({ points: pts, checking: [points[i], points[j]], divLine: null, closest: bestPair, depth, msg: `Brute force: dist(${i},${j}) = ${d.toFixed(1)}` });
+                        result.push({ points: pts, checking: [points[i], points[j]], divLine: null, closest: bestPair, depth, msg: `Brute force: dist(${i},${j}) = ${d.toFixed(1)}`, feedback: { msg: "Scanning pairs... 📡" } });
                         if (d < best) { best = d; bestPair = [points[i], points[j]]; }
                     }
                 }
@@ -40,7 +43,7 @@ const ClosestPairPoints = () => {
 
             const mid = Math.floor(n / 2);
             const midX = points[mid].x;
-            result.push({ points: pts, checking: null, divLine: midX, closest: null, depth, msg: `Divide at x = ${midX}. Left: ${mid} points, Right: ${n - mid} points.` });
+            result.push({ points: pts, checking: null, divLine: midX, closest: null, depth, msg: `Divide at x = ${midX}. Left: ${mid} points, Right: ${n - mid} points.`, feedback: { msg: "Dividing search area... ⚔️" } });
 
             const leftResult = closestPair(points.slice(0, mid), depth + 1);
             const rightResult = closestPair(points.slice(mid), depth + 1);
@@ -65,7 +68,7 @@ const ClosestPairPoints = () => {
         };
 
         const answer = closestPair(pts, 0);
-        result.push({ points: pts, checking: null, divLine: null, closest: answer.pair, depth: 0, msg: `🎉 Closest pair found! Distance = ${answer.dist.toFixed(2)}` });
+        result.push({ points: pts, checking: null, divLine: null, closest: answer.pair, depth: 0, msg: `🎉 Closest pair found! Distance = ${answer.dist.toFixed(2)}`, feedback: { msg: "Success! Closest aircraft detected ✈️", type: "success" } });
         return result;
     };
 
@@ -92,7 +95,10 @@ const ClosestPairPoints = () => {
     }, [isRunning, stepIdx, steps.length]);
 
     useEffect(() => {
-        if (stepIdx >= 0 && steps[stepIdx]) setMessage(steps[stepIdx].msg);
+        if (stepIdx >= 0 && steps[stepIdx]) {
+            setMessage(steps[stepIdx].msg);
+            if (steps[stepIdx].feedback) showFeedback(steps[stepIdx].feedback.msg, steps[stepIdx].feedback.type || 'info');
+        }
     }, [stepIdx]);
 
     const nextStep = () => {
@@ -258,7 +264,9 @@ double closest(vector<pair<int,int>>& pts,
                                 else if (isInPair(pt, currentStep.closest)) { fill = '#22C55E'; r = 8; }
                             }
                             return (
-                                <circle key={i} cx={pt.x} cy={pt.y} r={r} fill={fill} stroke="white" strokeWidth={2}>
+                                <circle key={i} cx={pt.x} cy={pt.y} r={r} fill={fill} stroke="white" strokeWidth={2}
+                                    className={isInPair(pt, currentStep?.checking) || isInPair(pt, currentStep?.closest) ? 'pulse-glow' : ''}
+                                >
                                     <animate attributeName="r" from={r + 2} to={r} dur="0.3s" />
                                 </circle>
                             );
@@ -275,9 +283,18 @@ double closest(vector<pair<int,int>>& pts,
 
                 {/* Controls */}
                 <div style={styles.controls}>
-                    <button onClick={startSimulation} disabled={isRunning} style={styles.primaryBtn}>Start Simulation</button>
-                    <button onClick={nextStep} disabled={isRunning} style={styles.secondaryBtn}>Next Step</button>
-                    <button onClick={reset} style={styles.dangerBtn}>Reset</button>
+                    <div style={{ position: 'relative' }}>
+                        <button onClick={() => { startSimulation(); setShowHint(false); }} disabled={isRunning} style={styles.primaryBtn}>
+                            ▶ Scan for Pairs! 📡
+                        </button>
+                        {showHint && !isRunning && (
+                            <div className="tooltip-hint" style={{ bottom: '110%', left: '50%' }}>
+                                Let's find the closest planes! ✨
+                            </div>
+                        )}
+                    </div>
+                    <button onClick={() => { nextStep(); setShowHint(false); }} disabled={isRunning} style={styles.secondaryBtn}>⏭ Next Scan</button>
+                    <button onClick={reset} style={styles.dangerBtn}>↺ Reset Radar</button>
                 </div>
             </div>
 

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useFeedback } from './FeedbackManager.jsx';
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -12,6 +13,8 @@ const W = 5; // Capacity
 
 const KnapsackDP = () => {
     const [viewMode, setViewMode] = useState('play'); // 'play' | 'sim'
+    const { showFeedback } = useFeedback();
+    const [showHint, setShowHint] = useState(true);
 
     // Play State
     const [bagItems, setBagItems] = useState([]);
@@ -49,8 +52,10 @@ const KnapsackDP = () => {
                 const newVal = newItems.reduce((acc, it) => acc + it.value, 0);
                 if (newVal === 45) {
                     setPlayMsg("Amazing! You found the optimal packing: Value 45.");
+                    showFeedback("Optimal packing found! 🎒🏆", "success");
                 } else {
                     setPlayMsg(`Added ${item.name}. Value is now ${newVal}.`);
+                    showFeedback(`Packed ${item.name}! 📦`);
                 }
             }
         }
@@ -118,6 +123,7 @@ const KnapsackDP = () => {
         if (!stopSim.current) {
             setActiveCell({ r: numItems, c: W });
             setSimMsg(`Finished! The maximum value possible is ${dp[numItems][W]}.`);
+            showFeedback("Success! Knapsack optimized 🎒🚀", "success");
             if (window.AppProgress) window.AppProgress.markProblemSolved();
         }
 
@@ -226,6 +232,11 @@ const KnapsackDP = () => {
                                         Value: {item.value}
                                     </div>
                                     {inBag && <div style={{ color: '#22C55E', fontWeight: 'bold' }}>In Bag ✓</div>}
+                                    {!inBag && viewMode === 'play' && showHint && item.id === 1 && (
+                                        <div className="tooltip-hint" style={{ bottom: '110%', left: '50%' }}>
+                                            Pack the compass first! ✨
+                                        </div>
+                                    )}
                                 </motion.div>
                             );
                         })}
@@ -284,7 +295,8 @@ const KnapsackDP = () => {
                                                         border: '1px solid #CBD5E1',
                                                         fontWeight: '800',
                                                         color: dpTable[r][c] === '?' ? '#94A3B8' : (getCellColor(r, c) === '#22C55E' ? 'white' : '#1E293B'),
-                                                        transition: 'background-color 0.3s'
+                                                        transition: 'background-color 0.3s',
+                                                        className: activeCell.r === r && activeCell.c === c ? 'pulse-glow' : ''
                                                     }}
                                                 >
                                                     {dpTable[r][c]}

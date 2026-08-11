@@ -56,6 +56,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 await mountOperatingSystems();
             } else if (topic.name === 'Computer Networks') {
                 await mountComputerNetworks();
+            } else if (topic.name === 'DBMS') {
+                await mountDBMS();
             } else {
                 const content = document.getElementById('learningTopicContent');
                 content.style.display = 'block';
@@ -76,21 +78,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const rootEl = document.getElementById('array-train-root');
         if (!rootEl) return;
 
-        // Dynamic imports for React and the component
-        const [React, ReactDOM, DataStructuresHub] = await Promise.all([
+        const [React, ReactDOM, DataStructuresHub, { FeedbackProvider }] = await Promise.all([
             import('react'),
             import('react-dom/client'),
-            import('./DataStructuresHub.jsx')
+            import('./DataStructuresHub.jsx'),
+            import('./FeedbackManager.jsx')
         ]);
 
         const root = ReactDOM.createRoot(rootEl);
-        root.render(React.createElement(DataStructuresHub.default));
+        root.render(
+            React.createElement(FeedbackProvider, {}, 
+                React.createElement(DataStructuresHub.default)
+            )
+        );
 
-        // Hide description when train is active
         document.getElementById('learningTopicContent').style.display = 'none';
 
-        // Handle back button cleanup
-        const originalBack = backBtn.onclick;
         backBtn.addEventListener('click', () => {
             root.unmount();
             document.getElementById('learningTopicContent').style.display = 'block';
@@ -102,14 +105,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const rootEl = document.getElementById('array-train-root');
         if (!rootEl) return;
 
-        const [React, ReactDOM, AlgorithmsHub] = await Promise.all([
+        const [React, ReactDOM, AlgorithmsHub, { FeedbackProvider }] = await Promise.all([
             import('react'),
             import('react-dom/client'),
-            import('./AlgorithmsHub.jsx')
+            import('./AlgorithmsHub.jsx'),
+            import('./FeedbackManager.jsx')
         ]);
 
         const root = ReactDOM.createRoot(rootEl);
-        root.render(React.createElement(AlgorithmsHub.default));
+        root.render(
+            React.createElement(FeedbackProvider, {}, 
+                React.createElement(AlgorithmsHub.default)
+            )
+        );
 
         document.getElementById('learningTopicContent').style.display = 'none';
 
@@ -124,14 +132,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const rootEl = document.getElementById('array-train-root');
         if (!rootEl) return;
 
-        const [React, ReactDOM, OperatingSystemsHub] = await Promise.all([
+        const [React, ReactDOM, OperatingSystemsHub, { FeedbackProvider }] = await Promise.all([
             import('react'),
             import('react-dom/client'),
-            import('./OperatingSystemsHub.jsx')
+            import('./OperatingSystemsHub.jsx'),
+            import('./FeedbackManager.jsx')
         ]);
 
         const root = ReactDOM.createRoot(rootEl);
-        root.render(React.createElement(OperatingSystemsHub.default));
+        root.render(
+            React.createElement(FeedbackProvider, {}, 
+                React.createElement(OperatingSystemsHub.default)
+            )
+        );
 
         document.getElementById('learningTopicContent').style.display = 'none';
 
@@ -142,23 +155,65 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { once: true });
     }
 
+    let cnRoot = null;
     async function mountComputerNetworks() {
         const rootEl = document.getElementById('array-train-root');
         if (!rootEl) return;
+        if (cnRoot) return;
 
-        const [React, ReactDOM, ComputerNetworksHub] = await Promise.all([
+        const [React, ReactDOM, ComputerNetworksHub, { FeedbackProvider }] = await Promise.all([
             import('react'),
             import('react-dom/client'),
-            import('./ComputerNetworksHub.jsx')
+            import('./ComputerNetworksHub.jsx'),
+            import('./FeedbackManager.jsx')
         ]);
 
-        const root = ReactDOM.createRoot(rootEl);
-        root.render(React.createElement(ComputerNetworksHub.default));
+        cnRoot = ReactDOM.createRoot(rootEl);
+        cnRoot.render(
+            React.createElement(FeedbackProvider, {}, 
+                React.createElement(ComputerNetworksHub.default)
+            )
+        );
 
         document.getElementById('learningTopicContent').style.display = 'none';
 
         backBtn.addEventListener('click', () => {
-            root.unmount();
+            if (cnRoot) {
+                cnRoot.unmount();
+                cnRoot = null;
+            }
+            document.getElementById('learningTopicContent').style.display = 'block';
+            rootEl.innerHTML = '';
+        }, { once: true });
+    }
+
+    let dbmsRoot = null;
+    async function mountDBMS() {
+        const rootEl = document.getElementById('array-train-root');
+        if (!rootEl) return;
+        if (dbmsRoot) return;
+
+        const [React, ReactDOM, DBMSHub, { FeedbackProvider }] = await Promise.all([
+            import('react'),
+            import('react-dom/client'),
+            import('./DBMSHub.jsx'),
+            import('./FeedbackManager.jsx')
+        ]);
+
+        dbmsRoot = ReactDOM.createRoot(rootEl);
+        dbmsRoot.render(
+            React.createElement(FeedbackProvider, {}, 
+                React.createElement(DBMSHub.default)
+            )
+        );
+
+        document.getElementById('learningTopicContent').style.display = 'none';
+
+        backBtn.addEventListener('click', () => {
+            if (dbmsRoot) {
+                dbmsRoot.unmount();
+                dbmsRoot = null;
+            }
             document.getElementById('learningTopicContent').style.display = 'block';
             rootEl.innerHTML = '';
         }, { once: true });

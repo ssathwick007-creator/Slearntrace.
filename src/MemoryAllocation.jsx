@@ -229,41 +229,47 @@ const Confetti = () => {
 };
 
 const styles = {
-    container: { padding: '2.5rem', backgroundColor: '#fff', borderRadius: '40px', border: '1px solid #e2e8f0', boxShadow: '0 20px 50px rgba(0,0,0,0.05)', position: 'relative', overflow: 'hidden' },
-    topHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '1.5rem' },
-    conceptTitle: { fontSize: '1rem', color: '#1e293b' },
-    conceptLabel: { color: '#ef4444', marginRight: '8px', fontWeight: '900', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px' },
-    modeIndicator: { fontSize: '0.7rem', fontWeight: '900', backgroundColor: '#f1f5f9', color: '#64748b', padding: '4px 12px', borderRadius: '999px', textTransform: 'uppercase' },
-    stepProgress: { fontSize: '0.8rem', fontWeight: '700', color: '#ef4444' },
-    modeTabs: { display: 'flex', gap: '0.5rem', marginBottom: '3rem', justifyContent: 'center' },
-    modeTab: { padding: '0.6rem 1.8rem', borderRadius: '15px', border: 'none', fontWeight: '800', cursor: 'pointer', fontSize: '0.9rem' },
-    guideBubble: { position: 'absolute', top: '160px', left: '50%', transform: 'translateX(-50%)', width: '300px', backgroundColor: '#1e293b', color: '#fff', padding: '1.5rem', borderRadius: '24px', zIndex: 100, boxShadow: '0 20px 40px rgba(0,0,0,0.2)' },
-    bubbleArrow: { width: 0, height: 0, borderLeft: '10px solid transparent', borderRight: '10px solid transparent', borderBottom: '10px solid #1e293b', position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%)' },
-    guideTitle: { fontSize: '1.1rem', fontWeight: '900', color: '#ef4444', marginBottom: '0.5rem' },
-    guideText: { fontSize: '0.9rem', color: '#cbd5e1', lineHeight: '1.5' },
-    guideNav: { display: 'flex', gap: '1rem', marginTop: '1.2rem' },
-    gNavBtn: { flex: 1, padding: '0.5rem', borderRadius: '10px', border: 'none', background: '#334155', color: '#fff', fontWeight: '700', cursor: 'pointer', fontSize: '0.75rem' },
-    successOverlay: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(255,255,255,0.95)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' },
-    successCard: { textAlign: 'center', background: '#fff', padding: '3rem', borderRadius: '35px', boxShadow: '0 25px 60px rgba(0,0,0,0.1)', border: '1px solid #f1f5f9', maxWidth: '400px' },
-    successIcon: { fontSize: '5rem', display: 'block', marginBottom: '1.5rem' },
-    successTitle: { fontSize: '1.8rem', fontWeight: '900', color: '#1e293b', marginBottom: '1rem' },
-    successText: { color: '#64748b', marginBottom: '2.5rem', lineHeight: '1.6' },
-    restartBtn: { padding: '1rem 3rem', borderRadius: '999px', border: 'none', background: '#3b82f6', color: '#fff', fontWeight: '900', cursor: 'pointer' },
-    visualizerArea: { backgroundColor: '#fcfdfe', borderRadius: '35px', padding: '2.5rem', border: '1px solid #f1f5f9' },
-    usageSection: { maxWidth: '450px', margin: '0 auto 3rem auto', textAlign: 'center' },
-    usageBar: { height: '12px', background: '#f1f5f9', borderRadius: '999px', overflow: 'hidden', marginBottom: '0.8rem' },
-    usageFill: { height: '100%', borderRadius: '999px' },
-    usageText: { fontSize: '0.85rem', fontWeight: '700', color: '#64748b' },
-    hotelGrid: { display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.8rem', maxWidth: '500px', margin: '0 auto 3rem auto' },
-    room: { height: '75px', background: '#fff', borderRadius: '18px', border: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', cursor: 'pointer', boxShadow: '0 4px 10px rgba(0,0,0,0.02)' },
-    rNum: { position: 'absolute', top: '5px', left: '8px', fontSize: '0.6rem', fontWeight: '800' },
-    gId: { fontWeight: '900', fontSize: '1.1rem' },
-    controls: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' },
-    actionRow: { display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.8rem' },
-    hotelBtn: { padding: '0.7rem 1.5rem', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff', color: '#1e293b', fontWeight: '800', cursor: 'pointer', fontSize: '0.85rem' },
-    majorBtn: { padding: '0.7rem 1.8rem', borderRadius: '12px', border: 'none', color: '#fff', fontWeight: '800', cursor: 'pointer', fontSize: '0.85rem' },
-    statusMsg: { fontSize: '0.85rem', color: '#ef4444', fontWeight: '800' },
-    challengeFloating: { position: 'absolute', bottom: '20px', left: '20px', background: '#fff', padding: '0.8rem 1.2rem', borderRadius: '15px', border: '1px solid #f1f5f9', fontSize: '0.8rem', boxShadow: '0 10px 20px rgba(0,0,0,0.05)' }
+    container: { maxWidth: '1000px', margin: '0 auto', padding: '1.5rem 0' },
+    headerArea: { marginBottom: '2.5rem', textAlign: 'left' },
+    hubTitle: { fontSize: '2rem', fontWeight: '900', color: '#0f172a', marginBottom: '0.5rem', letterSpacing: '-0.5px' },
+    hubSubtitle: { fontSize: '1.1rem', color: '#64748b', marginBottom: '1.5rem' },
+    metaphorBox: { 
+        backgroundColor: '#f8fafc', padding: '1.25rem', borderRadius: '16px', borderLeft: '4px solid #3b82f6',
+        display: 'flex', alignItems: 'center', gap: '1rem' 
+    },
+    metaphorTag: { fontSize: '0.75rem', fontWeight: '800', backgroundColor: '#3b82f6', color: '#fff', padding: '2px 8px', borderRadius: '6px', textTransform: 'uppercase' },
+    metaphorText: { margin: 0, fontSize: '1rem', color: '#334155', lineHeight: '1.5' },
+
+    card: { backgroundColor: '#fff', borderRadius: '24px', border: '1px solid #f1f5f9', boxShadow: '0 10px 30px -10px rgba(0,0,0,0.05)', padding: '2.5rem' },
+    visualPane: { display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '3rem', marginBottom: '3rem' },
+    hotelArea: { display: 'flex', flexDirection: 'column', gap: '1rem' },
+    stationLabel: { fontSize: '0.75rem', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1px' },
+    hotelGrid: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' },
+    roomBox: { 
+        height: '80px', borderRadius: '16px', border: '1px solid #e2e8f0', cursor: 'pointer',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative',
+        transition: 'all 0.2s ease'
+    },
+    roomNum: { position: 'absolute', top: '6px', left: '8px', fontSize: '10px', fontWeight: '800' },
+    guestId: { fontSize: '1.2rem', fontWeight: '900', color: '#fff' },
+
+    sidePanel: { display: 'flex', flexDirection: 'column', gap: '2rem' },
+    usageCard: { backgroundColor: '#f8fafc', padding: '1.5rem', borderRadius: '20px', border: '1px solid #f1f5f9' },
+    usageLabel: { fontSize: '0.8rem', fontWeight: '800', color: '#64748b', display: 'block', marginBottom: '1rem' },
+    usageTrack: { height: '10px', backgroundColor: '#e2e8f0', borderRadius: '5px', overflow: 'hidden' },
+    usageFill: { height: '100%', backgroundColor: '#3b82f6' },
+
+    actions: { display: 'flex', flexDirection: 'column', gap: '0.75rem' },
+    primaryBtn: { border: '1px solid #e2e8f0', backgroundColor: '#fff', color: '#0f172a', borderRadius: '12px', padding: '0.75rem', cursor: 'pointer', fontWeight: '700' },
+    secondaryBtn: { border: 'none', backgroundColor: '#f1f5f9', color: '#64748b', borderRadius: '12px', padding: '0.75rem', cursor: 'pointer', fontWeight: '700' },
+
+    bottomSection: { display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '2rem', borderTop: '1px solid #f1f5f9', paddingTop: '2rem' },
+    stepInfo: { },
+    infoTitle: { fontSize: '1.1rem', fontWeight: '800', color: '#0f172a', marginBottom: '0.75rem' },
+    infoText: { fontSize: '0.95rem', color: '#64748b', lineHeight: '1.6', margin: 0 },
+    hintCard: { backgroundColor: '#eff6ff', padding: '1.25rem', borderRadius: '16px', border: '1px solid #dbeafe' },
+    hintTag: { fontSize: '0.7rem', fontWeight: '800', color: '#2563eb', textTransform: 'uppercase', display: 'block', marginBottom: '4px' },
+    hintText: { margin: 0, fontSize: '0.85rem', color: '#1d4ed8', lineHeight: '1.5' }
 };
 
 export default MemoryAllocation;

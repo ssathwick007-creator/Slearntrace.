@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useFeedback } from './FeedbackManager.jsx';
 
 const ITEMS = [
     { id: 1, name: 'Gold Dust', value: 100, weight: 20 },
@@ -10,12 +11,14 @@ const ITEMS = [
 const FractionalKnapsack = () => {
     const [capacity, setCapacity] = useState(50);
     const [remainingCapacity, setRemainingCapacity] = useState(50);
-    const [bagValue, setBagValue] = useState(0);
     const [items, setItems] = useState([]);
     const [sortedItems, setSortedItems] = useState([]);
+    const [bagValue, setBagValue] = useState(0);
     const [currentIndex, setCurrentIndex] = useState(-1);
     const [bagItems, setBagItems] = useState([]);
     const [isRunning, setIsRunning] = useState(false);
+    const { showFeedback } = useFeedback();
+    const [showHint, setShowHint] = useState(true);
     const [message, setMessage] = useState('Step 1: Calculate Value/Weight ratio for each item.');
     const [activeLang, setActiveLang] = useState('javascript');
 
@@ -56,6 +59,7 @@ const FractionalKnapsack = () => {
         if (currentIndex >= sortedItems.length || remainingCapacity <= 0) {
             setIsRunning(false);
             setMessage(`Finished! Total Value in bag: $${bagValue.toFixed(2)}.`);
+            showFeedback("Success! Knapsack optimized 🎒🏆", "success");
             return;
         }
 
@@ -72,6 +76,7 @@ const FractionalKnapsack = () => {
             takeWeight = remainingCapacity;
             takeValue = item.value * fraction;
             setMessage(`Only ${remainingCapacity}kg space left! Taking ${Math.round(fraction * 100)}% of ${item.name}.`);
+            showFeedback(`Took a fraction of ${item.name}! ⚖️`);
         }
 
         setBagItems(prev => [...prev, { ...item, takenWeight: takeWeight, takenValue: takeValue, fraction }]);
@@ -123,7 +128,11 @@ const FractionalKnapsack = () => {
                                         backgroundColor: isTaken ? '#F1F5F9' : 'white',
                                         opacity: isTaken ? 0.6 : 1
                                     }}
-                                    style={styles.itemCard}
+                                    className={isCurrent ? 'pulse-glow' : ''}
+                                    style={{
+                                        ...styles.itemCard,
+                                        boxShadow: isCurrent ? '0 0 15px rgba(250, 204, 21, 0.4)' : '0 2px 4px rgba(0,0,0,0.02)'
+                                    }}
                                 >
                                     <div style={styles.itemHeader}>
                                         <span style={styles.itemName}>{item.name}</span>
@@ -189,9 +198,18 @@ const FractionalKnapsack = () => {
                             style={styles.input}
                         />
                     </div>
-                    <button onClick={startSimulation} disabled={isRunning || (currentIndex >= sortedItems.length && currentIndex !== -1)} style={styles.primaryBtn}>Start Optimizer</button>
-                    <button onClick={nextStep} disabled={isRunning || (currentIndex >= sortedItems.length && currentIndex !== -1)} style={styles.secondaryBtn}>Next Step</button>
-                    <button onClick={reset} style={styles.dangerBtn}>Reset</button>
+                    <div style={{ position: 'relative' }}>
+                        <button onClick={() => { startSimulation(); setShowHint(false); }} disabled={isRunning || (currentIndex >= sortedItems.length && currentIndex !== -1)} style={styles.primaryBtn}>
+                            ▶ Start Optimizer 🚀
+                        </button>
+                        {showHint && !isRunning && (
+                            <div className="tooltip-hint" style={{ bottom: '110%', left: '50%' }}>
+                                Let's pack the most valuable items! ✨
+                            </div>
+                        )}
+                    </div>
+                    <button onClick={() => { nextStep(); setShowHint(false); }} disabled={isRunning || (currentIndex >= sortedItems.length && currentIndex !== -1)} style={styles.secondaryBtn}>⏭ Next Step</button>
+                    <button onClick={reset} style={styles.dangerBtn}>↺ Reset</button>
                 </div>
             </div>
 

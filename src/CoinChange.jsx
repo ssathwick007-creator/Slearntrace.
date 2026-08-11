@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useFeedback } from './FeedbackManager.jsx';
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -8,6 +9,8 @@ const target = 11;
 
 const CoinChange = () => {
     const [viewMode, setViewMode] = useState('play'); // 'play' | 'sim'
+    const { showFeedback } = useFeedback();
+    const [showHint, setShowHint] = useState(true);
 
     // Play State
     const [userCoins, setUserCoins] = useState([]);
@@ -39,8 +42,10 @@ const CoinChange = () => {
         if (newSum === target) {
             if (newCoins.length === 3) {
                 setPlayMsg("Optimal solution found! 3 coins (5, 5, 1).");
+                showFeedback("Optimal solution found! You nailed it 🎯", "success");
             } else {
                 setPlayMsg(`Target reached with ${newCoins.length} coins. Can you do it in 3?`);
+                showFeedback("Success! You reached the target 🚀", "info");
             }
         } else {
             setPlayMsg(`Added ${val}¢. Current amount: ${newSum}¢`);
@@ -101,6 +106,7 @@ const CoinChange = () => {
         if (!stopSim.current) {
             setActiveCol(target); // Highlight final
             setSimMsg(`Finished! Minimum coins to make ${target}¢ is ${dp[target]}.`);
+            showFeedback("Success! Vending machine logic ready 🚀", "success");
             if (window.AppProgress) window.AppProgress.markProblemSolved();
         }
 
@@ -189,22 +195,28 @@ const CoinChange = () => {
                     {viewMode === 'play' && (
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#F8FAFC', padding: '20px', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
                             <p style={{ margin: '0 0 16px 0', fontWeight: '600', color: '#64748B' }}>Available Coins (Drag or Click)</p>
-                            <div style={{ display: 'flex', gap: '16px' }}>
-                                {coins.map(c => (
-                                    <motion.div
-                                        key={c}
-                                        onClick={() => addCoin(c)}
-                                        drag
-                                        dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-                                        dragElastic={0.5}
-                                        whileHover={{ scale: 1.1 }}
-                                        whileTap={{ scale: 0.9 }}
-                                        style={{ width: '60px', height: '60px', borderRadius: '50%', background: '#FACC15', border: '4px solid #CA8A04', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '1.2rem', color: '#713F12', cursor: 'grab', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
-                                    >
-                                        {c}
-                                    </motion.div>
-                                ))}
-                            </div>
+                                <div style={{ display: 'flex', gap: '16px', position: 'relative' }}>
+                                    {coins.map(c => (
+                                        <motion.div
+                                            key={c}
+                                            onClick={() => { addCoin(c); setShowHint(false); }}
+                                            drag
+                                            dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+                                            dragElastic={0.5}
+                                            whileHover={{ scale: 1.1 }}
+                                            whileTap={{ scale: 0.9 }}
+                                            className="pulse-glow"
+                                            style={{ width: '60px', height: '60px', borderRadius: '50%', background: '#FACC15', border: '4px solid #CA8A04', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '1.2rem', color: '#713F12', cursor: 'grab', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
+                                        >
+                                            {c}
+                                        </motion.div>
+                                    ))}
+                                    {showHint && (
+                                        <div className="tooltip-hint" style={{ bottom: '110%', left: '50%' }}>
+                                            Add coins to reach {target}¢! ✨
+                                        </div>
+                                    )}
+                                </div>
                         </div>
                     )}
 
@@ -236,10 +248,10 @@ const CoinChange = () => {
 
                     <div style={styles.controlsRow}>
                         {viewMode === 'play' ? (
-                            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={resetPlay} style={styles.btn('#EF4444')}>Reset Vending Logic</motion.button>
+                            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={resetPlay} style={styles.btn('#EF4444')}>↺ Reset Vending Logic</motion.button>
                         ) : (
                             <>
-                                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={runSimulation} disabled={simRunning} style={styles.btn('#4F46E5')}>▶ Start Animation</motion.button>
+                                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={runSimulation} disabled={simRunning} style={styles.btn('#4F46E5')}>▶ Start Animation 🎬</motion.button>
                                 <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={resetSim} style={styles.btn('#EF4444')}>↺ Reset</motion.button>
                             </>
                         )}
@@ -262,7 +274,8 @@ const CoinChange = () => {
                                         borderRadius: '8px',
                                         border: '1px solid #CBD5E1',
                                         padding: '4px',
-                                        transition: 'background-color 0.3s'
+                                        transition: 'background-color 0.3s',
+                                        className: i === activeCol ? 'pulse-glow' : ''
                                     }}
                                 >
                                     <span style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 'bold' }}>{i}</span>

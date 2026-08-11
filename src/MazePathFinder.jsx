@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
+import { useFeedback } from './FeedbackManager.jsx';
 
 const MAZE = [
     [0, 1, 0, 0, 0, 0, 0, 0],
@@ -23,6 +24,8 @@ const MazePathFinder = () => {
     const [isRunning, setIsRunning] = useState(false);
     const [activeLang, setActiveLang] = useState('javascript');
     const stopRef = useRef(false);
+    const { showFeedback } = useFeedback();
+    const [showHint, setShowHint] = useState(true);
     const stepsRef = useRef([]);
     const stepIdxRef = useRef(0);
 
@@ -41,13 +44,13 @@ const MazePathFinder = () => {
             const sn = {};
             for (const [pr, pc] of path) sn[`${pr}-${pc}`] = 'yellow';
             for (const k of Object.keys(visited)) if (!path.some(([a, b]) => `${a}-${b}` === k)) sn[k] = 'blue';
-            steps.push({ states: { ...sn }, msg: `Moving to (${r + 1}, ${c + 1})...` });
+            steps.push({ states: { ...sn }, msg: `Moving to (${r + 1}, ${c + 1})...`, current: `${r}-${c}` });
 
             if (r === ROWS - 1 && c === COLS - 1) {
                 const final = {};
                 for (const [pr, pc] of path) final[`${pr}-${pc}`] = 'green';
                 for (const k of Object.keys(visited)) if (!path.some(([a, b]) => `${a}-${b}` === k)) final[k] = 'blue';
-                steps.push({ states: { ...final }, msg: '🎉 Path found! Reached the goal!' });
+                steps.push({ states: { ...final }, msg: '🎉 Path found! Reached the goal!', feedback: { msg: "Success! Exit reached ✨", type: "success" } });
                 return true;
             }
 
@@ -62,7 +65,7 @@ const MazePathFinder = () => {
             for (const [pr, pc] of path) bt[`${pr}-${pc}`] = 'yellow';
             for (const k of Object.keys(visited)) if (!path.some(([a, b]) => `${a}-${b}` === k)) bt[k] = 'blue';
             bt[`${r}-${c}`] = 'red';
-            steps.push({ states: { ...bt }, msg: `↩️ Dead end at (${r + 1}, ${c + 1}). Backtracking...` });
+            steps.push({ states: { ...bt }, msg: `↩️ Dead end at (${r + 1}, ${c + 1}). Backtracking...`, current: `${r}-${c}`, feedback: { msg: "Trapped! Backtracking... 🔄", type: "info" } });
 
             return false;
         };
@@ -76,6 +79,7 @@ const MazePathFinder = () => {
         if (!s) return;
         setCellStates(s.states);
         setMessage(s.msg);
+        if (s.feedback) showFeedback(s.feedback.msg, s.feedback.type || 'info');
     };
 
     const startSimulation = () => {
@@ -252,6 +256,7 @@ const MazePathFinder = () => {
                                     key={`${r}-${c}`}
                                     animate={{ backgroundColor: getCellBg(r, c) }}
                                     transition={{ duration: 0.2 }}
+                                    className={cellStates[`${r}-${c}`] === 'yellow' || cellStates[`${r}-${c}`] === 'green' ? 'pulse-glow' : ''}
                                     style={{
                                         width: cellSize, height: cellSize,
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -260,6 +265,7 @@ const MazePathFinder = () => {
                                         userSelect: 'none',
                                         color: MAZE[r][c] === 1 ? '#475569' : '#1E293B',
                                         fontWeight: '700',
+                                        boxShadow: cellStates[`${r}-${c}`] === 'green' ? '0 0 10px rgba(34, 197, 94, 0.4)' : 'none'
                                     }}
                                 >
                                     {r === 0 && c === 0 ? '🟢' : (r === ROWS - 1 && c === COLS - 1 ? '🏁' : (MAZE[r][c] === 1 ? '🧱' : ''))}
@@ -279,9 +285,18 @@ const MazePathFinder = () => {
 
                 {/* Controls */}
                 <div style={styles.controls}>
-                    <button onClick={startSimulation} disabled={isRunning} style={styles.primaryBtn}>Start Simulation</button>
-                    <button onClick={nextStep} disabled={isRunning} style={styles.secondaryBtn}>Next Step</button>
-                    <button onClick={reset} style={styles.dangerBtn}>Reset</button>
+                    <div style={{ position: 'relative' }}>
+                        <button onClick={() => { startSimulation(); setShowHint(false); }} disabled={isRunning} style={styles.primaryBtn}>
+                            ▶ Find the Exit! 🏁
+                        </button>
+                        {showHint && !isRunning && (
+                            <div className="tooltip-hint" style={{ bottom: '110%', left: '50%' }}>
+                                Let's escape the maze! ✨
+                            </div>
+                        )}
+                    </div>
+                    <button onClick={() => { nextStep(); setShowHint(false); }} disabled={isRunning} style={styles.secondaryBtn}>⏭ Take a Step</button>
+                    <button onClick={reset} style={styles.dangerBtn}>↺ Reset Maze</button>
                 </div>
             </div>
 

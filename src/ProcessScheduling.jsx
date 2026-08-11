@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useFeedback } from './FeedbackManager.jsx';
 
 const ProcessScheduling = () => {
     const [orders, setOrders] = useState([]);
@@ -13,6 +14,8 @@ const ProcessScheduling = () => {
     const [guideStep, setGuideStep] = useState(0);
     const [challengeStatus, setChallengeStatus] = useState('none'); 
     const [showSuccess, setShowSuccess] = useState(false);
+    const { showFeedback } = useFeedback();
+    const [showHint, setShowHint] = useState(true);
 
     const intervalRef = useRef(null);
     const timeSlice = 2; 
@@ -41,6 +44,7 @@ const ProcessScheduling = () => {
     const startCooking = () => {
         if (orders.length === 0 || intervalRef.current) return;
         setStatus('Cooking');
+        showFeedback("Cooking started! Watch the CPU at work 👨‍🍳");
         if (mode === 'Challenge' && challengeStatus === 'none') setChallengeStatus('started');
     };
 
@@ -109,6 +113,7 @@ const ProcessScheduling = () => {
                         }
                     } else if (nextOrders.length === 0) {
                         setStatus('Idle');
+                        showFeedback("All orders served! Great job 🚀", "success");
                         clearInterval(intervalRef.current);
                         intervalRef.current = null;
                     }
@@ -203,6 +208,7 @@ const ProcessScheduling = () => {
                                         animate={{ scale: 1, opacity: 1 }}
                                         exit={{ scale: 1.5, opacity: 0 }}
                                         style={{ ...styles.activeOrder, backgroundColor: cooking.color }}
+                                        className="pulse-glow"
                                     >
                                         <div style={styles.cookingLabel}>COOKING</div>
                                         {cooking.name}
@@ -266,9 +272,18 @@ const ProcessScheduling = () => {
                         ))}
                     </div>
                     <div style={styles.actionGroup}>
-                        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={addOrder} style={styles.addBtn} disabled={mode === 'Challenge'}>+ New Order</motion.button>
-                        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={startCooking} style={styles.startBtn}>▶ Start Manager</motion.button>
-                        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={reset} style={styles.resetBtn}>🔄 Reset</motion.button>
+                        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={addOrder} style={styles.addBtn} disabled={mode === 'Challenge'}>+ New Order 📋</motion.button>
+                        <div style={{ position: 'relative' }}>
+                            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => { startCooking(); setShowHint(false); }} style={styles.startBtn}>
+                                ▶ Start Cooking! 🍳
+                            </motion.button>
+                            {showHint && !intervalRef.current && (
+                                <div className="tooltip-hint" style={{ bottom: '110%', left: '50%' }}>
+                                    Add an order and click Start! ✨
+                                </div>
+                            )}
+                        </div>
+                        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={reset} style={styles.resetBtn}>🔄 Start Over</motion.button>
                     </div>
                 </div>
             </div>
@@ -316,59 +331,46 @@ const Confetti = () => {
 };
 
 const styles = {
-    container: { padding: '2.5rem', backgroundColor: '#fff', borderRadius: '40px', border: '1px solid #e2e8f0', boxShadow: '0 20px 50px rgba(0,0,0,0.05)', position: 'relative', overflow: 'hidden' },
-    topHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '1.5rem' },
-    conceptTitle: { fontSize: '1rem', color: '#1e293b' },
-    conceptLabel: { color: '#ef4444', marginRight: '8px', fontWeight: '900', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px' },
-    modeIndicator: { fontSize: '0.7rem', fontWeight: '900', backgroundColor: '#f1f5f9', color: '#64748b', padding: '4px 12px', borderRadius: '999px', textTransform: 'uppercase' },
-    stepProgress: { fontSize: '0.8rem', fontWeight: '700', color: '#ef4444' },
-    modeTabs: { display: 'flex', gap: '0.5rem', marginBottom: '3rem', justifyContent: 'center' },
-    modeTab: { padding: '0.6rem 1.8rem', borderRadius: '15px', border: 'none', fontWeight: '800', cursor: 'pointer', fontSize: '0.9rem' },
-    guideBubble: { position: 'absolute', top: '160px', left: '50%', transform: 'translateX(-50%)', width: '300px', backgroundColor: '#1e293b', color: '#fff', padding: '1.5rem', borderRadius: '24px', zIndex: 100, boxShadow: '0 20px 40px rgba(0,0,0,0.2)' },
-    bubbleArrow: { width: 0, height: 0, borderLeft: '10px solid transparent', borderRight: '10px solid transparent', borderBottom: '10px solid #1e293b', position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%)' },
-    guideTitle: { fontSize: '1.1rem', fontWeight: '900', color: '#ef4444', marginBottom: '0.5rem' },
-    guideText: { fontSize: '0.9rem', color: '#cbd5e1', lineHeight: '1.5' },
-    guideNav: { display: 'flex', gap: '1rem', marginTop: '1.2rem' },
-    guideNavBtn: { flex: 1, padding: '0.5rem', borderRadius: '10px', border: 'none', background: '#334155', color: '#fff', fontWeight: '700', cursor: 'pointer', fontSize: '0.75rem' },
-    successOverlay: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(255,255,255,0.95)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' },
-    successCard: { textAlign: 'center', maxWidth: '400px', scale: 0.9 },
-    successIcon: { fontSize: '5rem', marginBottom: '1.5rem' },
-    successHeadline: { fontSize: '1.8rem', fontWeight: '900', color: '#1e293b', marginBottom: '1rem' },
-    successSubtext: { color: '#64748b', marginBottom: '2.5rem', lineHeight: '1.6' },
-    finishBtn: { padding: '1rem 3rem', borderRadius: '999px', border: 'none', backgroundColor: '#10b981', color: '#fff', fontWeight: '900', cursor: 'pointer', boxShadow: '0 10px 20px rgba(16, 185, 129, 0.2)' },
-    visualizerArea: { backgroundColor: '#fcfdfe', borderRadius: '35px', padding: '2.5rem', border: '1px solid #f1f5f9' },
-    kitchenLayout: { display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '3rem', marginBottom: '3rem' },
-    chefStation: { textAlign: 'center' },
-    stationHeader: { fontSize: '0.7rem', fontWeight: '900', color: '#94a3b8', letterSpacing: '2px', marginBottom: '1.5rem' },
-    chefSlot: { height: '180px', backgroundColor: '#fff', border: '2px dashed #e2e8f0', borderRadius: '30px', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
-    activeOrder: { padding: '1.5rem 2.5rem', borderRadius: '20px', color: '#fff', fontWeight: '900', fontSize: '1.2rem', position: 'relative' },
-    cookingLabel: { position: 'absolute', top: '-10px', left: '15px', background: '#fff', color: '#ef4444', fontSize: '0.6rem', padding: '2px 8px', borderRadius: '5px', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' },
-    progressBar: { position: 'absolute', bottom: 0, left: 0, width: '100%', height: '8px', background: '#f1f5f9' },
-    progressFill: { height: '100%', background: '#ef4444' },
-    idleChef: { color: '#94a3b8', fontWeight: '700', fontSize: '1.1rem' },
-    queueStation: { },
-    queueContainer: { display: 'flex', flexWrap: 'wrap', gap: '0.8rem', background: '#fff', padding: '1.5rem', borderRadius: '25px', border: '1px solid #f1f5f9', minHeight: '150px' },
-    queueOrder: { padding: '0.6rem 1.2rem', borderRadius: '12px', color: '#fff', fontWeight: '800', display: 'flex', gap: '8px', fontSize: '0.85rem' },
-    qId: { opacity: 0.8 },
-    qTime: { fontWeight: '900' },
-    emptyQueue: { color: '#cbd5e1', fontStyle: 'italic', width: '100%', textAlign: 'center', marginTop: '2rem' },
-    controls: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem' },
-    algoGroup: { display: 'flex', gap: '0.5rem', background: '#f8fafc', padding: '0.5rem', borderRadius: '20px' },
-    algoBtn: { padding: '0.6rem 1.2rem', borderRadius: '15px', border: 'none', fontWeight: '800', fontSize: '0.8rem', cursor: 'pointer' },
-    actionGroup: { display: 'flex', gap: '1.5rem' },
-    addBtn: { padding: '0.9rem 2rem', borderRadius: '15px', border: '2px solid #ef4444', color: '#ef4444', background: 'none', fontWeight: '900', cursor: 'pointer' },
-    startBtn: { padding: '0.9rem 2.5rem', borderRadius: '15px', border: 'none', background: '#ef4444', color: '#fff', fontWeight: '900', cursor: 'pointer', boxShadow: '0 8px 16px rgba(239, 68, 68, 0.2)' },
-    resetBtn: { padding: '0.9rem 1.5rem', borderRadius: '15px', border: 'none', background: '#64748b', color: '#fff', fontWeight: '800', cursor: 'pointer' },
-    challengeBox: { position: 'absolute', bottom: '20px', right: '20px', background: '#fff', padding: '1rem 1.5rem', borderRadius: '20px', boxShadow: '0 10px 25px rgba(0,0,0,0.05)', border: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: '1rem' },
-    challengeIcon: { fontSize: '1.5rem' },
-    challengeInfo: { fontSize: '0.85rem', color: '#1e293b' },
-    codeSection: { marginTop: '4rem', padding: '2.5rem', backgroundColor: '#f8fafc', borderRadius: '30px' },
-    subTitle: { fontSize: '1.2rem', fontWeight: '900', color: '#1e293b', marginBottom: '1.5rem' },
-    langSelector: { display: 'flex', gap: '0.6rem', marginBottom: '1.5rem' },
-    langBtn: { padding: '0.5rem 1.2rem', borderRadius: '10px', border: 'none', fontWeight: '800', cursor: 'pointer', fontSize: '0.75rem' },
-    codeBox: { background: '#1e293b', color: '#fff', padding: '2rem', borderRadius: '20px', fontSize: '0.85rem' },
-    confettiContainer: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'hidden' },
-    particle: { position: 'absolute', width: '8px', height: '8px', borderRadius: '2px' }
+    container: { maxWidth: '1000px', margin: '0 auto', padding: '1.5rem 0' },
+    headerArea: { marginBottom: '2.5rem', textAlign: 'left' },
+    hubTitle: { fontSize: '2rem', fontWeight: '900', color: '#0f172a', marginBottom: '0.5rem', letterSpacing: '-0.5px' },
+    hubSubtitle: { fontSize: '1.1rem', color: '#64748b', marginBottom: '1.5rem' },
+    metaphorBox: { 
+        backgroundColor: '#f8fafc', padding: '1.25rem', borderRadius: '16px', borderLeft: '4px solid #ef4444',
+        display: 'flex', alignItems: 'center', gap: '1rem' 
+    },
+    metaphorTag: { fontSize: '0.75rem', fontWeight: '800', backgroundColor: '#ef4444', color: '#fff', padding: '2px 8px', borderRadius: '6px', textTransform: 'uppercase' },
+    metaphorText: { margin: 0, fontSize: '1rem', color: '#334155', lineHeight: '1.5' },
+
+    card: { backgroundColor: '#fff', borderRadius: '24px', border: '1px solid #f1f5f9', boxShadow: '0 10px 30px -10px rgba(0,0,0,0.05)', padding: '2.5rem' },
+    algoSelector: { display: 'flex', gap: '0.75rem', marginBottom: '2.5rem', padding: '4px', backgroundColor: '#f8fafc', borderRadius: '16px', width: 'fit-content' },
+    algoTab: { border: '1px solid transparent', padding: '0.6rem 1.2rem', borderRadius: '12px', cursor: 'pointer', fontWeight: '700', fontSize: '0.85rem', transition: 'all 0.2s ease' },
+
+    visualPane: { display: 'flex', flexDirection: 'column', gap: '2rem' },
+    kitchenView: { display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '2rem' },
+    chefStation: { display: 'flex', flexDirection: 'column', gap: '0.75rem' },
+    stationLabel: { fontSize: '0.75rem', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1px' },
+    chefSlot: { height: '140px', backgroundColor: '#f8fafc', borderRadius: '20px', border: '2px dashed #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+    activeOrder: { padding: '1rem 2rem', borderRadius: '16px', color: '#fff', fontWeight: '800', boxShadow: '0 10px 20px -5px rgba(0,0,0,0.1)' },
+    idleText: { color: '#cbd5e1', fontWeight: '600', fontStyle: 'italic' },
+
+    queueStation: { display: 'flex', flexDirection: 'column', gap: '0.75rem' },
+    queueList: { display: 'flex', flexWrap: 'wrap', gap: '0.75rem', padding: '1.25rem', backgroundColor: '#f8fafc', borderRadius: '20px', minHeight: '140px' },
+    queueItem: { padding: '0.75rem 1.25rem', backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #f1f5f9', borderLeft: '4px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '4px', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' },
+    orderMeta: { fontSize: '0.75rem', fontWeight: '700', color: '#94a3b8' },
+
+    timelineArea: { borderTop: '1px solid #f1f5f9', paddingTop: '2rem' },
+    timelineTrack: { height: '50px', backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', padding: '0 10px', gap: '4px', overflowX: 'auto' },
+    timelineBlock: { height: '30px', borderRadius: '6px', minWidth: '40px' },
+    emptyTimeline: { color: '#cbd5e1', fontSize: '0.85rem', fontStyle: 'italic', paddingLeft: '10px' },
+
+    footerPanel: { marginTop: '2.5rem', display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '2rem', alignItems: 'center' },
+    controlsGroup: { display: 'flex', gap: '1rem' },
+    primaryBtn: { border: 'none', backgroundColor: '#0f172a', color: '#fff', borderRadius: '12px', padding: '0.8rem 1.5rem', cursor: 'pointer', fontWeight: '800', boxShadow: '0 4px 12px rgba(15, 23, 42, 0.2)' },
+    secondaryBtn: { background: 'none', border: '1px solid #e2e8f0', color: '#64748b', borderRadius: '12px', padding: '0.8rem 1.5rem', cursor: 'pointer', fontWeight: '600' },
+    hintCard: { backgroundColor: '#fff1f2', padding: '1rem 1.5rem', borderRadius: '16px', border: '1px solid #ffe4e6' },
+    hintTag: { fontSize: '0.7rem', fontWeight: '800', color: '#e11d48', textTransform: 'uppercase', display: 'block', marginBottom: '4px' },
+    hintText: { margin: 0, fontSize: '0.85rem', color: '#9f1239', lineHeight: '1.5' }
 };
 
 export default ProcessScheduling;

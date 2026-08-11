@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useFeedback } from './FeedbackManager.jsx';
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -10,6 +11,8 @@ const BubbleSort = () => {
     const [sorted, setSorted] = useState([]);
     const [message, setMessage] = useState('');
     const [isRunning, setIsRunning] = useState(false);
+    const { showFeedback } = useFeedback();
+    const [showHint, setShowHint] = useState(true);
     const [stepDone, setStepDone] = useState(false);
     const [activeLang, setActiveLang] = useState('python');
     const stopRef = useRef(false);
@@ -58,6 +61,7 @@ const BubbleSort = () => {
         setSorted(new Set([...sortedSet]));
         setComparing([]);
         setMessage('✓ Array is sorted!');
+        showFeedback('Success! Well done 🚀', 'success');
         setIsRunning(false);
         setStepDone(true);
     };
@@ -105,8 +109,8 @@ const BubbleSort = () => {
             <div style={s.header}>
                 <h2 style={s.title}>Bubble Sort — Rising Bubbles 🫧</h2>
                 <div style={s.desc}>
-                    <p>Imagine bubbles rising in water. The largest bubbles float upward with each pass.</p>
-                    <p>Bubble Sort works the same way by repeatedly <strong>swapping adjacent elements</strong> that are out of order.</p>
+                    <p>Think of it like bubbles in a soda: the lighter (smaller) ones stay down, while the heavy (larger) ones float to the top!</p>
+                    <p>We'll <strong>swap neighbors</strong> until everything is in its perfect place.</p>
                 </div>
             </div>
 
@@ -125,8 +129,14 @@ const BubbleSort = () => {
                                 style={{ ...s.barWrap }}
                                 layout
                                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                                className={comparing.includes(idx) ? 'pulse-glow' : ''}
                             >
-                                <div style={{ ...s.bar, height: `${(val / maxVal) * 160 + 20}px`, backgroundColor: bg }} />
+                                <div style={{ 
+                                    ...s.bar, 
+                                    height: `${(val / maxVal) * 160 + 20}px`, 
+                                    backgroundColor: bg,
+                                    boxShadow: comparing.includes(idx) ? '0 0 15px rgba(251, 191, 36, 0.5)' : 'none'
+                                }} />
                                 <span style={s.barLabel}>{val}</span>
                             </motion.div>
                         );
@@ -159,14 +169,21 @@ const BubbleSort = () => {
 
             {/* Controls */}
             <div style={s.controls}>
-                <button onClick={runBubbleSort} disabled={isRunning} style={{ ...s.btn, backgroundColor: '#4f46e5' }}>
-                    ▶ Start Sorting
-                </button>
-                <button onClick={handleNextStep} disabled={isRunning || stepDone} style={{ ...s.btn, backgroundColor: '#0891b2' }}>
-                    ⏭ Next Step
+                <div style={{ position: 'relative' }}>
+                    <button onClick={() => { runBubbleSort(); setShowHint(false); }} disabled={isRunning} style={{ ...s.btn, backgroundColor: '#4f46e5' }}>
+                        ▶ Let's Sort it! 🫧
+                    </button>
+                    {showHint && !isRunning && (
+                        <div className="tooltip-hint" style={{ bottom: '110%', left: '50%' }}>
+                            Try clicking 'Start' to see the magic ✨
+                        </div>
+                    )}
+                </div>
+                <button onClick={() => { handleNextStep(); setShowHint(false); }} disabled={isRunning || stepDone} style={{ ...s.btn, backgroundColor: '#0891b2' }}>
+                    ⏭ Take a Step
                 </button>
                 <button onClick={resetAll} style={{ ...s.btn, backgroundColor: '#ef4444' }}>
-                    ↺ Reset
+                    ↺ Reset Everything
                 </button>
             </div>
 

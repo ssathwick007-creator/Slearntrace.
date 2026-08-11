@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useFeedback } from './FeedbackManager.jsx';
 
 const ACTIVITIES = [
     { id: 'A', start: 1, end: 3 },
@@ -17,6 +18,8 @@ const ActivitySelection = () => {
     const [isRunning, setIsRunning] = useState(false);
     const [message, setMessage] = useState('Welcome! We want to schedule the maximum number of meetings.');
     const [activeLang, setActiveLang] = useState('javascript');
+    const { showFeedback } = useFeedback();
+    const [showHint, setShowHint] = useState(true);
 
     const reset = () => {
         setSortedActivities([...ACTIVITIES]);
@@ -57,9 +60,11 @@ const ActivitySelection = () => {
         if (!lastSelected || candidate.start >= lastSelected.end) {
             setSelectedIndices(prev => [...prev, currentIndex]);
             setMessage(`Selected Meeting ${candidate.id} (${candidate.start}-${candidate.end}). It starts after the last meeting ends.`);
+            showFeedback(`Selected Meeting ${candidate.id}! ✅`);
         } else {
             setRejectedIndices(prev => [...prev, currentIndex]);
-            setMessage(`Rejected Meeting ${candidate.id} (${candidate.start}-${candidate.end}). it overlaps with the scheduled time.`);
+            setMessage(`Rejected Meeting ${candidate.id} (${candidate.start}-${candidate.end}). It overlaps with the scheduled time.`);
+            showFeedback("Overlap found! Skipping... ⏭");
         }
 
         setCurrentIndex(prev => prev + 1);
@@ -72,6 +77,7 @@ const ActivitySelection = () => {
         } else if (currentIndex === sortedActivities.length) {
             setIsRunning(false);
             setMessage(`Done! Maximum meetings scheduled: ${selectedIndices.length}.`);
+            showFeedback("Success! Schedule optimized 📅🚀", "success");
         }
         return () => clearTimeout(interval);
     }, [isRunning, currentIndex]);
@@ -126,8 +132,10 @@ const ActivitySelection = () => {
                                         ...styles.activityBlock,
                                         left: `${act.start * 12.5}%`,
                                         width: `${(act.end - act.start) * 12.5}%`,
-                                        top: `${idx * 40}px`
+                                        top: `${idx * 40}px`,
+                                        boxShadow: isCurrent ? '0 0 15px rgba(250, 204, 21, 0.4)' : 'none'
                                     }}
+                                    className={isCurrent ? 'pulse-glow' : ''}
                                 >
                                     <span style={{
                                         fontWeight: 'bold',
@@ -150,9 +158,18 @@ const ActivitySelection = () => {
 
                 {/* Controls */}
                 <div style={styles.controls}>
-                    <button onClick={startSimulation} disabled={isRunning} style={styles.primaryBtn}>Start Simulation</button>
-                    <button onClick={nextStep} disabled={isRunning || currentIndex >= sortedActivities.length} style={styles.secondaryBtn}>Next Step</button>
-                    <button onClick={reset} style={styles.dangerBtn}>Reset</button>
+                    <div style={{ position: 'relative' }}>
+                        <button onClick={() => { startSimulation(); setShowHint(false); }} disabled={isRunning} style={styles.primaryBtn}>
+                            ▶ Start Scheduling! 📅
+                        </button>
+                        {showHint && !isRunning && (
+                            <div className="tooltip-hint" style={{ bottom: '110%', left: '50%' }}>
+                                Let's optimize the room! ✨
+                            </div>
+                        )}
+                    </div>
+                    <button onClick={() => { nextStep(); setShowHint(false); }} disabled={isRunning || currentIndex >= sortedActivities.length} style={styles.secondaryBtn}>⏭ Next Meeting</button>
+                    <button onClick={reset} style={styles.dangerBtn}>↺ Reset</button>
                 </div>
             </div>
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { useFeedback } from './FeedbackManager.jsx';
 
 const NQueens = () => {
     const [N, setN] = useState(6);
@@ -10,6 +11,8 @@ const NQueens = () => {
     const [colorMap, setColorMap] = useState({});
     const [activeLang, setActiveLang] = useState('javascript');
     const stopRef = useRef(false);
+    const { showFeedback } = useFeedback();
+    const [showHint, setShowHint] = useState(true);
     const stepsRef = useRef([]);
     const stepIdxRef = useRef(0);
 
@@ -44,7 +47,7 @@ const NQueens = () => {
                 const snap = bd.map(r => [...r]);
                 const colors = { ...cm };
                 for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (snap[r][c] === 1) colors[`${r}-${c}`] = 'green';
-                steps.push({ board: snap, colors, msg: `✅ Solution found! All ${n} queens placed safely.` });
+                steps.push({ board: snap, colors, msg: `✅ Solution found! All ${n} queens placed safely.`, feedback: { msg: "Success! All queens are safe 🏰", type: "success" } });
                 return true;
             }
             for (let col = 0; col < n; col++) {
@@ -54,13 +57,13 @@ const NQueens = () => {
                 if (isSafe(bd, row, col)) {
                     bd[row][col] = 1;
                     cm[`${row}-${col}`] = 'green';
-                    steps.push({ board: bd.map(r => [...r]), colors: { ...cm }, msg: `✅ Placed queen at (${row + 1}, ${col + 1}). Moving to next row.` });
+                    steps.push({ board: bd.map(r => [...r]), colors: { ...cm }, msg: `✅ Placed queen at (${row + 1}, ${col + 1}). Moving to next row.`, feedback: { msg: "Queen placed! 👑" } });
 
                     if (solve(row + 1)) return true;
 
                     bd[row][col] = 0;
                     cm[`${row}-${col}`] = 'blue';
-                    steps.push({ board: bd.map(r => [...r]), colors: { ...cm }, msg: `↩️ Backtracking from (${row + 1}, ${col + 1}). Trying next column.` });
+                    steps.push({ board: bd.map(r => [...r]), colors: { ...cm }, msg: `↩️ Backtracking from (${row + 1}, ${col + 1}). Trying next column.`, feedback: { msg: "Dead end... back up! 🔄", type: "info" } });
                 } else {
                     cm[`${row}-${col}`] = 'red';
                     steps.push({ board: bd.map(r => [...r]), colors: { ...cm }, msg: `❌ Conflict at (${row + 1}, ${col + 1}). Cannot place here.` });
@@ -79,6 +82,7 @@ const NQueens = () => {
         setBoard(s.board);
         setColorMap(s.colors);
         setMessage(s.msg);
+        if (s.feedback) showFeedback(s.feedback.msg, s.feedback.type || 'info');
     };
 
     const startSimulation = () => {
@@ -266,7 +270,7 @@ bool backtrack(vector<vector<int>>& board,
     return (
         <div style={styles.container}>
             <div style={styles.card}>
-                <h3 style={styles.cardTitle}>N-Queens — Chessboard Defender</h3>
+                <h3 style={styles.cardTitle}>N-Queens — The Safe Castle 🏰</h3>
                 <p style={styles.cardDesc}>
                     Place N queens on a chessboard so that no two queens attack each other.
                     The algorithm uses backtracking to try placing queens row by row, undoing choices that lead to conflicts.
@@ -304,6 +308,7 @@ bool backtrack(vector<vector<int>>& board,
                                     whileTap={{ scale: 0.95 }}
                                     animate={{ backgroundColor: getCellBg(r, c) }}
                                     transition={{ duration: 0.2 }}
+                                    className={colorMap[`${r}-${c}`] === 'yellow' || colorMap[`${r}-${c}`] === 'green' ? 'pulse-glow' : ''}
                                     style={{
                                         width: cellSize, height: cellSize,
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -311,6 +316,7 @@ bool backtrack(vector<vector<int>>& board,
                                         border: getCellBorder(r, c),
                                         fontSize: cellSize > 44 ? '1.6rem' : '1.3rem',
                                         userSelect: 'none',
+                                        boxShadow: colorMap[`${r}-${c}`] === 'green' ? '0 0 10px rgba(34, 197, 94, 0.3)' : 'none'
                                     }}
                                 >
                                     {cell === 1 ? '♛' : ''}
@@ -330,9 +336,18 @@ bool backtrack(vector<vector<int>>& board,
 
                 {/* Controls */}
                 <div style={styles.controls}>
-                    <button onClick={startSimulation} disabled={isRunning} style={styles.primaryBtn}>Start Simulation</button>
-                    <button onClick={nextStep} disabled={isRunning} style={styles.secondaryBtn}>Next Step</button>
-                    <button onClick={reset} style={styles.dangerBtn}>Reset</button>
+                    <div style={{ position: 'relative' }}>
+                        <button onClick={() => { startSimulation(); setShowHint(false); }} disabled={isRunning} style={styles.primaryBtn}>
+                            ▶ Solve the Puzzle 🧩
+                        </button>
+                        {showHint && !isRunning && (
+                            <div className="tooltip-hint" style={{ bottom: '110%', left: '50%' }}>
+                                Let's find a safe spot! ✨
+                            </div>
+                        )}
+                    </div>
+                    <button onClick={() => { nextStep(); setShowHint(false); }} disabled={isRunning} style={styles.secondaryBtn}>⏭ Take a Step</button>
+                    <button onClick={reset} style={styles.dangerBtn}>↺ Clear Board</button>
                 </div>
             </div>
 

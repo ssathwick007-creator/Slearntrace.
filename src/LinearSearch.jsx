@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useFeedback } from './FeedbackManager.jsx';
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -17,6 +18,8 @@ const LinearSearch = () => {
     });
 
     const [activeLang, setActiveLang] = useState('python');
+    const { showFeedback } = useFeedback();
+    const [showHint, setShowHint] = useState(true);
     const autoRunRef = useRef(false);
 
     // Auto Play Effect
@@ -116,6 +119,16 @@ const LinearSearch = () => {
         return state;
     };
 
+    const stepWithFeedback = (state) => {
+        const next = calculateNextStep(state);
+        if (next.status === 'found' && state.status !== 'found') {
+            showFeedback("Target found! Linear search never misses 🔍", "success");
+        } else if (next.status === 'not-found' && state.status !== 'not-found') {
+            showFeedback("Reached the end... target wasn't there ❌", "info");
+        }
+        return next;
+    };
+
     // UI Handlers
     const startSearch = () => {
         if (!searchState.target || isNaN(parseInt(searchState.target))) {
@@ -124,7 +137,8 @@ const LinearSearch = () => {
         }
         resetSearch();
         autoRunRef.current = true;
-        setSearchState(prev => calculateNextStep({ ...prev, status: 'idle' }));
+        setSearchState(prev => stepWithFeedback({ ...prev, status: 'idle' }));
+        setShowHint(false);
     };
 
     const nextStep = () => {
@@ -133,7 +147,8 @@ const LinearSearch = () => {
             return;
         }
         autoRunRef.current = false; // Pause any active auto-run
-        setSearchState(prev => calculateNextStep(prev));
+        setSearchState(prev => stepWithFeedback(prev));
+        setShowHint(false);
     };
 
     const resetSearch = () => {
@@ -198,7 +213,11 @@ const LinearSearch = () => {
                             <motion.div
                                 key={idx}
                                 style={{ ...s.box, backgroundColor: bg, color: textColor }}
-                                animate={{ scale: searchState.currentIndex === idx ? 1.05 : 1 }}
+                                animate={{ 
+                                    scale: searchState.currentIndex === idx ? 1.08 : 1,
+                                    boxShadow: searchState.currentIndex === idx ? '0 0 15px rgba(250, 204, 21, 0.4)' : 'none'
+                                }}
+                                className={searchState.currentIndex === idx ? 'pulse-glow' : ''}
                                 transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                                 layout
                             >
@@ -244,31 +263,32 @@ const LinearSearch = () => {
 
             {/* Controls */}
             <div style={s.controls}>
-                <button
-                    onClick={startSearch}
-                    disabled={searchState.status === 'running' || searchState.status === 'found' || searchState.status === 'not-found'}
-                    style={s.btn}
-                    onMouseOver={e => !e.target.disabled && (e.target.style.background = '#4338CA')}
-                    onMouseOut={e => !e.target.disabled && (e.target.style.background = '#4F46E5')}
-                >
-                    Start Search
-                </button>
+                <div style={{ position: 'relative' }}>
+                    <button
+                        onClick={startSearch}
+                        disabled={searchState.status === 'running' || searchState.status === 'found' || searchState.status === 'not-found'}
+                        style={s.btn}
+                    >
+                        ▶ Search One-by-One 🔍
+                    </button>
+                    {showHint && searchState.status === 'idle' && (
+                        <div className="tooltip-hint" style={{ bottom: '110%', left: '50%' }}>
+                            Start scanning the shelf! ✨
+                        </div>
+                    )}
+                </div>
                 <button
                     onClick={nextStep}
                     disabled={searchState.status === 'found' || searchState.status === 'not-found'}
                     style={s.btn}
-                    onMouseOver={e => !e.target.disabled && (e.target.style.background = '#4338CA')}
-                    onMouseOut={e => !e.target.disabled && (e.target.style.background = '#4F46E5')}
                 >
-                    Next Step
+                    ⏭ Check Next
                 </button>
                 <button
                     onClick={resetSearch}
                     style={s.btn}
-                    onMouseOver={e => !e.target.disabled && (e.target.style.background = '#4338CA')}
-                    onMouseOut={e => !e.target.disabled && (e.target.style.background = '#4F46E5')}
                 >
-                    Reset
+                    ↺ Reset 
                 </button>
             </div>
 

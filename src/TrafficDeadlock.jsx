@@ -188,41 +188,52 @@ const Confetti = () => {
 };
 
 const styles = {
-    container: { padding: '2.5rem', backgroundColor: '#fff', borderRadius: '40px', border: '1px solid #e2e8f0', boxShadow: '0 20px 50px rgba(0,0,0,0.05)', position: 'relative', overflow: 'hidden' },
-    topHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '1.5rem' },
-    conceptTitle: { fontSize: '1rem', color: '#1e293b' },
-    conceptLabel: { color: '#ef4444', marginRight: '8px', fontWeight: '900', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px' },
-    modeIndicator: { fontSize: '0.7rem', fontWeight: '900', backgroundColor: '#f1f5f9', color: '#64748b', padding: '4px 12px', borderRadius: '999px', textTransform: 'uppercase' },
-    stepProgress: { fontSize: '0.8rem', fontWeight: '700', color: '#ef4444' },
-    modeTabs: { display: 'flex', gap: '0.5rem', marginBottom: '3rem', justifyContent: 'center' },
-    modeTab: { padding: '0.6rem 1.8rem', borderRadius: '15px', border: 'none', fontWeight: '800', cursor: 'pointer', fontSize: '0.9rem' },
-    guideBubble: { position: 'absolute', top: '160px', left: '50%', transform: 'translateX(-50%)', width: '300px', backgroundColor: '#1e293b', color: '#fff', padding: '1.5rem', borderRadius: '24px', zIndex: 100, boxShadow: '0 20px 40px rgba(0,0,0,0.2)' },
-    bubbleArrow: { width: 0, height: 0, borderLeft: '10px solid transparent', borderRight: '10px solid transparent', borderBottom: '10px solid #1e293b', position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%)' },
-    guideTitle: { fontSize: '1.1rem', fontWeight: '900', color: '#ef4444', marginBottom: '0.5rem' },
-    guideText: { fontSize: '0.9rem', color: '#cbd5e1', lineHeight: '1.5' },
-    guideNav: { display: 'flex', gap: '1rem', marginTop: '1.2rem' },
-    gNavBtn: { flex: 1, padding: '0.5rem', borderRadius: '10px', border: 'none', background: '#334155', color: '#fff', fontWeight: '700', cursor: 'pointer', fontSize: '0.75rem' },
-    successOverlay: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(255,255,255,0.95)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' },
-    successCard: { textAlign: 'center', background: '#fff', padding: '3rem', borderRadius: '35px', boxShadow: '0 25px 60px rgba(0,0,0,0.1)', border: '1px solid #f1f5f9', maxWidth: '400px' },
-    successIcon: { fontSize: '5rem', display: 'block', marginBottom: '1.5rem' },
-    successTitle: { fontSize: '1.8rem', fontWeight: '900', color: '#1e293b', marginBottom: '1rem' },
-    successText: { color: '#64748b', marginBottom: '2.5rem' },
-    restartBtn: { padding: '1rem 3rem', borderRadius: '999px', border: 'none', background: '#3b82f6', color: '#fff', fontWeight: '900', cursor: 'pointer' },
-    visualizerArea: { backgroundColor: '#fcfdfe', borderRadius: '35px', padding: '2.5rem', border: '1px solid #f1f5f9' },
-    roadArena: { width: '100%', maxWidth: '600px', height: '400px', background: '#334155', margin: '0 auto 2.5rem auto', position: 'relative', borderRadius: '30px', overflow: 'hidden', boxShadow: 'inset 0 0 50px rgba(0,0,0,0.3)' },
-    roadH: { position: 'absolute', top: '160px', left: 0, width: '100%', height: '80px', borderTop: '2px dashed rgba(255,255,255,0.2)', borderBottom: '2px dashed rgba(255,255,255,0.2)' },
-    roadV: { position: 'absolute', left: '260px', top: 0, width: '80px', height: '100%', borderLeft: '2px dashed rgba(255,255,255,0.2)', borderRight: '2px dashed rgba(255,255,255,0.2)' },
-    asphaltStrip: { position: 'absolute', top: '38px', left: 0, width: '100%', height: '4px', background: 'rgba(255,255,255,0.1)' },
-    asphaltStripV: { position: 'absolute', left: '38px', top: 0, width: '4px', height: '100%', background: 'rgba(255,255,255,0.1)' },
-    carLayer: { position: 'relative', width: '100%', height: '100%', zIndex: 10 },
-    car: { width: '45px', height: '28px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'absolute', color: '#fff', fontWeight: '900', fontSize: '0.7rem' },
-    deadlockOverlay: { position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5, background: 'rgba(239, 68, 68, 0.1)' },
-    deadlockRing: { width: '220px', height: '220px', borderRadius: '50%', border: '4px dashed #ef4444', opacity: 0.4 },
-    jamLabel: { position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: '#ef4444', color: '#fff', padding: '8px 20px', borderRadius: '999px', fontWeight: '900', fontSize: '0.75rem', letterSpacing: '1px' },
-    controls: { display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1.5rem' },
-    actionRow: { display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' },
-    majorBtn: { padding: '0.8rem 1.8rem', borderRadius: '15px', border: 'none', color: '#fff', fontWeight: '900', cursor: 'pointer', fontSize: '0.85rem' },
-    statusFooter: { textAlign: 'center', marginTop: '1rem', fontSize: '0.85rem', color: '#64748b' }
+    container: { maxWidth: '1000px', margin: '0 auto', padding: '1.5rem 0' },
+    headerArea: { marginBottom: '2.5rem', textAlign: 'left' },
+    hubTitle: { fontSize: '2rem', fontWeight: '900', color: '#0f172a', marginBottom: '0.5rem', letterSpacing: '-0.5px' },
+    hubSubtitle: { fontSize: '1.1rem', color: '#64748b', marginBottom: '1.5rem' },
+    metaphorBox: { 
+        backgroundColor: '#f8fafc', padding: '1.25rem', borderRadius: '16px', borderLeft: '4px solid #f43f5e',
+        display: 'flex', alignItems: 'center', gap: '1rem' 
+    },
+    metaphorTag: { fontSize: '0.75rem', fontWeight: '800', backgroundColor: '#f43f5e', color: '#fff', padding: '2px 8px', borderRadius: '6px', textTransform: 'uppercase' },
+    metaphorText: { margin: 0, fontSize: '1rem', color: '#334155', lineHeight: '1.5' },
+
+    card: { backgroundColor: '#fff', borderRadius: '24px', border: '1px solid #f1f5f9', boxShadow: '0 10px 30px -10px rgba(0,0,0,0.05)', padding: '2.5rem' },
+    visualPane: { display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '3rem', alignItems: 'center' },
+    
+    intersectionBox: { 
+        width: '100%', height: '400px', backgroundColor: '#1e293b', borderRadius: '24px', position: 'relative', overflow: 'hidden',
+        boxShadow: 'inset 0 0 40px rgba(0,0,0,0.3)', border: '1px solid #334155'
+    },
+    roadH: { position: 'absolute', top: '50%', left: 0, width: '100%', height: '80px', transform: 'translateY(-50%)', borderTop: '2px dashed rgba(255,255,255,0.1)', borderBottom: '2px dashed rgba(255,255,255,0.1)', background: 'linear-gradient(rgba(255,255,255,0.02), transparent, rgba(255,255,255,0.02))' },
+    roadV: { position: 'absolute', left: '50%', top: 0, width: '80px', height: '100%', transform: 'translateX(-50%)', borderLeft: '2px dashed rgba(255,255,255,0.1)', borderRight: '2px dashed rgba(255,255,255,0.1)', background: 'linear-gradient(90deg, rgba(255,255,255,0.02), transparent, rgba(255,255,255,0.02))' },
+    
+    car: { 
+        width: '40px', height: '24px', borderRadius: '4px', position: 'absolute', zIndex: 10,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: '900', fontSize: '10px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.2)'
+    },
+    deadlockAlert: { 
+        position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 20,
+        backgroundColor: '#f43f5e', color: '#fff', padding: '0.75rem 1.5rem', borderRadius: '12px',
+        display: 'flex', alignItems: 'center', gap: '0.75rem', boxShadow: '0 10px 25px rgba(244, 63, 94, 0.4)'
+    },
+    alertIcon: { fontSize: '1.2rem' },
+    alertText: { fontWeight: '800', fontSize: '0.8rem', letterSpacing: '1px' },
+
+    controlSide: { display: 'flex', flexDirection: 'column', gap: '2rem' },
+    statusDisplay: { },
+    stationLabel: { fontSize: '0.75rem', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.75rem', display: 'block' },
+    statusBadge: { padding: '0.5rem 1rem', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '800', textAlign: 'center' },
+    
+    actionGroup: { display: 'flex', flexDirection: 'column', gap: '0.75rem' },
+    primaryBtn: { border: 'none', color: '#fff', borderRadius: '12px', padding: '0.8rem', cursor: 'pointer', fontWeight: '800', transition: 'all 0.2s ease' },
+    secondaryBtn: { background: 'none', border: '1px solid #e2e8f0', color: '#64748b', borderRadius: '12px', padding: '0.8rem', cursor: 'pointer', fontWeight: '600' },
+    
+    hintCard: { backgroundColor: '#fff1f2', padding: '1.25rem', borderRadius: '16px', border: '1px solid #ffe4e6' },
+    hintTag: { fontSize: '0.7rem', fontWeight: '800', color: '#e11d48', textTransform: 'uppercase', display: 'block', marginBottom: '4px' },
+    hintText: { margin: 0, fontSize: '0.85rem', color: '#be123c', lineHeight: '1.5' }
 };
 
 export default TrafficDeadlock;

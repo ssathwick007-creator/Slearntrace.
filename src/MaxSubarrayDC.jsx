@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
+import { useFeedback } from './FeedbackManager.jsx';
 
 const INITIAL_ARR = [2, -3, 4, -1, 5, -2, 3, -4, 6];
 
@@ -9,6 +10,8 @@ const MaxSubarrayDC = () => {
     const [isRunning, setIsRunning] = useState(false);
     const [message, setMessage] = useState('Track daily profit/loss. Find consecutive days that produce maximum total profit using divide-and-conquer.');
     const [activeLang, setActiveLang] = useState('javascript');
+    const { showFeedback } = useFeedback();
+    const [showHint, setShowHint] = useState(true);
     const stopRef = useRef(false);
 
     const buildSteps = () => {
@@ -36,13 +39,13 @@ const MaxSubarrayDC = () => {
             }
 
             const mid = Math.floor((lo + hi) / 2);
-            result.push({ highlight: Array.from({ length: hi - lo + 1 }, (_, i) => lo + i), divLine: mid, best: null, bestVal: null, phase: 'divide', msg: `Divide [${lo}..${hi}] at mid=${mid}` });
+            result.push({ highlight: Array.from({ length: hi - lo + 1 }, (_, i) => lo + i), divLine: mid, best: null, bestVal: null, phase: 'divide', msg: `Divide [${lo}..${hi}] at mid=${mid}`, feedback: { msg: "Dividing profit range... 📈" } });
 
             const left = solve(a, lo, mid, depth + 1);
             const right = solve(a, mid + 1, hi, depth + 1);
             const cross = maxCrossing(a, lo, mid, hi);
 
-            result.push({ highlight: Array.from({ length: cross.hi - cross.lo + 1 }, (_, i) => cross.lo + i), best: null, bestVal: cross.sum, phase: 'crossing', msg: `Crossing subarray [${cross.lo}..${cross.hi}] sum = ${cross.sum}` });
+            result.push({ highlight: Array.from({ length: cross.hi - cross.lo + 1 }, (_, i) => cross.lo + i), best: null, bestVal: cross.sum, phase: 'crossing', msg: `Crossing subarray [${cross.lo}..${cross.hi}] sum = ${cross.sum}`, feedback: { msg: "Checking overlapping days... 🔄" } });
 
             let best;
             if (left.sum >= right.sum && left.sum >= cross.sum) best = left;
@@ -57,7 +60,7 @@ const MaxSubarrayDC = () => {
         solve(arr, 0, arr.length - 1, 0);
         const final = solve(arr, 0, arr.length - 1, 0);
         // Replace last step with final
-        result.push({ highlight: Array.from({ length: final.hi - final.lo + 1 }, (_, i) => final.lo + i), best: [final.lo, final.hi], bestVal: final.sum, phase: 'done', msg: `🎉 Maximum subarray sum = ${final.sum}!` });
+        result.push({ highlight: Array.from({ length: final.hi - final.lo + 1 }, (_, i) => final.lo + i), best: [final.lo, final.hi], bestVal: final.sum, phase: 'done', msg: `🎉 Maximum subarray sum = ${final.sum}!`, feedback: { msg: "Success! Maximum profit found 💰", type: "success" } });
 
         return result;
     };
@@ -85,7 +88,10 @@ const MaxSubarrayDC = () => {
     }, [isRunning, stepIdx, steps.length]);
 
     useEffect(() => {
-        if (stepIdx >= 0 && steps[stepIdx]) setMessage(steps[stepIdx].msg);
+        if (stepIdx >= 0 && steps[stepIdx]) {
+            setMessage(steps[stepIdx].msg);
+            if (steps[stepIdx].feedback) showFeedback(steps[stepIdx].feedback.msg, steps[stepIdx].feedback.type || 'info');
+        }
     }, [stepIdx]);
 
     const nextStep = () => {
@@ -216,7 +222,8 @@ int maxSubArray(vector<int>& a, int lo, int hi) {
                                     <motion.div
                                         animate={{ height: barH, backgroundColor: c.bg }}
                                         transition={{ duration: 0.3 }}
-                                        style={{ width: 36, borderRadius: '6px 6px 2px 2px', border: `2px solid ${c.border}`, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '4px', fontSize: '0.8rem', fontWeight: '900', color: '#1E293B' }}
+                                        className={currentStep && currentStep.highlight && currentStep.highlight.includes(idx) ? 'pulse-glow' : ''}
+                                        style={{ width: 36, borderRadius: '6px 6px 2px 2px', border: `2px solid ${c.border}`, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '4px', fontSize: '0.8rem', fontWeight: '900', color: '#1E293B', boxShadow: c.bg === '#22C55E' ? '0 0 10px rgba(34, 197, 94, 0.4)' : 'none' }}
                                     >
                                         +{val}
                                     </motion.div>
@@ -226,7 +233,8 @@ int maxSubArray(vector<int>& a, int lo, int hi) {
                                     <motion.div
                                         animate={{ height: barH, backgroundColor: c.bg }}
                                         transition={{ duration: 0.3 }}
-                                        style={{ width: 36, borderRadius: '2px 2px 6px 6px', border: `2px solid ${c.border}`, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', paddingBottom: '4px', fontSize: '0.8rem', fontWeight: '900', color: '#991B1B' }}
+                                        className={currentStep && currentStep.highlight && currentStep.highlight.includes(idx) ? 'pulse-glow' : ''}
+                                        style={{ width: 36, borderRadius: '2px 2px 6px 6px', border: `2px solid ${c.border}`, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', paddingBottom: '4px', fontSize: '0.8rem', fontWeight: '900', color: '#991B1B', boxShadow: c.bg === '#22C55E' ? '0 0 10px rgba(34, 197, 94, 0.4)' : 'none' }}
                                     >
                                         {val}
                                     </motion.div>
@@ -257,9 +265,18 @@ int maxSubArray(vector<int>& a, int lo, int hi) {
 
                 {/* Controls */}
                 <div style={styles.controls}>
-                    <button onClick={startSimulation} disabled={isRunning} style={styles.primaryBtn}>Start Simulation</button>
-                    <button onClick={nextStep} disabled={isRunning} style={styles.secondaryBtn}>Next Step</button>
-                    <button onClick={reset} style={styles.dangerBtn}>Reset</button>
+                    <div style={{ position: 'relative' }}>
+                        <button onClick={() => { startSimulation(); setShowHint(false); }} disabled={isRunning} style={styles.primaryBtn}>
+                            ▶ Calculate Profit! 💰
+                        </button>
+                        {showHint && !isRunning && (
+                            <div className="tooltip-hint" style={{ bottom: '110%', left: '50%' }}>
+                                Let's find the peak! ✨
+                            </div>
+                        )}
+                    </div>
+                    <button onClick={() => { nextStep(); setShowHint(false); }} disabled={isRunning} style={styles.secondaryBtn}>⏭ Next Segment</button>
+                    <button onClick={reset} style={styles.dangerBtn}>↺ Restart Tracking</button>
                 </div>
             </div>
 

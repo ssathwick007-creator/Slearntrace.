@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
+import { useFeedback } from './FeedbackManager.jsx';
 
 const INITIAL_ARR = [9, 4, 7, 3, 8, 2, 6];
 
@@ -9,6 +10,8 @@ const QuickSortDC = () => {
     const [isRunning, setIsRunning] = useState(false);
     const [message, setMessage] = useState('Quick Sort organizes data by selecting a pivot and partitioning around it.');
     const [activeLang, setActiveLang] = useState('javascript');
+    const { showFeedback } = useFeedback();
+    const [showHint, setShowHint] = useState(true);
     const stopRef = useRef(false);
 
     const buildSteps = () => {
@@ -17,18 +20,18 @@ const QuickSortDC = () => {
 
         const partition = (a, lo, hi) => {
             const pivot = a[hi];
-            result.push({ arr: [...a], pivot: hi, range: [lo, hi], comparing: -1, sorted: [], msg: `Pivot = ${pivot} (index ${hi}). Partition [${a.slice(lo, hi + 1)}].` });
+            result.push({ arr: [...a], pivot: hi, range: [lo, hi], comparing: -1, sorted: [], msg: `Pivot = ${pivot} (index ${hi}). Partition [${a.slice(lo, hi + 1)}].`, feedback: { msg: `New pivot: ${pivot} 🎯` } });
             let i = lo;
             for (let j = lo; j < hi; j++) {
                 result.push({ arr: [...a], pivot: hi, range: [lo, hi], comparing: j, sorted: [], msg: `Compare ${a[j]} with pivot ${pivot}.` });
                 if (a[j] < pivot) {
                     [a[i], a[j]] = [a[j], a[i]];
-                    if (i !== j) result.push({ arr: [...a], pivot: hi, range: [lo, hi], comparing: -1, swapped: [i, j], sorted: [], msg: `Swap ${a[j]} ↔ ${a[i]}.` });
+                    if (i !== j) result.push({ arr: [...a], pivot: hi, range: [lo, hi], comparing: -1, swapped: [i, j], sorted: [], msg: `Swap ${a[j]} ↔ ${a[i]}.`, feedback: { msg: "Found smaller element! Swapping... 🔄" } });
                     i++;
                 }
             }
             [a[i], a[hi]] = [a[hi], a[i]];
-            result.push({ arr: [...a], pivot: i, range: [lo, hi], comparing: -1, sorted: [i], msg: `✅ Pivot ${pivot} placed at index ${i}.` });
+            result.push({ arr: [...a], pivot: i, range: [lo, hi], comparing: -1, sorted: [i], msg: `✅ Pivot ${pivot} placed at index ${i}.`, feedback: { msg: "Pivot settled! ⚓" } });
             return i;
         };
 
@@ -45,7 +48,7 @@ const QuickSortDC = () => {
 
         const sortedSet = new Set();
         sort(arr, 0, arr.length - 1, sortedSet);
-        result.push({ arr: [...arr], pivot: -1, range: [0, arr.length - 1], comparing: -1, sorted: Array.from({ length: arr.length }, (_, i) => i), msg: '🎉 Array fully sorted!' });
+        result.push({ arr: [...arr], pivot: -1, range: [0, arr.length - 1], comparing: -1, sorted: Array.from({ length: arr.length }, (_, i) => i), msg: '🎉 Array fully sorted!', feedback: { msg: "Success! All elements organized 🚀", type: "success" } });
         return result;
     };
 
@@ -72,7 +75,10 @@ const QuickSortDC = () => {
     }, [isRunning, stepIdx, steps.length]);
 
     useEffect(() => {
-        if (stepIdx >= 0 && steps[stepIdx]) setMessage(steps[stepIdx].msg);
+        if (stepIdx >= 0 && steps[stepIdx]) {
+            setMessage(steps[stepIdx].msg);
+            if (steps[stepIdx].feedback) showFeedback(steps[stepIdx].feedback.msg, steps[stepIdx].feedback.type || 'info');
+        }
     }, [stepIdx]);
 
     const nextStep = () => {
@@ -185,6 +191,7 @@ void quickSort(vector<int>& arr, int lo, int hi) {
                                 key={idx}
                                 animate={{ height, backgroundColor: c.bg }}
                                 transition={{ duration: 0.3 }}
+                                className={currentStep && (idx === currentStep.pivot || (currentStep.swapped && currentStep.swapped.includes(idx))) ? 'pulse-glow' : ''}
                                 style={{
                                     width: 44,
                                     borderRadius: '8px 8px 4px 4px',
@@ -192,7 +199,7 @@ void quickSort(vector<int>& arr, int lo, int hi) {
                                     display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
                                     paddingTop: '6px',
                                     fontSize: '0.9rem', fontWeight: '900', color: 'white',
-                                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                                    boxShadow: c.bg === '#22C55E' ? '0 0 10px rgba(34, 197, 94, 0.4)' : '0 2px 8px rgba(0,0,0,0.1)',
                                 }}
                             >
                                 {val}
@@ -211,9 +218,18 @@ void quickSort(vector<int>& arr, int lo, int hi) {
 
                 {/* Controls */}
                 <div style={styles.controls}>
-                    <button onClick={startSimulation} disabled={isRunning} style={styles.primaryBtn}>Start Simulation</button>
-                    <button onClick={nextStep} disabled={isRunning} style={styles.secondaryBtn}>Next Step</button>
-                    <button onClick={reset} style={styles.dangerBtn}>Reset</button>
+                    <div style={{ position: 'relative' }}>
+                        <button onClick={() => { startSimulation(); setShowHint(false); }} disabled={isRunning} style={styles.primaryBtn}>
+                            ▶ Organize Data! 📊
+                        </button>
+                        {showHint && !isRunning && (
+                            <div className="tooltip-hint" style={{ bottom: '110%', left: '50%' }}>
+                                Let's find the pivots! ✨
+                            </div>
+                        )}
+                    </div>
+                    <button onClick={() => { nextStep(); setShowHint(false); }} disabled={isRunning} style={styles.secondaryBtn}>⏭ Next Step</button>
+                    <button onClick={reset} style={styles.dangerBtn}>↺ Reset</button>
                 </div>
             </div>
 

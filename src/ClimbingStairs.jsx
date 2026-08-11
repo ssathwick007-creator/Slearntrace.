@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useFeedback } from './FeedbackManager.jsx';
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -7,6 +8,8 @@ const N = 5; // Top step
 
 const ClimbingStairs = () => {
     const [viewMode, setViewMode] = useState('play');
+    const { showFeedback } = useFeedback();
+    const [showHint, setShowHint] = useState(true);
 
     // Play State
     const [currStep, setCurrStep] = useState(0);
@@ -54,10 +57,9 @@ const ClimbingStairs = () => {
         setCurrStep(next);
 
         if (next === N) {
-            setPlayMsg("Success! You reached the top step.");
-            const newSolved = new Set(solvedSteps);
             newSolved.add(next);
             setSolvedSteps(newSolved);
+            showFeedback("Success! You reached the top step. 🚀", "success");
 
             // Mark DP table
             const newDp = [...dpTable];
@@ -134,6 +136,8 @@ const ClimbingStairs = () => {
             const s = steps[i];
             setActiveNode(s.node);
             setPlayMsg(s.msg);
+            if (s.done) showFeedback("Success! Simulation complete. 🎓", "success");
+            else if (s.hit) showFeedback("Hitting the memo! 🧠");
 
             if (type === 'memo') {
                 const newDp = Array(N + 1).fill('?');
@@ -216,7 +220,8 @@ const ClimbingStairs = () => {
                                 marginLeft: `${i * 45}px`,
                                 marginBottom: '5px',
                                 transition: 'background-color 0.3s, transform 0.2s',
-                                boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
+                                className: getStairColor(i) === '#FACC15' || getStairColor(i) === '#22C55E' ? 'pulse-glow' : '',
+                                boxShadow: getStairColor(i) === '#FACC15' ? '0 0 15px rgba(250, 204, 21, 0.5)' : '0 4px 10px rgba(0,0,0,0.05)',
                                 color: getStairColor(i) === '#F1F5F9' ? '#1E293B' : 'white',
                                 position: 'relative'
                             }}>
@@ -249,15 +254,22 @@ const ClimbingStairs = () => {
                     <div style={styles.controlsRow}>
                         {viewMode === 'play' && (
                             <>
-                                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => handleClimb(1)} disabled={currStep >= N} style={styles.btn('#3B82F6')}>Climb 1 Step</motion.button>
-                                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => handleClimb(2)} disabled={currStep >= N - 1} style={styles.btn('#10B981')}>Climb 2 Steps</motion.button>
-                                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={resetPlay} style={styles.btn('#64748B')}>Restart Run</motion.button>
-                                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={hardResetPlay} style={styles.btn('#EF4444')}>Reset Game</motion.button>
+                                <div style={{ position: 'relative' }}>
+                                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => { handleClimb(1); setShowHint(false); }} disabled={currStep >= N} style={styles.btn('#3B82F6')}>🏃 Take 1 Step</motion.button>
+                                    {showHint && (
+                                        <div className="tooltip-hint" style={{ bottom: '110%', left: '50%' }}>
+                                            Climb towards the top! ✨
+                                        </div>
+                                    )}
+                                </div>
+                                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => { handleClimb(2); setShowHint(false); }} disabled={currStep >= N - 1} style={styles.btn('#10B981')}>🏃 Take 2 Steps</motion.button>
+                                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={resetPlay} style={styles.btn('#64748B')}>↺ Restart Run</motion.button>
+                                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={hardResetPlay} style={styles.btn('#EF4444')}>🗑 Reset Game</motion.button>
                             </>
                         )}
                         {viewMode !== 'play' && (
                             <>
-                                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => runSimulation(viewMode)} disabled={simRunning} style={styles.btn('#4F46E5')}>▶ Start Animation</motion.button>
+                                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => runSimulation(viewMode)} disabled={simRunning} style={styles.btn('#4F46E5')}>▶ Start Animation 🎬</motion.button>
                                 <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={hardResetPlay} style={styles.btn('#EF4444')}>↺ Reset</motion.button>
                             </>
                         )}

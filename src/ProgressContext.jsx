@@ -9,7 +9,6 @@ export const topicsMeta = {
     'trees': { title: 'Trees', icon: '🌳', description: 'Trees represent hierarchical data structures with a root node and child nodes, essential for fast searching and sorting.', totalMetaphors: 8, totalProblems: 8, difficulty: 'Intermediate' },
     'graphs': { title: 'Graphs', icon: '🌐', description: 'Graphs represent networks of connected nodes and are used in navigation systems, social networks, and recommendation engines.', totalMetaphors: 9, totalProblems: 8, difficulty: 'Intermediate' },
     'hash-tables': { title: 'Hash Tables', icon: '🗂️', description: 'Hash tables map keys to values for highly efficient data retrieval, powering databases and associative arrays.', totalMetaphors: 7, totalProblems: 8, difficulty: 'Advanced' },
-    'os': { title: 'Operating Systems', icon: '💻', description: 'Operating Systems manage hardware and software resources, providing a foundation for all application programs.', totalMetaphors: 7, totalProblems: 0, difficulty: 'Intermediate' },
 };
 
 // ── Defaults ────────────────────────────────────────────────────────────────

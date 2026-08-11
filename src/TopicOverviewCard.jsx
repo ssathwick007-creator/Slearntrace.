@@ -94,11 +94,14 @@ const TopicOverviewCard = ({ topic, onStart }) => {
                 <div style={styles.actionContainer}>
                     <button
                         onClick={onStart}
-                        style={styles.startBtn}
+                        style={{
+                            ...styles.startBtn,
+                            animation: pct === 0 ? 'pulse-glow 2s infinite' : 'none'
+                        }}
                         onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
                         onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
                     >
-                        {pct > 0 ? 'Continue Learning →' : 'Start Learning →'}
+                        {pct > 0 ? 'Continue Your Journey →' : "Let's Explore Together! 🚀"}
                     </button>
                 </div>
             </div>

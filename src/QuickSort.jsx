@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useFeedback } from './FeedbackManager.jsx';
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const INIT = [9, 4, 7, 3, 8, 2, 6, 5];
@@ -14,6 +15,8 @@ const QuickSort = () => {
     const [isRunning, setIsRunning] = useState(false);
     const [stepDone, setStepDone] = useState(false);
     const [activeLang, setActiveLang] = useState('python');
+    const { showFeedback } = useFeedback();
+    const [showHint, setShowHint] = useState(true);
     const stopRef = useRef(false);
     const maxVal = Math.max(...INIT);
 
@@ -29,6 +32,7 @@ const QuickSort = () => {
         const pivotVal = arr[high];
         setPivot(high);
         setMessage(`Pivot: ${pivotVal} at index ${high}`);
+        showFeedback(`New Pivot selected: ${pivotVal}! 🎯`);
         await sleep(600);
         let i = low - 1;
         for (let j = low; j < high; j++) {
@@ -73,6 +77,7 @@ const QuickSort = () => {
         if (!stopRef.current) {
             setSorted(new Set(Array.from({ length: arr.length }, (_, i) => i)));
             setMessage('✓ Array is sorted!');
+            showFeedback("Quick Sort complete! That was fast ⚡", "success");
             setIsRunning(false); setStepDone(true);
         }
     };
@@ -90,14 +95,25 @@ const QuickSort = () => {
             <div style={s.header}>
                 <h2 style={s.title}>Quick Sort — Pivot Organizer ⚡</h2>
                 <div style={s.desc}>
-                    <p>Quick Sort selects a <strong>pivot element</strong> and partitions the array so smaller elements go left and larger go right, then recursively sorts each side.</p>
+                    <p>Quick Sort is all about picking a <strong>Hero (Pivot)</strong> and organizing the crowd — everyone smaller goes left, everyone bigger goes right!</p>
                 </div>
             </div>
             <div style={s.visualizer}>
                 <div style={s.barsContainer}>
                     {array.map((val, idx) => (
-                        <motion.div key={idx} style={s.barWrap} layout transition={{ type: 'spring', stiffness: 300, damping: 30 }}>
-                            <div style={{ ...s.bar, height: `${(val / maxVal) * 160 + 20}px`, backgroundColor: barColor(idx) }} />
+                        <motion.div 
+                            key={idx} 
+                            style={s.barWrap} 
+                            layout 
+                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                            className={swapping.includes(idx) || idx === pivot ? 'pulse-glow' : ''}
+                        >
+                            <div style={{ 
+                                ...s.bar, 
+                                height: `${(val / maxVal) * 160 + 20}px`, 
+                                backgroundColor: barColor(idx),
+                                boxShadow: idx === pivot ? '0 0 15px rgba(168, 85, 247, 0.4)' : (swapping.includes(idx) ? '0 0 15px rgba(239, 68, 68, 0.4)' : 'none')
+                            }} />
                             <span style={s.barLabel}>{val}</span>
                         </motion.div>
                     ))}
@@ -112,9 +128,22 @@ const QuickSort = () => {
                 </div>
             </div>
             <div style={s.controls}>
-                <button onClick={runSort} disabled={isRunning} style={{ ...s.btn, backgroundColor: '#4f46e5' }}>▶ Start Sorting</button>
-                <button onClick={() => { if (!stepDone) runSort(); }} disabled={isRunning || stepDone} style={{ ...s.btn, backgroundColor: '#0891b2' }}>⏭ Next Step</button>
-                <button onClick={resetAll} style={{ ...s.btn, backgroundColor: '#ef4444' }}>↺ Reset</button>
+                <div style={{ position: 'relative' }}>
+                    <button onClick={() => { runSort(); setShowHint(false); }} disabled={isRunning} style={{ ...s.btn, backgroundColor: '#4f46e5' }}>
+                        ▶ Go Fast! (Quick Sort) ⚡
+                    </button>
+                    {showHint && !isRunning && (
+                        <div className="tooltip-hint" style={{ bottom: '110%', left: '50%' }}>
+                            Pick a pivot and go! ✨
+                        </div>
+                    )}
+                </div>
+                <button onClick={() => { if (!stepDone) { runSort(); setShowHint(false); } }} disabled={isRunning || stepDone} style={{ ...s.btn, backgroundColor: '#0891b2' }}>
+                    ⏭ Take a Step
+                </button>
+                <button onClick={resetAll} style={{ ...s.btn, backgroundColor: '#ef4444' }}>
+                    ↺ Reset All
+                </button>
             </div>
             <div style={s.codeSection}>
                 <h3 style={s.subTitle}>Quick Sort Implementation</h3>

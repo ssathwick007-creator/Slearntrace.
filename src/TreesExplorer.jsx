@@ -5,6 +5,7 @@ import TreeTraversal from './TreeTraversal.jsx';
 import TreeHeightBalance from './TreeHeightBalance.jsx';
 import TreeDiameter from './TreeDiameter.jsx';
 import LevelOrderTraversal from './LevelOrderTraversal.jsx';
+import TreeViews from './TreeViews.jsx';
 import TreesSummary from './TreesSummary.jsx';
 import TreesPracticeProblems from './TreesPracticeProblems.jsx';
 
@@ -15,66 +16,30 @@ const TreesExplorer = () => {
         <div style={styles.shell}>
             <div style={styles.topBar}>
                 <div style={styles.tabs}>
-                    <button
-                        style={{
-                            ...styles.tab,
-                            borderBottom: activeTab === 'family-tree' ? '3px solid #10b981' : 'none',
-                            color: activeTab === 'family-tree' ? '#10b981' : '#64748b'
-                        }}
-                        onClick={() => setActiveTab('family-tree')}
-                    >
-                        🌳 Family Tree
-                    </button>
-                    <button
-                        style={{
-                            ...styles.tab,
-                            borderBottom: activeTab === 'bst' ? '3px solid #10b981' : 'none',
-                            color: activeTab === 'bst' ? '#10b981' : '#64748b'
-                        }}
-                        onClick={() => setActiveTab('bst')}
-                    >
-                        📚 Bookshelf BST
-                    </button>
-                    <button
-                        style={{
-                            ...styles.tab,
-                            borderBottom: activeTab === 'traversal' ? '3px solid #10b981' : 'none',
-                            color: activeTab === 'traversal' ? '#10b981' : '#64748b'
-                        }}
-                        onClick={() => setActiveTab('traversal')}
-                    >
-                        🚶‍♂️ Family Reunion
-                    </button>
-                    <button
-                        style={{
-                            ...styles.tab,
-                            borderBottom: activeTab === 'balance' ? '3px solid #10b981' : 'none',
-                            color: activeTab === 'balance' ? '#10b981' : '#64748b'
-                        }}
-                        onClick={() => setActiveTab('balance')}
-                    >
-                        ⚖️ Tree Balance
-                    </button>
-                    <button
-                        style={{
-                            ...styles.tab,
-                            borderBottom: activeTab === 'diameter' ? '3px solid #10b981' : 'none',
-                            color: activeTab === 'diameter' ? '#10b981' : '#64748b'
-                        }}
-                        onClick={() => setActiveTab('diameter')}
-                    >
-                        📏 Tree Diameter
-                    </button>
-                    <button
-                        style={{
-                            ...styles.tab,
-                            borderBottom: activeTab === 'level-order' ? '3px solid #10b981' : 'none',
-                            color: activeTab === 'level-order' ? '#10b981' : '#64748b'
-                        }}
-                        onClick={() => setActiveTab('level-order')}
-                    >
-                        📸 Level Order
-                    </button>
+                    {[
+                        { id: 'family-tree', label: '🌳 Family Tree' },
+                        { id: 'bst', label: '📚 Bookshelf BST' },
+                        { id: 'traversal', label: '🚶‍♂️ Family Reunion' },
+                        { id: 'balance', label: '⚖️ Tree Balance' },
+                        { id: 'diameter', label: '📏 Tree Diameter' },
+                        { id: 'level-order', label: '📸 Level Order' },
+                        { id: 'views', label: '🎬 Tree Views' }
+                    ].map(tab => (
+                        <button
+                            key={tab.id}
+                            style={{
+                                ...styles.tab,
+                                backgroundColor: activeTab === tab.id ? '#0f172a' : 'transparent',
+                                color: activeTab === tab.id ? '#fff' : '#64748b',
+                                fontWeight: activeTab === tab.id ? '700' : '500',
+                                boxShadow: activeTab === tab.id ? '0 10px 15px -3px rgba(15, 23, 42, 0.1), 0 4px 6px -2px rgba(15, 23, 42, 0.05)' : 'none',
+                                borderBottom: activeTab === tab.id ? '2px solid #3b82f6' : '2px solid transparent'
+                            }}
+                            onClick={() => setActiveTab(tab.id)}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
                 </div>
             </div>
 
@@ -85,6 +50,7 @@ const TreesExplorer = () => {
                 {activeTab === 'balance' && <TreeHeightBalance />}
                 {activeTab === 'diameter' && <TreeDiameter />}
                 {activeTab === 'level-order' && <LevelOrderTraversal />}
+                {activeTab === 'views' && <TreeViews />}
             </div>
 
             <TreesSummary />
@@ -103,25 +69,35 @@ const styles = {
     topBar: {
         display: 'flex',
         justifyContent: 'center',
-        borderBottom: '1px solid #e2e8f0',
-        marginBottom: '1rem'
+        borderBottom: '1px solid #f1f5f9',
+        marginBottom: '2rem',
+        position: 'sticky',
+        top: '56px',
+        backgroundColor: 'rgba(255,255,255,0.95)',
+        backdropFilter: 'blur(16px)',
+        zIndex: 90,
+        padding: '0.75rem 0'
     },
     tabs: {
         display: 'flex',
-        gap: '2rem',
-        padding: '0 1rem'
+        gap: '0.5rem',
+        padding: '0 1rem',
+        overflowX: 'auto',
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none'
     },
     tab: {
-        padding: '1rem 0',
+        padding: '0.6rem 1.1rem',
         background: 'none',
         border: 'none',
-        fontSize: '1rem',
-        fontWeight: '700',
+        fontSize: '0.875rem',
         cursor: 'pointer',
-        transition: 'all 0.2s',
+        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
         display: 'flex',
         alignItems: 'center',
-        gap: '8px'
+        gap: '8px',
+        whiteSpace: 'nowrap',
+        borderRadius: '10px'
     },
     content: {
         animation: 'fadeIn 0.5s ease'

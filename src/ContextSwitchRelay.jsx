@@ -205,48 +205,51 @@ const Confetti = () => {
 };
 
 const styles = {
-    container: { padding: '2.5rem', backgroundColor: '#fff', borderRadius: '40px', border: '1px solid #e2e8f0', boxShadow: '0 20px 50px rgba(0,0,0,0.05)', position: 'relative', overflow: 'hidden' },
-    topHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '1.5rem' },
-    conceptTitle: { fontSize: '1rem', color: '#1e293b' },
-    conceptLabel: { color: '#ef4444', marginRight: '8px', fontWeight: '900', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px' },
-    modeIndicator: { fontSize: '0.7rem', fontWeight: '900', backgroundColor: '#f1f5f9', color: '#64748b', padding: '4px 12px', borderRadius: '999px', textTransform: 'uppercase' },
-    stepProgress: { fontSize: '0.8rem', fontWeight: '700', color: '#ef4444' },
-    modeTabs: { display: 'flex', gap: '0.5rem', marginBottom: '3rem', justifyContent: 'center' },
-    modeTab: { padding: '0.6rem 1.8rem', borderRadius: '15px', border: 'none', fontWeight: '800', cursor: 'pointer', fontSize: '0.9rem' },
-    guideBubble: { position: 'absolute', top: '160px', left: '50%', transform: 'translateX(-50%)', width: '300px', backgroundColor: '#1e293b', color: '#fff', padding: '1.5rem', borderRadius: '24px', zIndex: 100, boxShadow: '0 20px 40px rgba(0,0,0,0.2)' },
-    bubbleArrow: { width: 0, height: 0, borderLeft: '10px solid transparent', borderRight: '10px solid transparent', borderBottom: '10px solid #1e293b', position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%)' },
-    guideTitle: { fontSize: '1.1rem', fontWeight: '900', color: '#ef4444', marginBottom: '0.5rem' },
-    guideText: { fontSize: '0.9rem', color: '#cbd5e1', lineHeight: '1.5' },
-    guideNav: { display: 'flex', gap: '1rem', marginTop: '1.2rem' },
-    gNavBtn: { flex: 1, padding: '0.5rem', borderRadius: '10px', border: 'none', background: '#334155', color: '#fff', fontWeight: '700', cursor: 'pointer', fontSize: '0.75rem' },
-    successOverlay: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(255,255,255,0.95)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' },
-    successCard: { textAlign: 'center', background: '#fff', padding: '3rem', borderRadius: '35px', boxShadow: '0 25px 60px rgba(0,0,0,0.1)', border: '1px solid #f1f5f9' },
-    successIcon: { fontSize: '5rem', display: 'block', marginBottom: '1.5rem' },
-    successTitle: { fontSize: '1.8rem', fontWeight: '900', color: '#1e293b', marginBottom: '1rem' },
-    successText: { color: '#64748b', marginBottom: '2.5rem' },
-    restartBtn: { padding: '1rem 3rem', borderRadius: '999px', border: 'none', background: '#3b82f6', color: '#fff', fontWeight: '900', cursor: 'pointer' },
-    challengeFloating: { position: 'absolute', top: '180px', left: '50%', transform: 'translateX(-50%)', zIndex: 110, width: '320px' },
-    challengeCardInner: { background: '#fff', padding: '1.5rem', borderRadius: '25px', boxShadow: '0 15px 40px rgba(0,0,0,0.1)', border: '1px solid #f1f5f9', textAlign: 'center' },
-    cTitle: { margin: '0 0 0.5rem 0', color: '#ef4444', fontWeight: '900', fontSize: '1.1rem' },
-    cText: { fontSize: '0.85rem', color: '#64748b', marginBottom: '1.2rem' },
-    optBtn: { background: '#10b981', color: '#fff', border: 'none', padding: '0.6rem 1.2rem', borderRadius: '10px', fontWeight: '800', cursor: 'pointer' },
-    visualizerArea: { backgroundColor: '#fcfdfe', borderRadius: '35px', padding: '2.5rem', border: '1px solid #f1f5f9' },
-    raceTrack: { height: '180px', background: '#1e293b', borderRadius: '30px', position: 'relative', overflow: 'hidden', boxShadow: 'inset 0 0 40px rgba(0,0,0,0.4)', marginBottom: '2.5rem' },
-    trackLanes: { position: 'relative', width: '100%', height: '100%' },
-    lane: { position: 'absolute', top: '25px', transform: 'translateX(-50%)' },
-    runnerBox: { padding: '1.2rem', borderRadius: '20px', border: '2px solid', textAlign: 'center', minWidth: '100px' },
-    rEmoji: { fontSize: '2.2rem', display: 'block', marginBottom: '0.5rem' },
-    rName: { fontSize: '0.8rem', fontWeight: '900', color: '#1e293b' },
-    rStatus: { fontSize: '0.6rem', fontWeight: '900', marginTop: '4px', letterSpacing: '1px' },
-    baton: { position: 'absolute', top: '75px', fontSize: '2.5rem', transform: 'translateX(-50%)', zIndex: 5 },
-    consoleBox: { background: '#1e293b', color: '#fff', padding: '1.2rem 1.8rem', borderRadius: '20px', marginBottom: '2rem' },
-    cLabel: { fontSize: '0.6rem', fontWeight: '900', color: '#ef4444', marginBottom: '0.5rem', letterSpacing: '1px' },
-    cMsg: { fontSize: '0.85rem', fontFamily: 'monospace', color: '#cbd5e1' },
-    controls: { display: 'flex', justifyContent: 'center' },
-    actionRow: { display: 'flex', gap: '1rem' },
-    startBtn: { padding: '1rem 2.5rem', borderRadius: '15px', border: 'none', background: '#10b981', color: '#fff', fontWeight: '900', cursor: 'pointer' },
-    resetBtn: { padding: '1rem 2rem', borderRadius: '15px', border: 'none', background: '#64748b', color: '#fff', fontWeight: '800', cursor: 'pointer' },
-    overheadGauge: { textAlign: 'center', marginTop: '1rem', fontSize: '0.85rem', color: '#64748b' }
+    container: { maxWidth: '1000px', margin: '0 auto', padding: '1.5rem 0' },
+    headerArea: { marginBottom: '2.5rem', textAlign: 'left' },
+    hubTitle: { fontSize: '2rem', fontWeight: '900', color: '#0f172a', marginBottom: '0.5rem', letterSpacing: '-0.5px' },
+    hubSubtitle: { fontSize: '1.1rem', color: '#64748b', marginBottom: '1.5rem' },
+    metaphorBox: { 
+        backgroundColor: '#f8fafc', padding: '1.25rem', borderRadius: '16px', borderLeft: '4px solid #ef4444',
+        display: 'flex', alignItems: 'center', gap: '1rem' 
+    },
+    metaphorTag: { fontSize: '0.75rem', fontWeight: '800', backgroundColor: '#ef4444', color: '#fff', padding: '2px 8px', borderRadius: '6px', textTransform: 'uppercase' },
+    metaphorText: { margin: 0, fontSize: '1rem', color: '#334155', lineHeight: '1.5' },
+
+    card: { backgroundColor: '#fff', borderRadius: '24px', border: '1px solid #f1f5f9', boxShadow: '0 10px 30px -10px rgba(0,0,0,0.05)', padding: '2.5rem' },
+    visualPane: { display: 'grid', gridTemplateColumns: '0.7fr 1.3fr', gap: '3rem', marginBottom: '3rem', alignItems: 'center' },
+    
+    processQueue: { display: 'flex', flexDirection: 'column', gap: '1rem' },
+    stationLabel: { fontSize: '0.75rem', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem', display: 'block' },
+    pCard: { padding: '1.25rem', borderRadius: '16px', border: '2px solid', backgroundColor: '#fff', transition: 'all 0.3s ease' },
+    pLabel: { fontSize: '0.9rem', fontWeight: '900', display: 'block', marginBottom: '4px' },
+    pState: { fontSize: '0.75rem', color: '#64748b', fontFamily: 'monospace' },
+
+    cpuWorkspace: { },
+    cpuShell: { 
+        backgroundColor: '#0f172a', borderRadius: '24px', padding: '2.5rem', position: 'relative',
+        boxShadow: '0 20px 40px -12px rgba(15, 23, 42, 0.3)', border: '1px solid #1e293b'
+    },
+    cpuLabel: { position: 'absolute', top: '12px', right: '16px', fontSize: '10px', fontWeight: '900', color: '#334155' },
+    registerGrid: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' },
+    regBox: { 
+        backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px', padding: '1rem',
+        color: '#94a3b8', fontSize: '0.8rem', fontFamily: 'monospace', textAlign: 'center'
+    },
+    switchOverlay: { 
+        position: 'absolute', inset: 0, backgroundColor: 'rgba(15, 23, 42, 0.9)', borderRadius: '24px',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10
+    },
+    switchIcon: { color: '#ef4444', fontWeight: '900', fontSize: '1.1rem', letterSpacing: '1px' },
+
+    bottomSection: { display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '2rem', alignItems: 'center' },
+    controlsGroup: { display: 'flex', gap: '1rem' },
+    primaryBtn: { border: 'none', backgroundColor: '#0f172a', color: '#fff', borderRadius: '12px', padding: '0.8rem 1.8rem', cursor: 'pointer', fontWeight: '800' },
+    secondaryBtn: { background: 'none', border: '1px solid #e2e8f0', color: '#64748b', borderRadius: '12px', padding: '0.8rem 1.5rem', cursor: 'pointer', fontWeight: '600' },
+    
+    hintCard: { backgroundColor: '#fef2f2', padding: '1.25rem', borderRadius: '16px', border: '1px solid #fee2e2' },
+    hintTag: { fontSize: '0.7rem', fontWeight: '800', color: '#dc2626', textTransform: 'uppercase', display: 'block', marginBottom: '4px' },
+    hintText: { margin: 0, fontSize: '0.85rem', color: '#991b1b', lineHeight: '1.5' }
 };
 
 export default ContextSwitchRelay;

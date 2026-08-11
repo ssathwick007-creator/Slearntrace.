@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useFeedback } from './FeedbackManager.jsx';
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -16,6 +17,8 @@ const TwoPointerSearch = () => {
     });
 
     const [activeLang, setActiveLang] = useState('python');
+    const { showFeedback } = useFeedback();
+    const [showHint, setShowHint] = useState(true);
     const autoRunRef = useRef(false);
 
     // Auto Play Effect
@@ -140,6 +143,16 @@ const TwoPointerSearch = () => {
         return state;
     };
 
+    const stepWithFeedback = (state) => {
+        const next = calculateNextStep(state);
+        if (next.status === 'found' && state.status !== 'found') {
+            showFeedback("Found it! The pair perfectly matches the sum 🎯", "success");
+        } else if (next.status === 'not-found' && state.status !== 'not-found') {
+            showFeedback("No match found in the hallway 🚶", "info");
+        }
+        return next;
+    };
+
     // UI Handlers
     const startSearch = () => {
         if (!searchState.target || isNaN(parseInt(searchState.target))) {
@@ -148,7 +161,8 @@ const TwoPointerSearch = () => {
         }
         resetSearch();
         autoRunRef.current = true;
-        setSearchState(prev => calculateNextStep({ ...prev, status: 'idle' }));
+        setSearchState(prev => stepWithFeedback({ ...prev, status: 'idle' }));
+        setShowHint(false);
     };
 
     const nextStep = () => {
@@ -157,7 +171,8 @@ const TwoPointerSearch = () => {
             return;
         }
         autoRunRef.current = false;
-        setSearchState(prev => calculateNextStep(prev));
+        setSearchState(prev => stepWithFeedback(prev));
+        setShowHint(false);
     };
 
     const resetSearch = () => {
@@ -176,11 +191,9 @@ const TwoPointerSearch = () => {
         <div style={s.container}>
             {/* Header */}
             <div style={s.header}>
-                <h2 style={s.title}>Two Pointers — Finding a Match in a Hallway 🚶</h2>
+                <h2 style={s.title}>Two Pointers — Finding a Match 🚶</h2>
                 <div style={s.desc}>
-                    <p>Imagine two people starting at opposite ends of a hallway.</p>
-                    <p>One person walks from the left, the other from the right. They move step by step toward each other until they meet or find what they are looking for.</p>
-                    <p>The <strong>Two Pointer</strong> technique is highly efficient for searching pairs in a sorted array.</p>
+                    <p>Two Pointers is like meeting a friend in a long hallway. One starts at each end and you move closer until you find the perfect match!</p>
                 </div>
             </div>
 
@@ -226,7 +239,12 @@ const TwoPointerSearch = () => {
                                 <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                     <motion.div
                                         style={{ ...s.box, backgroundColor: bg, color: textColor, opacity }}
-                                        animate={{ scale: (searchState.left === idx || searchState.right === idx) ? 1.05 : 1, opacity }}
+                                        animate={{ 
+                                            scale: (searchState.left === idx || searchState.right === idx) ? 1.08 : 1, 
+                                            opacity,
+                                            boxShadow: (searchState.left === idx) ? '0 0 15px rgba(250, 204, 21, 0.4)' : (searchState.right === idx ? '0 0 15px rgba(59, 130, 246, 0.4)' : 'none')
+                                        }}
+                                        className={(searchState.left === idx || searchState.right === idx) ? 'pulse-glow' : ''}
                                         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                                         layout
                                     >
@@ -289,31 +307,32 @@ const TwoPointerSearch = () => {
 
             {/* Controls */}
             <div style={s.controls}>
-                <button
-                    onClick={startSearch}
-                    disabled={searchState.status === 'running' || searchState.status === 'found' || searchState.status === 'not-found'}
-                    style={s.btn}
-                    onMouseOver={e => !e.target.disabled && (e.target.style.background = '#4338CA')}
-                    onMouseOut={e => !e.target.disabled && (e.target.style.background = '#4F46E5')}
-                >
-                    Start Search
-                </button>
+                <div style={{ position: 'relative' }}>
+                    <button
+                        onClick={startSearch}
+                        disabled={searchState.status === 'running' || searchState.status === 'found' || searchState.status === 'not-found'}
+                        style={s.btn}
+                    >
+                        ▶ Find the Pair! 🚶
+                    </button>
+                    {showHint && searchState.status === 'idle' && (
+                        <div className="tooltip-hint" style={{ bottom: '110%', left: '50%' }}>
+                            Step into the hallway! ✨
+                        </div>
+                    )}
+                </div>
                 <button
                     onClick={nextStep}
                     disabled={searchState.status === 'found' || searchState.status === 'not-found'}
                     style={s.btn}
-                    onMouseOver={e => !e.target.disabled && (e.target.style.background = '#4338CA')}
-                    onMouseOut={e => !e.target.disabled && (e.target.style.background = '#4F46E5')}
                 >
-                    Next Step
+                    ⏭ Take a Step
                 </button>
                 <button
                     onClick={resetSearch}
                     style={s.btn}
-                    onMouseOver={e => !e.target.disabled && (e.target.style.background = '#4338CA')}
-                    onMouseOut={e => !e.target.disabled && (e.target.style.background = '#4F46E5')}
                 >
-                    Reset
+                    ↺ Reset All
                 </button>
             </div>
 

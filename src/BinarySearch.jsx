@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useFeedback } from './FeedbackManager.jsx';
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -18,6 +19,8 @@ const BinarySearch = () => {
     });
 
     const [activeLang, setActiveLang] = useState('python');
+    const { showFeedback } = useFeedback();
+    const [showHint, setShowHint] = useState(true);
     const autoRunRef = useRef(false);
 
     // Auto Play Effect
@@ -157,7 +160,21 @@ const BinarySearch = () => {
             }
         }
 
-        return state;
+        const result = state;
+        if (result.status === 'found') showFeedback("Found it! Binary search is incredibly fast 🎯", "success");
+        if (result.status === 'not-found') showFeedback("Not here... the range was exhausted ❌", "info");
+        return result;
+    };
+
+    // Override calculateNextStep to inject feedback on completion
+    const stepWithFeedback = (state) => {
+        const next = calculateNextStep(state);
+        if (next.status === 'found' && state.status !== 'found') {
+            showFeedback("Found it! Binary Search is lightning fast 🎯", "success");
+        } else if (next.status === 'not-found' && state.status !== 'not-found') {
+            showFeedback("Target not found in the list ❌", "info");
+        }
+        return next;
     };
 
     // UI Handlers
@@ -168,7 +185,8 @@ const BinarySearch = () => {
         }
         resetSearch();
         autoRunRef.current = true;
-        setSearchState(prev => calculateNextStep({ ...prev, status: 'idle' }));
+        setSearchState(prev => stepWithFeedback({ ...prev, status: 'idle' }));
+        setShowHint(false);
     };
 
     const nextStep = () => {
@@ -177,7 +195,8 @@ const BinarySearch = () => {
             return;
         }
         autoRunRef.current = false; // Pause any active auto-run
-        setSearchState(prev => calculateNextStep(prev));
+        setSearchState(prev => stepWithFeedback(prev));
+        setShowHint(false);
     };
 
     const resetSearch = () => {
@@ -245,7 +264,12 @@ const BinarySearch = () => {
                                 <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                     <motion.div
                                         style={{ ...s.box, backgroundColor: bg, color: textColor, opacity }}
-                                        animate={{ scale: searchState.mid === idx ? 1.05 : 1, opacity }}
+                                        animate={{ 
+                                            scale: searchState.mid === idx ? 1.08 : 1, 
+                                            opacity,
+                                            boxShadow: searchState.mid === idx ? '0 0 15px rgba(250, 204, 21, 0.4)' : 'none'
+                                        }}
+                                        className={searchState.mid === idx ? 'pulse-glow' : ''}
                                         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                                         layout
                                     >
@@ -308,31 +332,32 @@ const BinarySearch = () => {
 
             {/* Controls */}
             <div style={s.controls}>
-                <button
-                    onClick={startSearch}
-                    disabled={searchState.status === 'running' || searchState.status === 'found' || searchState.status === 'not-found'}
-                    style={s.btn}
-                    onMouseOver={e => !e.target.disabled && (e.target.style.background = '#4338CA')}
-                    onMouseOut={e => !e.target.disabled && (e.target.style.background = '#4F46E5')}
-                >
-                    Start Search
-                </button>
+                <div style={{ position: 'relative' }}>
+                    <button
+                        onClick={startSearch}
+                        disabled={searchState.status === 'running' || searchState.status === 'found' || searchState.status === 'not-found'}
+                        style={s.btn}
+                    >
+                        ▶ Hunt the Number! 🎯
+                    </button>
+                    {showHint && searchState.status === 'idle' && (
+                        <div className="tooltip-hint" style={{ bottom: '110%', left: '50%' }}>
+                            Let's find your target! ✨
+                        </div>
+                    )}
+                </div>
                 <button
                     onClick={nextStep}
                     disabled={searchState.status === 'found' || searchState.status === 'not-found'}
                     style={s.btn}
-                    onMouseOver={e => !e.target.disabled && (e.target.style.background = '#4338CA')}
-                    onMouseOut={e => !e.target.disabled && (e.target.style.background = '#4F46E5')}
                 >
-                    Next Step
+                    ⏭ Take a Step
                 </button>
                 <button
                     onClick={resetSearch}
                     style={s.btn}
-                    onMouseOver={e => !e.target.disabled && (e.target.style.background = '#4338CA')}
-                    onMouseOut={e => !e.target.disabled && (e.target.style.background = '#4F46E5')}
                 >
-                    Reset
+                    ↺ Reset All
                 </button>
             </div>
 

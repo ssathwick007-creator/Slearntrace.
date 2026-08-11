@@ -14,56 +14,28 @@ const ArraysExplorer = () => {
         <div style={styles.shell}>
             <div style={styles.topBar}>
                 <div style={styles.tabs}>
-                    <button
-                        style={{
-                            ...styles.tab,
-                            borderBottom: activeTab === 'train' ? '3px solid #4f46e5' : 'none',
-                            color: activeTab === 'train' ? '#4f46e5' : '#64748b'
-                        }}
-                        onClick={() => setActiveTab('train')}
-                    >
-                        🚂 Fixed Train
-                    </button>
-                    <button
-                        style={{
-                            ...styles.tab,
-                            borderBottom: activeTab === 'concert' ? '3px solid #ef4444' : 'none',
-                            color: activeTab === 'concert' ? '#ef4444' : '#64748b'
-                        }}
-                        onClick={() => setActiveTab('concert')}
-                    >
-                        🤘 Concert Seating
-                    </button>
-                    <button
-                        style={{
-                            ...styles.tab,
-                            borderBottom: activeTab === 'elevator' ? '3px solid #4f46e5' : 'none',
-                            color: activeTab === 'elevator' ? '#4f46e5' : '#64748b'
-                        }}
-                        onClick={() => setActiveTab('elevator')}
-                    >
-                        🛗 Elevator Zoom
-                    </button>
-                    <button
-                        style={{
-                            ...styles.tab,
-                            borderBottom: activeTab === 'library' ? '3px solid #78350f' : 'none',
-                            color: activeTab === 'library' ? '#78350f' : '#64748b'
-                        }}
-                        onClick={() => setActiveTab('library')}
-                    >
-                        📚 Library Bookshelf
-                    </button>
-                    <button
-                        style={{
-                            ...styles.tab,
-                            borderBottom: activeTab === 'parking' ? '3px solid #334155' : 'none',
-                            color: activeTab === 'parking' ? '#334155' : '#64748b'
-                        }}
-                        onClick={() => setActiveTab('parking')}
-                    >
-                        🚗 Parking Lot 2D
-                    </button>
+                    {[
+                        { id: 'train', label: '🚂 Fixed Train' },
+                        { id: 'concert', label: '🤘 Concert Seating' },
+                        { id: 'elevator', label: '🛗 Elevator Zoom' },
+                        { id: 'library', label: '📚 Library Bookshelf' },
+                        { id: 'parking', label: '🚗 Parking Lot 2D' }
+                    ].map(tab => (
+                        <button
+                            key={tab.id}
+                            style={{
+                                ...styles.tab,
+                                backgroundColor: activeTab === tab.id ? '#0f172a' : 'transparent',
+                                color: activeTab === tab.id ? '#fff' : '#64748b',
+                                fontWeight: activeTab === tab.id ? '700' : '500',
+                                boxShadow: activeTab === tab.id ? '0 10px 15px -3px rgba(15, 23, 42, 0.1), 0 4px 6px -2px rgba(15, 23, 42, 0.05)' : 'none',
+                                borderBottom: activeTab === tab.id ? '2px solid #3b82f6' : '2px solid transparent'
+                            }}
+                            onClick={() => setActiveTab(tab.id)}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
                 </div>
 
                 <div style={styles.langSelector}>
@@ -117,56 +89,67 @@ const styles = {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        borderBottom: '1px solid #e2e8f0',
-        marginBottom: '1rem',
+        borderBottom: '1px solid #f1f5f9',
+        marginBottom: '2rem',
         flexWrap: 'wrap',
-        gap: '1rem'
+        gap: '1rem',
+        position: 'sticky',
+        top: '56px',
+        backgroundColor: 'rgba(255,255,255,0.95)',
+        backdropFilter: 'blur(16px)',
+        zIndex: 90,
+        padding: '0.75rem 0'
     },
     tabs: {
         display: 'flex',
-        gap: '2rem',
-        padding: '0 1rem'
+        gap: '0.5rem',
+        padding: '0 1rem',
+        overflowX: 'auto',
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none'
     },
     langSelector: {
         display: 'flex',
         alignItems: 'center',
         gap: '12px',
-        padding: '0 1rem 0.5rem 1rem'
+        padding: '0 1rem'
     },
     langLabel: {
-        fontSize: '0.8rem',
+        fontSize: '0.75rem',
         fontWeight: '700',
         color: '#94a3b8',
-        textTransform: 'uppercase'
+        textTransform: 'uppercase',
+        letterSpacing: '0.05em'
     },
     langButtons: {
         display: 'flex',
         gap: '4px',
         backgroundColor: '#f8fafc',
-        padding: '2px',
-        borderRadius: '8px',
+        padding: '3px',
+        borderRadius: '10px',
         border: '1px solid #e2e8f0'
     },
     langBtn: {
-        padding: '4px 12px',
-        borderRadius: '6px',
-        border: '1px solid transparent',
-        fontSize: '0.8rem',
-        fontWeight: '600',
-        cursor: 'pointer',
-        transition: 'all 0.2s'
-    },
-    tab: {
-        padding: '1rem 0',
-        background: 'none',
+        padding: '5px 14px',
+        borderRadius: '7px',
         border: 'none',
-        fontSize: '1rem',
+        fontSize: '0.75rem',
         fontWeight: '700',
         cursor: 'pointer',
-        transition: 'all 0.2s',
+        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+    },
+    tab: {
+        padding: '0.6rem 1.1rem',
+        background: 'none',
+        border: 'none',
+        fontSize: '0.875rem',
+        cursor: 'pointer',
+        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
         display: 'flex',
         alignItems: 'center',
-        gap: '8px'
+        gap: '8px',
+        whiteSpace: 'nowrap',
+        borderRadius: '10px'
     },
     content: {
         animation: 'fadeIn 0.5s ease'

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useFeedback } from './FeedbackManager.jsx';
 
 const COINS = [25, 10, 5, 1];
 
@@ -9,8 +10,10 @@ const GreedyCoinChange = () => {
     const [selectedCoins, setSelectedCoins] = useState([]);
     const [currentBestCoin, setCurrentBestCoin] = useState(null);
     const [isRunning, setIsRunning] = useState(false);
-    const [message, setMessage] = useState('Welcome to the Fast Vending Machine! Goal: Return change using the fewest coins.');
+    const [message, setMessage] = useState('Welcome! Let\'s return the change using the fewest coins possible.');
     const [activeLang, setActiveLang] = useState('javascript');
+    const { showFeedback } = useFeedback();
+    const [showHint, setShowHint] = useState(true);
 
     const reset = () => {
         setRemaining(target);
@@ -24,6 +27,7 @@ const GreedyCoinChange = () => {
         if (remaining <= 0) {
             setIsRunning(false);
             setMessage(`Finished! Returned change using ${selectedCoins.length} coins.`);
+            showFeedback("Success! Change returned 🪙🚀", "success");
             return;
         }
 
@@ -31,6 +35,7 @@ const GreedyCoinChange = () => {
         if (bestCoin) {
             setCurrentBestCoin(bestCoin);
             setMessage(`Step: Largest coin ≤ ${remaining} is ${bestCoin}. Subtracting it...`);
+            showFeedback(`Picking ${bestCoin}¢ coin! 🎯`);
 
             // Artificial delay for subtraction after showing "current best"
             setTimeout(() => {
@@ -112,8 +117,10 @@ const GreedyCoinChange = () => {
                                 animate={{
                                     scale: currentBestCoin === c ? 1.15 : 1,
                                     backgroundColor: currentBestCoin === c ? '#FEF9C3' : '#F1F5F9',
-                                    borderColor: currentBestCoin === c ? '#FACC15' : '#E2E8F0'
+                                    borderColor: currentBestCoin === c ? '#FACC15' : '#E2E8F0',
+                                    boxShadow: currentBestCoin === c ? '0 0 15px rgba(250, 204, 21, 0.4)' : 'none'
                                 }}
+                                className={currentBestCoin === c ? 'pulse-glow' : ''}
                                 style={styles.slot}
                             >
                                 <div style={{ ...styles.coin, background: '#F59E0B', marginBottom: '8px' }}>{c}</div>
@@ -147,9 +154,16 @@ const GreedyCoinChange = () => {
                             style={styles.input}
                         />
                     </div>
-                    <button onClick={() => setIsRunning(true)} disabled={isRunning || remaining <= 0} style={styles.primaryBtn}>Start Simulation</button>
-                    <button onClick={nextStep} disabled={isRunning || remaining <= 0} style={styles.secondaryBtn}>Next Step</button>
-                    <button onClick={reset} style={styles.dangerBtn}>Reset</button>
+                    <div style={{ position: 'relative' }}>
+                        <button onClick={() => { setIsRunning(true); setShowHint(false); }} disabled={isRunning || remaining <= 0} style={styles.primaryBtn}>▶ Give Change! 🪙</button>
+                        {showHint && !isRunning && (
+                            <div className="tooltip-hint" style={{ bottom: '110%', left: '50%' }}>
+                                Let's be greedy! ✨
+                            </div>
+                        )}
+                    </div>
+                    <button onClick={() => { nextStep(); setShowHint(false); }} disabled={isRunning || remaining <= 0} style={styles.secondaryBtn}>⏭ Next Coin</button>
+                    <button onClick={reset} style={styles.dangerBtn}>↺ Reset</button>
                 </div>
             </div>
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { useFeedback } from './FeedbackManager.jsx';
 
 const INITIAL_PUZZLE = [
     [5, 3, 0, 0, 7, 0, 0, 0, 0],
@@ -21,6 +22,8 @@ const SudokuSolver = () => {
     const [isRunning, setIsRunning] = useState(false);
     const [activeLang, setActiveLang] = useState('javascript');
     const stopRef = useRef(false);
+    const { showFeedback } = useFeedback();
+    const [showHint, setShowHint] = useState(true);
     const stepsRef = useRef([]);
     const stepIdxRef = useRef(0);
 
@@ -44,17 +47,17 @@ const SudokuSolver = () => {
                         for (let num = 1; num <= 9; num++) {
                             if (isValid(bd, r, c, num)) {
                                 bd[r][c] = num;
-                                steps.push({ grid: bd.map(x => [...x]), highlight: `${r}-${c}`, color: 'green', msg: `✅ Placed ${num} at (${r + 1}, ${c + 1}).` });
+                                steps.push({ grid: bd.map(x => [...x]), highlight: `${r}-${c}`, color: 'green', msg: `✅ Placed ${num} at (${r + 1}, ${c + 1}).`, feedback: { msg: "Number placed! 📝" } });
                                 if (solve()) return true;
                                 bd[r][c] = 0;
-                                steps.push({ grid: bd.map(x => [...x]), highlight: `${r}-${c}`, color: 'red', msg: `↩️ Backtrack: removed ${num} from (${r + 1}, ${c + 1}).` });
+                                steps.push({ grid: bd.map(x => [...x]), highlight: `${r}-${c}`, color: 'red', msg: `↩️ Backtrack: removed ${num} from (${r + 1}, ${c + 1}).`, feedback: { msg: "Conflict found... backing up. 🔄", type: "info" } });
                             }
                         }
                         return false;
                     }
                 }
             }
-            steps.push({ grid: bd.map(x => [...x]), highlight: null, color: null, msg: '🎉 Sudoku solved successfully!' });
+            steps.push({ grid: bd.map(x => [...x]), highlight: null, color: null, msg: '🎉 Sudoku solved successfully!', feedback: { msg: "Puzzle solved! You're a logic master 🏆", type: "success" } });
             return true;
         };
         solve();
@@ -67,6 +70,7 @@ const SudokuSolver = () => {
         setGrid(s.grid);
         setColorMap(s.highlight ? { [s.highlight]: s.color } : {});
         setMessage(s.msg);
+        if (s.feedback) showFeedback(s.feedback.msg, s.feedback.type || 'info');
     };
 
     const startSimulation = () => {
@@ -225,6 +229,7 @@ const SudokuSolver = () => {
                                     key={`${r}-${c}`}
                                     animate={{ backgroundColor: getCellBg(r, c) }}
                                     transition={{ duration: 0.15 }}
+                                    className={colorMap[`${r}-${c}`] ? 'pulse-glow' : ''}
                                     style={{
                                         width: 42, height: 42,
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -234,6 +239,7 @@ const SudokuSolver = () => {
                                         borderRight: (c + 1) % 3 === 0 && c < 8 ? '3px solid #1E293B' : '1px solid #CBD5E1',
                                         borderBottom: (r + 1) % 3 === 0 && r < 8 ? '3px solid #1E293B' : '1px solid #CBD5E1',
                                         userSelect: 'none',
+                                        boxShadow: colorMap[`${r}-${c}`] === 'green' ? '0 0 10px rgba(79, 70, 229, 0.4)' : 'none'
                                     }}
                                 >
                                     {cell !== 0 ? cell : ''}
@@ -252,9 +258,18 @@ const SudokuSolver = () => {
 
                 {/* Controls */}
                 <div style={styles.controls}>
-                    <button onClick={startSimulation} disabled={isRunning} style={styles.primaryBtn}>Start Simulation</button>
-                    <button onClick={nextStep} disabled={isRunning} style={styles.secondaryBtn}>Next Step</button>
-                    <button onClick={reset} style={styles.dangerBtn}>Reset</button>
+                    <div style={{ position: 'relative' }}>
+                        <button onClick={() => { startSimulation(); setShowHint(false); }} disabled={isRunning} style={styles.primaryBtn}>
+                            ▶ Solve the Board! 🏆
+                        </button>
+                        {showHint && !isRunning && (
+                            <div className="tooltip-hint" style={{ bottom: '110%', left: '50%' }}>
+                                Let's solve it! ✨
+                            </div>
+                        )}
+                    </div>
+                    <button onClick={() => { nextStep(); setShowHint(false); }} disabled={isRunning} style={styles.secondaryBtn}>⏭ Step Through</button>
+                    <button onClick={reset} style={styles.dangerBtn}>↺ Clear All</button>
                 </div>
             </div>
 

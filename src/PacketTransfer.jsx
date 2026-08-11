@@ -2,351 +2,259 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const PacketTransfer = () => {
-    const [status, setStatus] = useState('idle'); // idle, splitting, transferring, assembling, done
+    const [status, setStatus] = useState('idle'); // 'idle', 'splitting', 'transferring', 'assembling', 'done'
     const [stepMode, setStepMode] = useState(false);
-    const [stepText, setStepText] = useState('');
+    const [stepIndex, setStepIndex] = useState(-1);
 
-    const startTransfer = () => {
+    const packets = [
+        { id: 1, seq: '#001', data: 'He' },
+        { id: 2, seq: '#002', data: 'll' },
+        { id: 3, seq: '#003', data: 'o!' },
+    ];
+
+    const transferSteps = [
+        { status: 'splitting', label: '1. Fragmentation', desc: 'Large data is sliced into smaller units called MTU (Maximum Transmission Unit).' },
+        { status: 'transferring', label: '2. Transmission', desc: 'Packets travel independently. They might even take different routes!' },
+        { status: 'assembling', label: '3. Reassembly', desc: 'The receiver uses Sequence Numbers to put the puzzle back together.' },
+        { status: 'done', label: '4. Complete', desc: 'Original data "Hello!" is perfectly restored.' }
+    ];
+
+    const handleRunSim = () => {
+        setStepMode(false);
+        runAuto();
+    };
+
+    const runAuto = async () => {
+        setStatus('splitting'); await wait(1000);
+        setStatus('transferring'); await wait(2000);
+        setStatus('assembling'); await wait(1200);
+        setStatus('done');
+    };
+
+    const wait = (ms) => new Promise(res => setTimeout(res, ms));
+
+    const handleStepStart = () => {
+        setStepMode(true);
+        setStepIndex(0);
         setStatus('splitting');
-        setStepText('Step 1: Packet leaves source');
-        setTimeout(() => {
-            setStatus('transferring');
-            setStepText('Step 2: Packets travel through network');
-        }, 1000);
-        setTimeout(() => {
-            setStatus('assembling');
-            setStepText('Step 3: Packets are reassembled');
-        }, 2500);
-        setTimeout(() => setStatus('done'), 3500);
     };
 
-    const reset = () => {
+    const handleNextStep = () => {
+        if (stepIndex < 3) {
+            const next = stepIndex + 1;
+            setStepIndex(next);
+            setStatus(transferSteps[next].status);
+        }
+    };
+
+    const handleReset = () => {
         setStatus('idle');
-        setStepText('');
+        setStepMode(false);
+        setStepIndex(-1);
     };
 
-    const packets = [1, 2, 3, 4];
+    const handleReplay = () => {
+        setStepMode(false);
+        runAuto();
+    };
 
     return (
         <div style={styles.container}>
-            <div style={styles.contentHeader}>
-                <h2 style={styles.contentTitle}>Packet Transfer — Breaking the Parcel</h2>
-                <p style={styles.contentSubtitle}>Learn why the internet breaks large files into tiny "packets" to send them across the network efficiently.</p>
-                <p style={styles.quickLine}>In 10 seconds: big data is split into small packets, sent fast, then rebuilt.</p>
+            <div style={styles.headerArea}>
+                <h2 style={styles.hubTitle}>Packet Transfer</h2>
+                <p style={styles.hubSubtitle}>Big files are broken into tiny "packets" to travel light and fast across the web.</p>
+                <div style={styles.metaphorBox}>
+                    <span style={styles.metaphorTag}>Metaphor</span>
+                    <p style={styles.metaphorText}>The <strong>Puzzle Parcel</strong>: Sending a giant box is hard. Breaking it into small pieces (packets) makes it easier to move. The receiver just follows the numbers to rebuild it!</p>
+                </div>
             </div>
 
             <div style={styles.card}>
-                <div style={styles.transferStage}>
-                    <div style={styles.nodeSection}>
-                        <div style={styles.nodeTitle}>Sender</div>
-                        <AnimatePresence>
-                            {status === 'idle' && (
-                                <motion.div 
-                                    initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
-                                    style={styles.largeParcel}
-                                >
-                                    📦 Data Parcel
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                        {status === 'splitting' && (
-                            <div style={styles.packetGrid}>
-                                {packets.map(p => (
-                                    <motion.div 
-                                        key={p} 
-                                        initial={{ scale: 0 }} animate={{ scale: 1 }}
-                                        style={styles.microPacket}
-                                    >
-                                        📄 p{p}
+                <div style={styles.mainControls}>
+                    {!stepMode ? (
+                        <div style={styles.initialBtns}>
+                            <button style={styles.primaryBtn} onClick={handleRunSim}>Start Transmission</button>
+                            <button style={styles.secondaryBtn} onClick={handleStepStart}>▶ Start Step Mode</button>
+                        </div>
+                    ) : (
+                        <div style={styles.stepControls}>
+                            <button 
+                                style={{...styles.nextBtn, opacity: stepIndex === 3 ? 0.5 : 1}} 
+                                onClick={handleNextStep} 
+                                disabled={stepIndex === 3}
+                            >
+                                Next Step →
+                            </button>
+                            <button style={styles.ghostBtn} onClick={handleReplay}>↺ Replay</button>
+                            <button style={styles.ghostBtn} onClick={handleReset}>✕ Reset</button>
+                        </div>
+                    )}
+                </div>
+
+                <div style={styles.stageArea}>
+                    <div style={styles.nodeColumn}>
+                        <span style={styles.columnLabel}>Sender</span>
+                        <div style={styles.nodeBox}>
+                            <AnimatePresence mode="wait">
+                                {status === 'idle' && (
+                                    <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} style={styles.giantData}>
+                                        <span style={{fontSize: '2rem'}}>📄</span>
+                                        <strong>"Hello!"</strong>
                                     </motion.div>
-                                ))}
-                            </div>
-                        )}
+                                )}
+                                {status === 'splitting' && (
+                                    <div style={styles.fragmentGrid}>
+                                        {packets.map(p => (
+                                            <motion.div 
+                                                key={p.id} 
+                                                initial={{ y: -10, opacity: 0 }} 
+                                                animate={{ y: 0, opacity: 1 }}
+                                                style={styles.microPacket}
+                                            >
+                                                <span style={styles.seqTag}>{p.seq}</span>
+                                                <span style={styles.dataShort}>{p.data}</span>
+                                            </motion.div>
+                                        ))}
+                                    </div>
+                                )}
+                            </AnimatePresence>
+                        </div>
                     </div>
 
-                    <div style={styles.networkBackbone}>
-                        <div style={styles.backboneLine}></div>
-                        {status === 'transferring' && packets.map((p, i) => (
-                            <motion.div
-                                key={p}
-                                initial={{ left: '0%', opacity: 0 }}
-                                animate={{ 
-                                    left: '100%',
-                                    opacity: 1,
-                                    y: [0, (i % 2 === 0 ? -20 : 20), 0]
-                                }}
-                                transition={{ duration: 1.5, delay: i * 0.2, ease: "easeInOut" }}
-                                style={styles.travelingPacket}
+                    <div style={styles.wireStage}>
+                        <div style={styles.wireLine} />
+                        <AnimatePresence>
+                            {status === 'transferring' && packets.map((p, i) => (
+                                <motion.div
+                                    key={p.id}
+                                    initial={{ left: '0%', opacity: 0 }}
+                                    animate={{ 
+                                        left: '100%', 
+                                        opacity: 1,
+                                        y: [0, i % 2 === 0 ? -15 : 15, 0] 
+                                    }}
+                                    transition={{ duration: 1.8, delay: i * 0.3, ease: "easeInOut" }}
+                                    style={styles.flyingPacket}
+                                >
+                                    📩
+                                </motion.div>
+                            ))}
+                        </AnimatePresence>
+                    </div>
+
+                    <div style={styles.nodeColumn}>
+                        <span style={styles.columnLabel}>Receiver</span>
+                        <div style={styles.nodeBox}>
+                            <AnimatePresence mode="wait">
+                                {status === 'assembling' && (
+                                    <div style={styles.fragmentGrid}>
+                                        {packets.map(p => (
+                                            <motion.div 
+                                                key={p.id} 
+                                                initial={{ scale: 0.5, opacity: 0 }} 
+                                                animate={{ scale: 1, opacity: 1 }}
+                                                style={{...styles.microPacket, borderColor: '#10b981'}}
+                                            >
+                                                <span style={styles.seqTag}>{p.seq}</span>
+                                                <span style={styles.dataShort}>{p.data}</span>
+                                            </motion.div>
+                                        ))}
+                                    </div>
+                                )}
+                                {status === 'done' && (
+                                    <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} style={{...styles.giantData, borderColor: '#10b981', backgroundColor: '#f0fdf4'}}>
+                                        <span style={{fontSize: '2rem'}}>✅</span>
+                                        <strong>"Hello!"</strong>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    </div>
+                </div>
+
+                <div style={styles.theoryRow}>
+                    <div style={styles.statusDisplay}>
+                        <AnimatePresence mode="wait">
+                            <motion.div 
+                                key={status} 
+                                initial={{ opacity: 0, x: -10 }} 
+                                animate={{ opacity: 1, x: 0 }}
+                                style={styles.statusCard}
                             >
-                                📄
+                                <span style={styles.statusLabel}>
+                                    {stepMode && stepIndex >= 0 ? transferSteps[stepIndex].label : "Transfer Progress"}
+                                </span>
+                                <p style={styles.statusDesc}>
+                                    {stepMode && stepIndex >= 0 ? transferSteps[stepIndex].desc : 
+                                     status === 'idle' ? "Waitng for transmission. We have a 'Hello!' message to send." :
+                                     "Watch how the data is handled in each phase..."}
+                                </p>
                             </motion.div>
-                        ))}
-                    </div>
-
-                    <div style={styles.nodeSection}>
-                        <div style={styles.nodeTitle}>Receiver</div>
-                        {status === 'assembling' && (
-                            <div style={styles.packetGrid}>
-                                {packets.map(p => (
-                                    <motion.div 
-                                        key={p} 
-                                        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                                        style={styles.microPacket}
-                                    >
-                                        📄 p{p}
-                                    </motion.div>
-                                ))}
-                            </div>
-                        )}
-                        <AnimatePresence>
-                            {status === 'done' && (
-                                <motion.div 
-                                    initial={{ scale: 0, y: 20 }} animate={{ scale: 1, y: 0 }}
-                                    style={{...styles.largeParcel, backgroundColor: '#dcfce7', borderColor: '#10b981'}}
-                                >
-                                    📦 Reassembled
-                                </motion.div>
-                            )}
                         </AnimatePresence>
                     </div>
-                </div>
-
-                <div style={styles.explanationArea}>
-                    <div style={styles.textDetails}>
-                        <h4 style={styles.theoryTitle}>The Power of Packets</h4>
-                        <p style={styles.theoryText}>
-                            Small packets are easier to manage. If one packet gets lost, only that 
-                            piece needs to be resent, not the entire file. They can also take 
-                            different routes to avoid traffic jams!
-                        </p>
-                        <p style={styles.realHint}>💡 In real systems, each packet carries sequence data so receivers can reorder correctly.</p>
-                    </div>
-                    <div style={styles.interactionStrip}>
-                        <div style={styles.statusPill}>
-                            {status === 'idle' && "Ready to transmit..."}
-                            {status === 'splitting' && "✂️ Slicing data into packets..."}
-                            {status === 'transferring' && "⚡ Traveling through cables..."}
-                            {status === 'assembling' && "🧩 Piecing it back together..."}
-                            {status === 'done' && "✅ Delivery complete!"}
-                        </div>
-                        <div style={styles.btnGroup}>
-                            <motion.button 
-                                whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                                onClick={startTransfer} style={styles.mainBtn} disabled={status !== 'idle'}
-                            >
-                                Start Transfer
-                            </motion.button>
-                            <motion.button 
-                                whileHover={{ backgroundColor: '#f1f5f9' }}
-                                onClick={reset} style={styles.resetBtn}
-                            >
-                                Try Again
-                            </motion.button>
-                            <button style={styles.resetBtn} onClick={() => setStepMode(v => !v)}>
-                                {stepMode ? 'Step Off' : '▶ Step Mode'}
-                            </button>
-                            <button style={styles.resetBtn} onClick={startTransfer} disabled={status !== 'done' && status !== 'idle'}>
-                                Replay Animation
-                            </button>
+                    <div style={styles.hintColumn}>
+                        <div style={styles.quickTip}>
+                            <strong>Why do this?</strong>
+                            <p>If one tiny packet is lost, we only resend 2 letters, not the whole book!</p>
                         </div>
                     </div>
                 </div>
-                {stepMode && stepText && <div style={styles.stepBox}>{stepText}</div>}
-                {status === 'done' && <div style={styles.successMsg}>Packet Delivered Successfully 🚀</div>}
             </div>
         </div>
     );
 };
 
 const styles = {
-    container: {
-        maxWidth: '1000px',
-        margin: '0 auto',
-        padding: '1rem 0'
+    container: { maxWidth: '1000px', margin: '0 auto', padding: '0.5rem 0' },
+    headerArea: { marginBottom: '2rem', textAlign: 'left' },
+    hubTitle: { fontSize: '1.75rem', fontWeight: '900', color: '#0f172a', marginBottom: '0.4rem', letterSpacing: '-0.5px' },
+    hubSubtitle: { fontSize: '1rem', color: '#64748b', marginBottom: '1.25rem' },
+    metaphorBox: { 
+        backgroundColor: '#f8fafc', padding: '1.25rem', borderRadius: '16px', borderLeft: '4px solid #10b981',
+        display: 'flex', alignItems: 'center', gap: '1rem' 
     },
-    contentHeader: {
-        marginBottom: '2rem',
-        textAlign: 'left'
+    metaphorTag: { fontSize: '0.75rem', fontWeight: '800', backgroundColor: '#10b981', color: '#fff', padding: '2px 8px', borderRadius: '6px', textTransform: 'uppercase' },
+    metaphorText: { margin: 0, fontSize: '1rem', color: '#334155', lineHeight: '1.5' },
+
+    card: { backgroundColor: '#fff', borderRadius: '24px', border: '1px solid #f1f5f9', boxShadow: '0 10px 30px -10px rgba(0,0,0,0.05)', padding: '2.5rem' },
+    mainControls: { marginBottom: '2.5rem', display: 'flex', justifyContent: 'center' },
+    initialBtns: { display: 'flex', alignItems: 'center', gap: '1rem' },
+    primaryBtn: { border: 'none', backgroundColor: '#0f172a', color: '#fff', borderRadius: '12px', padding: '0.75rem 1.5rem', cursor: 'pointer', fontWeight: '700', boxShadow: '0 4px 12px rgba(15, 23, 42, 0.2)' },
+    secondaryBtn: { background: 'none', border: '1px dashed #cbd5e1', color: '#64748b', borderRadius: '12px', padding: '0.75rem 1.5rem', cursor: 'pointer', fontWeight: '600' },
+    stepControls: { display: 'flex', gap: '0.75rem', alignItems: 'center' },
+    nextBtn: { border: 'none', backgroundColor: '#10b981', color: '#fff', borderRadius: '12px', padding: '0.7rem 1.4rem', cursor: 'pointer', fontWeight: '700' },
+    ghostBtn: { background: 'none', border: '1px solid #e2e8f0', color: '#64748b', borderRadius: '12px', padding: '0.7rem 1.2rem', cursor: 'pointer', fontWeight: '600' },
+
+    stageArea: { 
+        height: '240px', backgroundColor: '#f8fafc', borderRadius: '24px', position: 'relative', 
+        border: '1px solid #f1f5f9', marginBottom: '3rem', display: 'flex', alignItems: 'center', padding: '0 2rem' 
     },
-    contentTitle: {
-        fontSize: '1.75rem',
-        fontWeight: '800',
-        color: '#0f172a',
-        marginBottom: '0.5rem'
+    nodeColumn: { flex: '0 0 150px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' },
+    columnLabel: { fontSize: '0.75rem', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1px' },
+    nodeBox: { width: '100%', height: '140px', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+    giantData: { 
+        padding: '1.5rem', backgroundColor: '#fff', borderRadius: '20px', border: '2px solid #e2e8f0', 
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 10px rgba(0,0,0,0.03)' 
     },
-    contentSubtitle: {
-        fontSize: '1rem',
-        color: '#64748b',
-        fontWeight: '400'
+    fragmentGrid: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' },
+    microPacket: { 
+        width: '40px', height: '48px', backgroundColor: '#fff', borderRadius: '10px', border: '1.5px solid #e2e8f0',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px' 
     },
-    quickLine: {
-        marginTop: '0.5rem',
-        fontSize: '0.92rem',
-        color: '#334155'
-    },
-    card: {
-        backgroundColor: '#fff',
-        borderRadius: '20px',
-        border: '1px solid #f1f5f9',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
-        padding: '2.5rem'
-    },
-    transferStage: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        backgroundColor: '#f8fafc',
-        borderRadius: '16px',
-        padding: '3rem 2rem',
-        border: '1px solid #f1f5f9',
-        marginBottom: '2.5rem',
-        minHeight: '220px'
-    },
-    nodeSection: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        width: '140px'
-    },
-    nodeTitle: {
-        fontSize: '0.75rem',
-        fontWeight: '800',
-        textTransform: 'uppercase',
-        letterSpacing: '1px',
-        color: '#94a3b8',
-        marginBottom: '1rem'
-    },
-    largeParcel: {
-        padding: '1rem 1.5rem',
-        backgroundColor: '#fff',
-        border: '2px solid #e2e8f0',
-        borderRadius: '12px',
-        fontWeight: '700',
-        fontSize: '0.9rem',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-        color: '#1e293b'
-    },
-    packetGrid: {
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '8px'
-    },
-    microPacket: {
-        padding: '4px 8px',
-        backgroundColor: '#fff',
-        border: '1px solid #cbd5e1',
-        borderRadius: '6px',
-        fontSize: '0.7rem',
-        fontWeight: '700'
-    },
-    networkBackbone: {
-        flex: 1,
-        height: '4px',
-        margin: '0 3rem',
-        position: 'relative'
-    },
-    backboneLine: {
-        position: 'absolute',
-        top: '50%',
-        left: 0,
-        right: 0,
-        height: '2px',
-        backgroundColor: '#e2e8f0',
-        transform: 'translateY(-50%)',
-        opacity: 0.5
-    },
-    travelingPacket: {
-        position: 'absolute',
-        fontSize: '1.4rem',
-        top: '-15px',
-        zIndex: 10
-    },
-    explanationArea: {
-        display: 'grid',
-        gridTemplateColumns: '1.2fr 1fr',
-        gap: '3rem',
-        alignItems: 'center'
-    },
-    theoryTitle: {
-        fontSize: '1.25rem',
-        color: '#0f172a',
-        marginBottom: '0.75rem',
-        fontWeight: '800'
-    },
-    theoryText: {
-        fontSize: '1rem',
-        color: '#475569',
-        lineHeight: '1.6',
-        margin: 0
-    },
-    realHint: {
-        marginTop: '0.8rem',
-        color: '#0f766e',
-        backgroundColor: '#ecfeff',
-        borderRadius: '8px',
-        padding: '0.5rem 0.7rem',
-        fontSize: '0.88rem'
-    },
-    interactionStrip: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1.25rem'
-    },
-    statusPill: {
-        padding: '0.75rem',
-        backgroundColor: '#f1f5f9',
-        color: '#475569',
-        borderRadius: '12px',
-        fontSize: '0.875rem',
-        fontWeight: '700',
-        textAlign: 'center',
-        border: '1px solid #e2e8f0'
-    },
-    btnGroup: {
-        display: 'flex',
-        gap: '0.75rem'
-    },
-    mainBtn: {
-        flex: 2,
-        padding: '0.85rem',
-        backgroundColor: '#0f172a',
-        color: '#fff',
-        border: 'none',
-        borderRadius: '12px',
-        cursor: 'pointer',
-        fontSize: '0.9rem',
-        fontWeight: '700',
-        transition: 'all 0.2s ease'
-    },
-    resetBtn: {
-        flex: 1,
-        padding: '0.85rem',
-        backgroundColor: '#fff',
-        color: '#64748b',
-        border: '1px solid #e2e8f0',
-        borderRadius: '12px',
-        cursor: 'pointer',
-        fontSize: '0.875rem',
-        fontWeight: '600'
-    },
-    stepBox: {
-        marginTop: '1rem',
-        backgroundColor: '#eff6ff',
-        color: '#1d4ed8',
-        border: '1px solid #bfdbfe',
-        borderRadius: '10px',
-        padding: '0.65rem 0.85rem',
-        fontSize: '0.9rem'
-    },
-    successMsg: {
-        marginTop: '0.8rem',
-        backgroundColor: '#dcfce7',
-        color: '#166534',
-        borderRadius: '10px',
-        padding: '0.6rem 0.8rem',
-        textAlign: 'center',
-        fontWeight: '700'
-    }
+    seqTag: { fontSize: '8px', fontWeight: '800', color: '#94a3b8' },
+    dataShort: { fontSize: '10px', fontWeight: '900', color: '#0f172a' },
+    wireStage: { flex: 1, padding: '0 2rem', position: 'relative', height: '100%', display: 'flex', alignItems: 'center' },
+    wireLine: { width: '100%', height: '2px', backgroundColor: '#e2e8f0', borderStyle: 'dashed' },
+    flyingPacket: { position: 'absolute', fontSize: '1.5rem', zIndex: 10 },
+
+    theoryRow: { display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '2rem' },
+    statusDisplay: { backgroundColor: '#fff', padding: '1.5rem', borderRadius: '20px', border: '1.5px solid #f1f5f9' },
+    statusCard: { display: 'flex', flexDirection: 'column', gap: '0.5rem' },
+    statusLabel: { fontSize: '0.8rem', fontWeight: '800', color: '#10b981', textTransform: 'uppercase' },
+    statusDesc: { margin: 0, fontSize: '1rem', color: '#475569', lineHeight: '1.5' },
+    hintColumn: { display: 'flex', alignItems: 'center' },
+    quickTip: { backgroundColor: '#f0fdf4', padding: '1.25rem', borderRadius: '16px', border: '1px solid #dcfce7' },
+    tipText: { fontSize: '0.9rem', color: '#166534', margin: '4px 0 0 0', lineHeight: '1.5' }
 };
 
 export default PacketTransfer;

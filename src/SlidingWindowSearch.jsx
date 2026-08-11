@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useFeedback } from './FeedbackManager.jsx';
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -18,6 +19,8 @@ const SlidingWindowSearch = () => {
     });
 
     const [activeLang, setActiveLang] = useState('python');
+    const { showFeedback } = useFeedback();
+    const [showHint, setShowHint] = useState(true);
     const autoRunRef = useRef(false);
 
     // Auto Play Effect
@@ -104,6 +107,16 @@ const SlidingWindowSearch = () => {
         return state;
     };
 
+    const stepWithFeedback = (state) => {
+        const next = calculateNextStep(state);
+        if (next.status === 'completed' && state.status !== 'completed') {
+            showFeedback(`Maximum sum of ${next.maxSum} found! 🏆`, "success");
+        } else if (next.phase === 'slide-window' && state.phase !== 'slide-window') {
+            showFeedback("Slide! 📷 New data captured.");
+        }
+        return next;
+    };
+
     // UI Handlers
     const startSearch = () => {
         if (searchState.k > searchState.array.length || searchState.k <= 0) {
@@ -112,7 +125,8 @@ const SlidingWindowSearch = () => {
         }
         resetSearch();
         autoRunRef.current = true;
-        setSearchState(prev => calculateNextStep({ ...prev, status: 'idle' }));
+        setSearchState(prev => stepWithFeedback({ ...prev, status: 'idle' }));
+        setShowHint(false);
     };
 
     const nextStep = () => {
@@ -121,7 +135,8 @@ const SlidingWindowSearch = () => {
             return;
         }
         autoRunRef.current = false;
-        setSearchState(prev => calculateNextStep(prev));
+        setSearchState(prev => stepWithFeedback(prev));
+        setShowHint(false);
     };
 
     const resetSearch = () => {
@@ -142,11 +157,9 @@ const SlidingWindowSearch = () => {
         <div style={s.container}>
             {/* Header */}
             <div style={s.header}>
-                <h2 style={s.title}>Sliding Window — The Moving Camera Frame 📷</h2>
+                <h2 style={s.title}>Sliding Window — The Moving Camera 📷</h2>
                 <div style={s.desc}>
-                    <p>Imagine a camera frame moving across a row of objects.</p>
-                    <p>The camera only captures a few objects at a time. As the frame slides forward, new objects enter the frame and old ones leave.</p>
-                    <p>The <strong>Sliding Window</strong> technique avoids recalculating overlapping parts of the array by reusing previous work.</p>
+                    <p>The Sliding Window is like a camera frame. Instead of looking at everything, we focus on a small part and slide it across!</p>
                 </div>
             </div>
 
@@ -195,7 +208,11 @@ const SlidingWindowSearch = () => {
                                 <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                     <motion.div
                                         style={{ ...s.box, backgroundColor: bg, color: textColor }}
-                                        animate={{ scale: inWindow ? 1.05 : 1 }}
+                                        animate={{ 
+                                            scale: inWindow ? 1.08 : 1,
+                                            boxShadow: inWindow ? '0 0 15px rgba(250, 204, 21, 0.4)' : 'none'
+                                        }}
+                                        className={inWindow ? 'pulse-glow' : ''}
                                         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                                         layout
                                     >
@@ -263,31 +280,32 @@ const SlidingWindowSearch = () => {
 
             {/* Controls */}
             <div style={s.controls}>
-                <button
-                    onClick={startSearch}
-                    disabled={searchState.status === 'running' || searchState.status === 'completed'}
-                    style={s.btn}
-                    onMouseOver={e => !e.target.disabled && (e.target.style.background = '#4338CA')}
-                    onMouseOut={e => !e.target.disabled && (e.target.style.background = '#4F46E5')}
-                >
-                    Start Sliding
-                </button>
+                <div style={{ position: 'relative' }}>
+                    <button
+                        onClick={startSearch}
+                        disabled={searchState.status === 'running' || searchState.status === 'completed'}
+                        style={s.btn}
+                    >
+                        ▶ Slide the Frame! 📷
+                    </button>
+                    {showHint && searchState.status === 'idle' && (
+                        <div className="tooltip-hint" style={{ bottom: '110%', left: '50%' }}>
+                            Start the camera! ✨
+                        </div>
+                    )}
+                </div>
                 <button
                     onClick={nextStep}
                     disabled={searchState.status === 'completed'}
                     style={s.btn}
-                    onMouseOver={e => !e.target.disabled && (e.target.style.background = '#4338CA')}
-                    onMouseOut={e => !e.target.disabled && (e.target.style.background = '#4F46E5')}
                 >
-                    Slide Next
+                    ⏭ Next Slide
                 </button>
                 <button
                     onClick={resetSearch}
                     style={s.btn}
-                    onMouseOver={e => !e.target.disabled && (e.target.style.background = '#4338CA')}
-                    onMouseOut={e => !e.target.disabled && (e.target.style.background = '#4F46E5')}
                 >
-                    Reset
+                    ↺ Reset All
                 </button>
             </div>
 

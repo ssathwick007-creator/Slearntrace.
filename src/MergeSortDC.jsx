@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useFeedback } from './FeedbackManager.jsx';
 
 const INITIAL_ARR = [8, 3, 5, 2, 7, 4];
 
@@ -9,6 +10,8 @@ const MergeSortDC = () => {
     const [isRunning, setIsRunning] = useState(false);
     const [message, setMessage] = useState('A factory that processes tasks by splitting them into smaller ones, solving each, then combining.');
     const [activeLang, setActiveLang] = useState('javascript');
+    const { showFeedback } = useFeedback();
+    const [showHint, setShowHint] = useState(true);
     const stopRef = useRef(false);
 
     const buildSteps = () => {
@@ -26,7 +29,7 @@ const MergeSortDC = () => {
             }
             while (i < left.length) a[k++] = left[i++];
             while (j < right.length) a[k++] = right[j++];
-            result.push({ type: 'merge-done', arr: [...a], l, r, depth, msg: `✅ Merged → [${a.slice(l, r + 1)}]` });
+            result.push({ type: 'merge-done', arr: [...a], l, r, depth, msg: `✅ Merged → [${a.slice(l, r + 1)}]`, feedback: { msg: "Successfully combined! 🧩" } });
         };
 
         const sort = (a, l, r, depth) => {
@@ -35,14 +38,14 @@ const MergeSortDC = () => {
                 return;
             }
             const m = Math.floor((l + r) / 2);
-            result.push({ type: 'divide', arr: [...a], l, m, r, depth, msg: `Divide [${a.slice(l, r + 1)}] → [${a.slice(l, m + 1)}] | [${a.slice(m + 1, r + 1)}]` });
+            result.push({ type: 'divide', arr: [...a], l, m, r, depth, msg: `Divide [${a.slice(l, r + 1)}] → [${a.slice(l, m + 1)}] | [${a.slice(m + 1, r + 1)}]`, feedback: { msg: "Dividing task... ⚔️" } });
             sort(a, l, m, depth + 1);
             sort(a, m + 1, r, depth + 1);
             merge(a, l, m, r, depth);
         };
 
         sort(arr, 0, arr.length - 1, 0);
-        result.push({ type: 'done', arr: [...arr], l: 0, r: arr.length - 1, depth: 0, msg: '🎉 Array fully sorted!' });
+        result.push({ type: 'done', arr: [...arr], l: 0, r: arr.length - 1, depth: 0, msg: '🎉 Array fully sorted!', feedback: { msg: "Success! Factory completed all tasks 🚀", type: "success" } });
         return result;
     };
 
@@ -50,6 +53,7 @@ const MergeSortDC = () => {
         const s = steps[idx];
         if (!s) return;
         setMessage(s.msg);
+        if (s.feedback) showFeedback(s.feedback.msg, s.feedback.type || 'info');
     };
 
     const startSimulation = () => {
@@ -201,13 +205,14 @@ void mergeSort(vector<int>& arr, int l, int r) {
                                 key={idx}
                                 animate={{ backgroundColor: c.bg, borderColor: c.border }}
                                 transition={{ duration: 0.3 }}
+                                className={currentStep && currentStep.type !== 'done' && idx >= currentStep.l && idx <= currentStep.r ? 'pulse-glow' : ''}
                                 style={{
                                     width: 52, height: 52,
                                     borderRadius: '12px',
                                     border: `3px solid ${c.border}`,
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                     fontSize: '1.2rem', fontWeight: '900', color: '#1E293B',
-                                    boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+                                    boxShadow: c.bg === '#DCFCE7' ? '0 0 10px rgba(34, 197, 94, 0.3)' : '0 2px 8px rgba(0,0,0,0.06)'
                                 }}
                             >
                                 {val}
@@ -242,9 +247,18 @@ void mergeSort(vector<int>& arr, int l, int r) {
 
                 {/* Controls */}
                 <div style={styles.controls}>
-                    <button onClick={startSimulation} disabled={isRunning} style={styles.primaryBtn}>Start Simulation</button>
-                    <button onClick={nextStep} disabled={isRunning} style={styles.secondaryBtn}>Next Step</button>
-                    <button onClick={reset} style={styles.dangerBtn}>Reset</button>
+                    <div style={{ position: 'relative' }}>
+                        <button onClick={() => { startSimulation(); setShowHint(false); }} disabled={isRunning} style={styles.primaryBtn}>
+                            ▶ Process Tasks! ⚙️
+                        </button>
+                        {showHint && !isRunning && (
+                            <div className="tooltip-hint" style={{ bottom: '110%', left: '50%' }}>
+                                Let's divide and conquer! ✨
+                            </div>
+                        )}
+                    </div>
+                    <button onClick={() => { nextStep(); setShowHint(false); }} disabled={isRunning} style={styles.secondaryBtn}>⏭ Next Stage</button>
+                    <button onClick={reset} style={styles.dangerBtn}>↺ Reset Factory</button>
                 </div>
             </div>
 

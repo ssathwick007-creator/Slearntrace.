@@ -9,20 +9,27 @@ import FileSystemLibrary from './FileSystemLibrary.jsx';
 import ContextSwitchRelay from './ContextSwitchRelay.jsx';
 import OSPracticeProblems from './OSPracticeProblems.jsx';
 
+const tabs = [
+    { id: 'scheduling', label: '🍳 Process Scheduling', component: <ProcessScheduling /> },
+    { id: 'threads', label: '👨‍🍳 Threads', component: <ThreadsParallelism /> },
+    { id: 'memory', label: '🏨 Memory Management', component: <MemoryAllocation /> },
+    { id: 'paging', label: '📚 Paging', component: <PagingOrganizer /> },
+    { id: 'deadlock', label: '🚗 Deadlock', component: <TrafficDeadlock /> },
+    { id: 'filesystem', label: '📖 File System', component: <FileSystemLibrary /> },
+    { id: 'context', label: '🏃‍♂️ Context Switch', component: <ContextSwitchRelay /> },
+];
+
+// Unified background icon data (moved outside to prevent re-randomization on re-renders)
+const bgIconData = Array.from({ length: 12 }).map(() => ({
+    icon: ['⚙️', '🧠', '📁', '💻', '💾', '🔌', '📄'][Math.floor(Math.random() * 7)],
+    x: Math.random() * 100, // percentage based
+    y: Math.random() * 100,
+    duration: 25 + Math.random() * 25,
+    delay: Math.random() * -20,
+}));
+
 const OperatingSystemsHub = () => {
     const [activeTab, setActiveTab] = useState('scheduling');
-
-    const tabs = [
-        { id: 'scheduling', label: '🍳 Process Scheduling', component: <ProcessScheduling /> },
-        { id: 'threads', label: '👨‍🍳 Threads', component: <ThreadsParallelism /> },
-        { id: 'memory', label: '🏨 Memory Management', component: <MemoryAllocation /> },
-        { id: 'paging', label: '📚 Paging', component: <PagingOrganizer /> },
-        { id: 'deadlock', label: '🚗 Deadlock', component: <TrafficDeadlock /> },
-        { id: 'filesystem', label: '📖 File System', component: <FileSystemLibrary /> },
-        { id: 'context', label: '🏃‍♂️ Context Switch', component: <ContextSwitchRelay /> },
-    ];
-
-    const bgIcons = ['⚙️', '🧠', '📁', '💻', '💾', '🔌', '📄'];
 
     const scrollToMetaphors = () => {
         const element = document.getElementById('metaphor-section');
@@ -36,26 +43,26 @@ const OperatingSystemsHub = () => {
             {/* Premium Animated Background */}
             <div style={styles.bgContainer}>
                 <div style={styles.gradientGlow}></div>
-                {bgIcons.map((icon, i) => (
+                {bgIconData.map((data, i) => (
                     <motion.div
                         key={i}
-                        style={styles.floatingIcon}
-                        initial={{ 
-                            x: Math.random() * 1000, 
-                            y: Math.random() * 1000,
-                            opacity: 0.03
+                        style={{
+                            ...styles.floatingIcon,
+                            left: `${data.x}%`,
+                            top: `${data.y}%`,
                         }}
                         animate={{ 
-                            y: [0, -1200],
-                            x: [0, Math.random() * 200 - 100],
+                            y: [0, -1000],
+                            opacity: [0.03, 0.05, 0.03]
                         }}
                         transition={{ 
-                            duration: 30 + Math.random() * 30, 
+                            duration: data.duration,
                             repeat: Infinity, 
-                            ease: "linear" 
+                            ease: "linear",
+                            delay: data.delay
                         }}
                     >
-                        {icon}
+                        {data.icon}
                     </motion.div>
                 ))}
             </div>
@@ -92,23 +99,25 @@ const OperatingSystemsHub = () => {
                 <div id="metaphor-section" style={styles.topBar}>
                     <div style={styles.tabs}>
                         {tabs.map((tab) => (
-                            <motion.button
+                            <button
                                 key={tab.id}
-                                whileHover={{ backgroundColor: 'rgba(15, 23, 42, 0.05)', opacity: 1 }}
-                                whileTap={{ scale: 0.98 }}
                                 style={{
                                     ...styles.tab,
-                                    backgroundColor: activeTab === tab.id ? '#0f172a' : 'transparent',
-                                    color: activeTab === tab.id ? '#fff' : '#475569',
-                                    opacity: activeTab === tab.id ? 1 : 0.8,
+                                    color: activeTab === tab.id ? '#0f172a' : '#64748b',
+                                    opacity: activeTab === tab.id ? 1 : 0.65,
                                     fontWeight: activeTab === tab.id ? '700' : '500',
-                                    boxShadow: activeTab === tab.id ? '0 4px 12px rgba(15, 23, 42, 0.15)' : 'none',
-                                    borderBottom: activeTab === tab.id ? '2px solid #3b82f6' : '2px solid transparent'
                                 }}
                                 onClick={() => setActiveTab(tab.id)}
                             >
                                 {tab.label}
-                            </motion.button>
+                                {activeTab === tab.id && (
+                                    <motion.div
+                                        layoutId="activeTabUnderlineOS"
+                                        style={styles.activeUnderline}
+                                        transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
+                                    />
+                                )}
+                            </button>
                         ))}
                     </div>
                 </div>
@@ -117,10 +126,10 @@ const OperatingSystemsHub = () => {
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeTab}
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            transition={{ duration: 0.2, ease: "easeInOut" }}
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.2, ease: "easeOut" }}
                         >
                             {tabs.find(t => t.id === activeTab)?.component}
                         </motion.div>
@@ -176,29 +185,29 @@ const styles = {
     },
     heroSection: {
         textAlign: 'center',
-        padding: '2.3rem 0 1.4rem 0',
-        marginBottom: '0.4rem'
+        padding: '3rem 0 2rem 0',
     },
     heroTitle: {
-        fontSize: '2.8rem',
+        fontSize: '2.75rem',
         fontWeight: '900',
         color: '#0f172a',
-        marginBottom: '0.6rem',
-        letterSpacing: '-1.5px'
+        marginBottom: '0.5rem',
+        letterSpacing: '-1.5px',
+        lineHeight: '1.1'
     },
     heroSubtitle: {
-        fontSize: '1.1rem',
+        fontSize: '1.10rem',
         color: '#475569',
         maxWidth: '600px',
-        margin: '0 auto 0.8rem auto',
-        lineHeight: '1.5',
+        margin: '0 auto',
+        lineHeight: '1.6',
         opacity: 0.85
     },
     tagline: {
         fontSize: '0.9rem',
         fontWeight: '500',
         color: '#64748b',
-        marginBottom: '0.6rem',
+        marginTop: '0.5rem',
         fontStyle: 'italic',
         opacity: 0.7
     },
@@ -208,35 +217,50 @@ const styles = {
         borderBottom: '1px solid #f1f5f9',
         marginBottom: '1.5rem',
         position: 'sticky',
-        top: '0',
-        backgroundColor: 'rgba(255,255,255,0.95)',
-        backdropFilter: 'blur(10px)',
-        zIndex: 50,
-        padding: '0.5rem 0'
+        top: '72px',
+        backgroundColor: 'rgba(255,255,255,0.85)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        zIndex: 100,
+        padding: '0.5rem 0',
+        scrollMarginTop: '80px',
     },
     tabs: {
         display: 'flex',
-        gap: '0.4rem',
+        gap: '0.5rem',
         padding: '0 1rem',
         overflowX: 'auto',
-        scrollbarWidth: 'none'
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none',
+        maskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)',
+        WebkitMaskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)',
     },
     tab: {
-        padding: '0.7rem 1.2rem',
+        padding: '0.6rem 1.2rem',
         background: 'none',
         border: 'none',
-        fontSize: '0.85rem',
+        fontSize: '0.875rem',
         cursor: 'pointer',
-        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+        transition: 'all 0.2s ease',
         display: 'flex',
         alignItems: 'center',
-        gap: '8px',
+        gap: '10px',
         whiteSpace: 'nowrap',
-        borderRadius: '12px'
+        borderRadius: '8px',
+        position: 'relative'
+    },
+    activeUnderline: {
+        position: 'absolute',
+        bottom: '-0.5rem',
+        left: '20%',
+        right: '20%',
+        height: '2px',
+        backgroundColor: '#3b82f6',
+        borderRadius: '2px',
     },
     content: {
         minHeight: '600px',
-        marginBottom: '2.2rem'
+        marginBottom: '2rem'
     },
     practiceSection: {
         paddingBottom: '3.5rem',

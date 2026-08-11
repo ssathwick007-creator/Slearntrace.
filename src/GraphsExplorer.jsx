@@ -20,89 +20,38 @@ const GraphsExplorer = () => {
         <div style={styles.shell}>
             <div style={styles.topBar}>
                 <div style={styles.tabs}>
-                    <button
-                        style={{
-                            ...styles.tab,
-                            borderBottom: activeTab === 'graph-basics' ? '3px solid #10b981' : 'none',
-                            color: activeTab === 'graph-basics' ? '#10b981' : '#64748b'
-                        }}
-                        onClick={() => setActiveTab('graph-basics')}
-                    >
-                        🌐 Graph Basics
-                    </button>
-                    <button
-                        style={{
-                            ...styles.tab,
-                            borderBottom: activeTab === 'bfs' ? '3px solid #10b981' : 'none',
-                            color: activeTab === 'bfs' ? '#10b981' : '#64748b'
-                        }}
-                        onClick={() => setActiveTab('bfs')}
-                    >
-                        🚚 BFS Delivery
-                    </button>
-                    <button
-                        style={{
-                            ...styles.tab,
-                            borderBottom: activeTab === 'dfs' ? '3px solid #10b981' : 'none',
-                            color: activeTab === 'dfs' ? '#10b981' : '#64748b'
-                        }}
-                        onClick={() => setActiveTab('dfs')}
-                    >
-                        🧗‍♂️ DFS Maze
-                    </button>
-                    <button
-                        style={{
-                            ...styles.tab,
-                            borderBottom: activeTab === 'gps' ? '3px solid #10b981' : 'none',
-                            color: activeTab === 'gps' ? '#10b981' : '#64748b'
-                        }}
-                        onClick={() => setActiveTab('gps')}
-                    >
-                        📍 GPS Navigator
-                    </button>
-                    <button
-                        style={{
-                            ...styles.tab,
-                            borderBottom: activeTab === 'cycle' ? '3px solid #10b981' : 'none',
-                            color: activeTab === 'cycle' ? '#10b981' : '#64748b'
-                        }}
-                        onClick={() => setActiveTab('cycle')}
-                    >
-                        🔄 Cycle Detection
-                    </button>
-                    <button
-                        style={{
-                            ...styles.tab,
-                            borderBottom: activeTab === 'topo' ? '3px solid #10b981' : 'none',
-                            color: activeTab === 'topo' ? '#10b981' : '#64748b'
-                        }}
-                        onClick={() => setActiveTab('topo')}
-                    >
-                        📋 Topological Sort
-                    </button>
-                    <button
-                        style={{
-                            ...styles.tab,
-                            borderBottom: activeTab === 'mst' ? '3px solid #10b981' : 'none',
-                            color: activeTab === 'mst' ? '#10b981' : '#64748b'
-                        }}
-                        onClick={() => setActiveTab('mst')}
-                    >
-                        🌳 Minimum Spanning Tree
-                    </button>
-                    <button
-                        style={{
-                            ...styles.tab,
-                            borderBottom: activeTab === 'union-find' ? '3px solid #10b981' : 'none',
-                            color: activeTab === 'union-find' ? '#10b981' : '#64748b'
-                        }}
-                        onClick={() => setActiveTab('union-find')}
-                    >
-                        👥 Union-Find
-                    </button>
-
-
-
+                    {[
+                        { id: 'graph-basics', label: '🌐 Graph Basics' },
+                        { id: 'bfs', label: '🚚 BFS Delivery' },
+                        { id: 'dfs', label: '🧗‍♂️ DFS Maze' },
+                        { id: 'gps', label: '📍 GPS Navigator' },
+                        { id: 'cycle', label: '🔄 Cycle Detection' },
+                        { id: 'topo', label: '📋 Topological Sort' },
+                        { id: 'mst', label: '🌳 Minimum Spanning Tree' },
+                        { id: 'union-find', label: '👥 Union-Find' }
+                    ].map(tab => (
+                        <motion.button
+                            key={tab.id}
+                            whileHover={{ backgroundColor: 'rgba(15, 23, 42, 0.04)', opacity: 1 }}
+                            whileTap={{ scale: 0.98 }}
+                            style={{
+                                ...styles.tab,
+                                color: activeTab === tab.id ? '#0f172a' : '#64748b',
+                                opacity: activeTab === tab.id ? 1 : 0.65,
+                                fontWeight: activeTab === tab.id ? '700' : '500',
+                            }}
+                            onClick={() => setActiveTab(tab.id)}
+                        >
+                            {tab.label}
+                            {activeTab === tab.id && (
+                                <motion.div
+                                    layoutId="activeTabUnderlineGraphs"
+                                    style={styles.activeUnderline}
+                                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                />
+                            )}
+                        </motion.button>
+                    ))}
                 </div>
             </div>
 
@@ -136,25 +85,47 @@ const styles = {
     topBar: {
         display: 'flex',
         justifyContent: 'center',
-        borderBottom: '1px solid #e2e8f0',
-        marginBottom: '1rem'
+        borderBottom: '1px solid #f1f5f9',
+        marginBottom: '1.5rem',
+        position: 'sticky',
+        top: '0',
+        backgroundColor: 'rgba(255,255,255,0.85)',
+        backdropFilter: 'blur(16px)',
+        zIndex: 100,
+        padding: '0.5rem 0'
     },
     tabs: {
         display: 'flex',
-        gap: '2rem',
-        padding: '0 1rem'
+        gap: '0.5rem',
+        padding: '0 1.5rem',
+        overflowX: 'auto',
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none',
+        maskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
+        WebkitMaskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
     },
     tab: {
-        padding: '1rem 0',
+        padding: '0.6rem 1.1rem',
         background: 'none',
         border: 'none',
-        fontSize: '1rem',
-        fontWeight: '700',
+        fontSize: '0.875rem',
         cursor: 'pointer',
-        transition: 'all 0.2s',
+        transition: 'all 0.2s ease',
         display: 'flex',
         alignItems: 'center',
-        gap: '8px'
+        gap: '8px',
+        whiteSpace: 'nowrap',
+        borderRadius: '8px',
+        position: 'relative'
+    },
+    activeUnderline: {
+        position: 'absolute',
+        bottom: '-0.5rem',
+        left: '20%',
+        right: '20%',
+        height: '2px',
+        backgroundColor: '#3b82f6',
+        borderRadius: '2px',
     },
     content: {
         animation: 'fadeIn 0.5s ease'

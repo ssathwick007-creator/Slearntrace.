@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useFeedback } from './FeedbackManager.jsx';
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const INIT = [8, 3, 5, 2, 7, 4, 6, 1];
@@ -12,6 +13,8 @@ const InsertionSort = () => {
     const [sorted, setSorted] = useState(new Set([0])); // green
     const [message, setMessage] = useState('');
     const [isRunning, setIsRunning] = useState(false);
+    const { showFeedback } = useFeedback();
+    const [showHint, setShowHint] = useState(true);
     const [stepDone, setStepDone] = useState(false);
     const [activeLang, setActiveLang] = useState('python');
     const stopRef = useRef(false);
@@ -61,6 +64,7 @@ const InsertionSort = () => {
             if (window.AppProgress) window.AppProgress.markMetaphorCompleted('InsertionSort');
         }
         setMessage('✓ Array is sorted!');
+        showFeedback('Success! You nailed it 🚀', 'success');
         setIsRunning(false); setStepDone(true);
     };
 
@@ -100,9 +104,9 @@ const InsertionSort = () => {
     return (
         <div style={s.container}>
             <div style={s.header}>
-                <h2 style={s.title}>Insertion Sort — Organizing Cards in Hand 🃏</h2>
+                <h2 style={s.title}>Insertion Sort — Organizing Your Hand 🃏</h2>
                 <div style={s.desc}>
-                    <p>Insertion Sort works like arranging playing cards in your hand. You pick one card at a time and <strong>insert it into its correct position</strong> among the already sorted cards.</p>
+                    <p>Insertion Sort is exactly like sorting playing cards. You pick one card and slide it into its perfect spot in your sorted row!</p>
                 </div>
             </div>
 
@@ -112,8 +116,19 @@ const InsertionSort = () => {
                 </div>
                 <div style={s.barsContainer}>
                     {array.map((val, idx) => (
-                        <motion.div key={idx} style={s.barWrap} layout transition={{ type: 'spring', stiffness: 300, damping: 30 }}>
-                            <div style={{ ...s.bar, height: `${(val / maxVal) * 160 + 20}px`, backgroundColor: barColor(idx) }} />
+                        <motion.div 
+                            key={idx} 
+                            style={s.barWrap} 
+                            layout 
+                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                            className={idx === current ? 'pulse-glow' : ''}
+                        >
+                            <div style={{ 
+                                ...s.bar, 
+                                height: `${(val / maxVal) * 160 + 20}px`, 
+                                backgroundColor: barColor(idx),
+                                boxShadow: idx === current ? '0 0 15px rgba(251, 191, 36, 0.5)' : 'none'
+                            }} />
                             <span style={s.barLabel}>{val}</span>
                         </motion.div>
                     ))}
@@ -129,9 +144,22 @@ const InsertionSort = () => {
             </div>
 
             <div style={s.controls}>
-                <button onClick={runSort} disabled={isRunning} style={{ ...s.btn, backgroundColor: '#4f46e5' }}>▶ Start Sorting</button>
-                <button onClick={handleNextStep} disabled={isRunning || stepDone} style={{ ...s.btn, backgroundColor: '#0891b2' }}>⏭ Next Step</button>
-                <button onClick={resetAll} style={{ ...s.btn, backgroundColor: '#ef4444' }}>↺ Reset</button>
+                <div style={{ position: 'relative' }}>
+                    <button onClick={() => { runSort(); setShowHint(false); }} disabled={isRunning} style={{ ...s.btn, backgroundColor: '#4f46e5' }}>
+                        ▶ Let's Sort it! 🃏
+                    </button>
+                    {showHint && !isRunning && (
+                        <div className="tooltip-hint" style={{ bottom: '110%', left: '50%' }}>
+                            Pick a card to start sorting ✨
+                        </div>
+                    )}
+                </div>
+                <button onClick={() => { handleNextStep(); setShowHint(false); }} disabled={isRunning || stepDone} style={{ ...s.btn, backgroundColor: '#0891b2' }}>
+                    ⏭ Take a Step
+                </button>
+                <button onClick={resetAll} style={{ ...s.btn, backgroundColor: '#ef4444' }}>
+                    ↺ Reset Everything
+                </button>
             </div>
 
             <div style={s.codeSection}>
