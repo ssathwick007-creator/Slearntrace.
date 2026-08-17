@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="go">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/backend/tests/go.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

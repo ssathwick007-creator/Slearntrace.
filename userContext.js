@@ -5,19 +5,21 @@
  * │  AUTH STATE         getUserId() returns                      │
  * ├──────────────────────────────────────────────────────────────┤
  * │  Not signed in      persistent localStorage UUID             │
- * │  Signed in          Firebase Auth UID (from window.__authState) │
+ * │  Signed in          Auth UID (from window.__authState)       │
  * └──────────────────────────────────────────────────────────────┘
  *
  * AUTH EXTENSION POINT
  * ────────────────────
  * This is the ONLY file that needs to change when upgrading auth.
  * All call sites in script.js, exports, and comparisons use getUserId()
- * and will automatically get the Firebase UID after sign-in.
+ * and will automatically get the Auth UID after sign-in.
  *
- * Future Firebase example (already wired — no changes needed):
- *   The window.__authState.user check below IS the extension point.
- *   When a user signs in, auth-check.js sets window.__authState.user,
- *   and getUserId() immediately returns their Firebase UID.
+ * The window.__authState.user check below IS the extension point.
+ * When a user signs in, auth-check.js sets window.__authState.user,
+ * and getUserId() immediately returns their Auth UID.
+ *
+ * SUPABASE MIGRATION: No changes needed here. The service layer
+ * (src/services/auth/) sets window.__authState via auth-check.js.
  */
 
 const USER_ID_KEY = 'learntrace_user_id';
@@ -64,12 +66,12 @@ function _getOrCreateAnonymousId() {
 }
 
 /**
- * Returns the Firebase UID of the currently signed-in user, or null.
+ * Returns the Auth UID of the currently signed-in user, or null.
  * Reads from window.__authState which is set by auth-check.js.
  * Never throws.
  * @returns {string|null}
  */
-function _getFirebaseUid() {
+function _getAuthUid() {
   try {
     const state = window.__authState;
     if (state && state.ready && state.user && state.user.uid) {
@@ -83,7 +85,7 @@ function _getFirebaseUid() {
  * Returns the current effective user ID.
  *
  * Priority order:
- *  1. Firebase UID — when the user is signed in (window.__authState.user is set)
+ *  1. Auth UID — when the user is signed in (window.__authState.user is set)
  *  2. Anonymous UUID — persistent localStorage UUID for anonymous users
  *
  * This is the single function all session recording, exports, and comparisons
@@ -92,7 +94,7 @@ function _getFirebaseUid() {
  * @returns {string}  Never null/undefined
  */
 export function getUserId() {
-  return _getFirebaseUid() || _getOrCreateAnonymousId();
+  return _getAuthUid() || _getOrCreateAnonymousId();
 }
 
 /**
@@ -101,13 +103,13 @@ export function getUserId() {
  * @returns {'authenticated'|'anonymous'}
  */
 export function getUserRole() {
-  return _getFirebaseUid() ? 'authenticated' : 'anonymous';
+  return _getAuthUid() ? 'authenticated' : 'anonymous';
 }
 
 /**
  * Returns a minimal user context object.
  *
- * AUTH EXTENSION POINT — when Firestore profiles are needed, replace this
+ * AUTH EXTENSION POINT — when database profiles are needed, replace this
  * body to fetch from window.userProfile (set by auth-check.js).
  *
  * @returns {{ uid: string, displayName: string, email: string|null, role: string }}

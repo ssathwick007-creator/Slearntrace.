@@ -1014,8 +1014,8 @@ import { getUserId as _getUserIdFromContext, getUserRole } from './userContext.j
       await writeAttemptsToStorage(capped);
 
       // Notify cloud sync layer that a new session was saved.
-      // auth-check.js listens for this and triggers Firestore upload when signed in.
-      // script.js has no Firebase dependency — the event is the decoupling point.
+      // auth-check.js listens for this and triggers cloud upload when signed in.
+      // script.js has no auth/database dependency — the event is the decoupling point.
       try {
         document.dispatchEvent(new CustomEvent('learntrace:session-saved', {
           detail: { timestamp: endTimeMs },
@@ -1348,7 +1348,7 @@ import { getUserId as _getUserIdFromContext, getUserRole } from './userContext.j
         // Mirror export to cloud if authenticated
         const uid = getUserId();
         if (uid && uid !== 'anonymous') {
-          import('./firebase.js').then(({ saveCloudExport }) => {
+          import('./src/services/database/index.js').then(({ saveCloudExport }) => {
             saveCloudExport(uid, 'text', content);
           }).catch(() => { });
         }
@@ -1384,7 +1384,7 @@ import { getUserId as _getUserIdFromContext, getUserRole } from './userContext.j
         // Mirror export to cloud if authenticated
         const uid = getUserId();
         if (uid && uid !== 'anonymous') {
-          import('./firebase.js').then(({ saveCloudExport }) => {
+          import('./src/services/database/index.js').then(({ saveCloudExport }) => {
             saveCloudExport(uid, 'json', content);
           }).catch(() => { });
         }

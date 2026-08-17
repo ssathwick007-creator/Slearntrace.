@@ -6,7 +6,7 @@
  * the call sites in script.js; just update the implementation here.
  *
  * SYNC EXTENSION POINT — markSessionsSynced() is called by cloudSync.js
- * to flag sessions after they are written to Firestore.
+ * to flag sessions after they are written to the cloud database.
  */
 const STORAGE_KEY = "learnTraceAttempts";
 
@@ -56,7 +56,7 @@ export function saveSession(session) {
 
 /**
  * Marks the given sessions as synced (synced: true) in localStorage.
- * Called by cloudSync.js after a successful Firestore write.
+ * Called by cloudSync.js after a successful cloud database write.
  * @param {number[]} timestamps  Array of session timestamps to mark synced
  */
 export function markSessionsSynced(timestamps) {

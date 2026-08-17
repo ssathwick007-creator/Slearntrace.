@@ -63,6 +63,37 @@ document.addEventListener('DOMContentLoaded', () => {
         editorContainer.parentNode.insertBefore(examplesContainer, editorContainer);
     }
 
+    // --- NEW: Execution Status UI ---
+    let currentExecutionState = 'starting'; 
+    const executionStatusContainer = document.createElement('div');
+    executionStatusContainer.id = 'executionStatusContainer';
+    executionStatusContainer.style.display = 'flex';
+    executionStatusContainer.style.alignItems = 'center';
+    executionStatusContainer.style.gap = '8px';
+    executionStatusContainer.style.marginBottom = '10px';
+    executionStatusContainer.style.fontSize = '0.9rem';
+    executionStatusContainer.style.fontWeight = '500';
+    
+    if (terminal && terminal.parentNode) {
+        terminal.parentNode.insertBefore(executionStatusContainer, terminal);
+    }
+
+    function updateExecutionUI(state) {
+        currentExecutionState = state;
+        if (state === 'ready') {
+            executionStatusContainer.innerHTML = '<span style="color: #10b981;">●</span> Execution Ready';
+            if (runBtn) {
+                runBtn.disabled = getUserRole() === 'anonymous';
+            }
+        } else if (state === 'starting') {
+            executionStatusContainer.innerHTML = '<span style="color: #f59e0b;">◌</span> Starting execution service...';
+        } else {
+            executionStatusContainer.innerHTML = '<span style="color: #ef4444;">●</span> Execution Service Offline';
+        }
+    }
+    
+    updateExecutionUI('starting');
+
     // --- NEW: Dynamic Challenge Database ---
     let challenges = {
         Foundation: [],
@@ -78,6 +109,29 @@ document.addEventListener('DOMContentLoaded', () => {
         : 'https://learntrace-backend.onrender.com');
 
     console.log(`[LearnTrace] Backend URL set to: ${BACKEND_URL}`);
+
+    async function pollExecutionHealth() {
+        try {
+            const res = await fetch(`${BACKEND_URL}/health`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data.execution === 'ready') {
+                    if (currentExecutionState !== 'ready') updateExecutionUI('ready');
+                } else if (data.execution === 'starting' || data.docker === 'starting') {
+                    if (currentExecutionState !== 'starting') updateExecutionUI('starting');
+                } else {
+                    if (currentExecutionState !== 'unavailable') updateExecutionUI('unavailable');
+                }
+            } else {
+                if (currentExecutionState !== 'unavailable') updateExecutionUI('unavailable');
+            }
+        } catch (e) {
+            if (currentExecutionState !== 'unavailable') updateExecutionUI('unavailable');
+        }
+        setTimeout(pollExecutionHealth, 3000);
+    }
+    
+    pollExecutionHealth();
 
     function applyAuthGating() {
         const isAnon = getUserRole() === 'anonymous';
@@ -118,10 +172,16 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTierProgressUI(true); // Show loading state in tiers
 
         try {
-            const response = await fetch(`${BACKEND_URL}/api/problems?language=${languageId.toLowerCase()}`);
-            if (!response.ok) throw new Error('Failed to fetch problems');
-
-            const data = await response.json();
+            const { getCodingProblems } = await import('./services/database/contentService.js');
+            const allProblems = await getCodingProblems();
+            
+            // Map DB format to old API format
+            const data = allProblems.map(p => ({
+                problemId: p.id,
+                keywordTitle: p.title,
+                difficultyTier: p.difficulty_tier,
+                mode: 'practice'
+            }));
 
             // Group problems by tier
             challenges = { Foundation: [], Momentum: [], Mastery: [] };
@@ -131,10 +191,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            console.log(`Fetched ${data.length} problems for ${languageId}`);
+            console.log(`Fetched ${data.length} problems for ${languageId} from Supabase`);
         } catch (error) {
             console.error('Error fetching problems:', error);
-            // Optionally show error in UI
         } finally {
             isLoadingProblems = false;
             updateTierProgressUI(false);
@@ -541,6 +600,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         runBtn.addEventListener('click', async () => {
             if (getUserRole() === 'anonymous') return;
+            
+            if (currentExecutionState === 'unavailable') {
+                alert("Code execution is unavailable. Please start LearnTrace using START_LEARNTRACE.bat.");
+                if (terminal) terminal.innerHTML = '<span class="term-error">Code execution is unavailable. Please start LearnTrace using START_LEARNTRACE.bat.</span>';
+                return;
+            } else if (currentExecutionState === 'starting') {
+                if (terminal) terminal.innerHTML = '<span class="term-sys">Starting execution environment...</span>';
+                return;
+            }
+
             const code = monacoEditor ? monacoEditor.getValue().trim() : '';
             if (!code || !currentLanguage) return;
 
@@ -553,15 +622,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const payload = {
                 language: currentLanguage.id,
                 code: code,
-                input: inputArea ? inputArea.value : ""
+                input: inputArea ? inputArea.value : "",
+                profileId: getUserId() !== 'anonymous' ? getUserId() : null,
+                problemId: currentChallenge ? currentChallenge.problemId : null
             };
 
-            // 2. FETCH WITH 15-SECOND TIMEOUT
+            // 2. FETCH WITH 25-SECOND TIMEOUT (Judge0 may take a moment)
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 15000);
+            const timeoutId = setTimeout(() => controller.abort(), 25000);
 
             try {
-                const response = await fetch(`${BACKEND_URL}/api/run`, {
+                const response = await fetch(`${BACKEND_URL}/api/execute`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload),
@@ -580,11 +651,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (!response.ok || (result.exitCode !== 0 && !result.stdout)) {
                     // 3. ERROR DISPLAY
-                    const errorMsg = result.stderr || "Execution Failed";
-                    terminal.innerHTML = `<span class="term-error">${errorMsg.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>`;
+                    let errorMsg = result.stderr || "Execution Failed";
+                    let statusLabel = result.status || "Error";
+                    terminal.innerHTML = `<span class="term-error">&gt; ${statusLabel}</span><br><br><span class="term-error">${errorMsg.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>`;
                 } else {
                     // 4. SUCCESS OUTPUT
                     let outHtml = '';
+                    let statusLabel = result.status || "Success";
+
+                    if (result.status && result.status !== "Success") {
+                        outHtml += `<span class="term-sys">&gt; ${statusLabel}</span><br><br>`;
+                    }
 
                     if (result.stdout) {
                         outHtml += `<span class="term-success">${result.stdout.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>`;
@@ -598,12 +675,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else {
                         outHtml += `\n\n<span class="term-sys">[Finished with exit code ${result.exitCode || 0}]</span>`;
                     }
-                    terminal.innerHTML = outHtml;
 
                     // Add execution metrics
-                    if (result.time !== undefined) {
-                        outHtml += `\n<span class="term-sys" style="font-size: 0.8em; opacity: 0.6;">\n[Finished in ${(result.time / 1000).toFixed(2)}s]</span>`;
+                    let metrics = [];
+                    if (result.time !== undefined && result.time !== null) {
+                        metrics.push(`${(result.time / 1000).toFixed(2)}s`);
                     }
+                    if (result.memory !== undefined && result.memory !== null) {
+                        metrics.push(`${(result.memory / 1024).toFixed(2)} MB`);
+                    }
+                    
+                    if (metrics.length > 0) {
+                        outHtml += `\n<span class="term-sys" style="font-size: 0.8em; opacity: 0.6;">\n[Metrics: ${metrics.join(' | ')}]</span>`;
+                    }
+
+                    terminal.innerHTML = outHtml;
 
                     // CHALLENGE TRACKING
                     if (result.exitCode === 0 && currentChallenge) {

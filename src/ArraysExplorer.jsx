@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useProgress } from './ProgressContext.jsx';
+import { getMetaphorsByTopic } from './services/database/contentService.js';
 import ArrayTrain from './ArrayTrain.jsx';
 import ConcertSeating from './ConcertSeating.jsx';
 import ElevatorAccess from './ElevatorAccess.jsx';
@@ -6,21 +8,60 @@ import LibraryBookshelf from './LibraryBookshelf.jsx';
 import ParkingLotGrid from './ParkingLotGrid.jsx';
 import ArrayPracticeProblems from './ArrayPracticeProblems.jsx';
 
+// Fallback metaphors
+const FALLBACK_TABS = [
+    { id: 'ArrayTrain', component_id: 'train', label: '🚂 Fixed Train', dbMetaphor: null },
+    { id: 'ConcertSeating', component_id: 'concert', label: '🤘 Concert Seating', dbMetaphor: null },
+    { id: 'ElevatorAccess', component_id: 'elevator', label: '🛗 Elevator Zoom', dbMetaphor: null },
+    { id: 'LibraryBookshelf', component_id: 'library', label: '📚 Library Bookshelf', dbMetaphor: null },
+    { id: 'ParkingLotGrid', component_id: 'parking', label: '🚗 Parking Lot 2D', dbMetaphor: null }
+];
+
 const ArraysExplorer = () => {
-    const [activeTab, setActiveTab] = useState('train');
+    const [activeTab, setActiveTab] = useState('ArrayTrain');
     const [language, setLanguage] = useState('python');
+    const [tabs, setTabs] = useState(FALLBACK_TABS);
+    
+    const ctx = useProgress();
+    
+    useEffect(() => {
+        let cancelled = false;
+        const fetchMetaphors = async () => {
+            if (!ctx?.topicsMeta?.arrays?.dbId) return;
+            try {
+                const dbMetaphors = await getMetaphorsByTopic(ctx.topicsMeta.arrays.dbId);
+                if (dbMetaphors && dbMetaphors.length > 0 && !cancelled) {
+                    // Map DB metaphors to tabs
+                    const mergedTabs = FALLBACK_TABS.map(fb => {
+                        const dbMatch = dbMetaphors.find(m => m.id === fb.id);
+                        if (dbMatch) {
+                            // Extract emoji from fallback label if possible
+                            const emoji = fb.label.split(' ')[0];
+                            return {
+                                ...fb,
+                                label: `${emoji} ${dbMatch.title}`,
+                                dbMetaphor: dbMatch
+                            };
+                        }
+                        return fb;
+                    });
+                    setTabs(mergedTabs);
+                }
+            } catch (err) {
+                console.warn('[ArraysExplorer] Failed to fetch metaphors from Supabase', err);
+            }
+        };
+        fetchMetaphors();
+        return () => { cancelled = true; };
+    }, [ctx?.topicsMeta?.arrays?.dbId]);
+
+    const activeTabData = tabs.find(t => t.id === activeTab);
 
     return (
         <div style={styles.shell}>
             <div style={styles.topBar}>
                 <div style={styles.tabs}>
-                    {[
-                        { id: 'train', label: '🚂 Fixed Train' },
-                        { id: 'concert', label: '🤘 Concert Seating' },
-                        { id: 'elevator', label: '🛗 Elevator Zoom' },
-                        { id: 'library', label: '📚 Library Bookshelf' },
-                        { id: 'parking', label: '🚗 Parking Lot 2D' }
-                    ].map(tab => (
+                    {tabs.map(tab => (
                         <button
                             key={tab.id}
                             style={{
@@ -60,11 +101,11 @@ const ArraysExplorer = () => {
             </div>
 
             <div style={styles.content}>
-                {activeTab === 'train' && <ArrayTrain language={language} />}
-                {activeTab === 'concert' && <ConcertSeating language={language} />}
-                {activeTab === 'elevator' && <ElevatorAccess language={language} />}
-                {activeTab === 'library' && <LibraryBookshelf language={language} />}
-                {activeTab === 'parking' && <ParkingLotGrid language={language} />}
+                {activeTabData?.component_id === 'train' && <ArrayTrain language={language} dbMetaphor={activeTabData?.dbMetaphor} />}
+                {activeTabData?.component_id === 'concert' && <ConcertSeating language={language} dbMetaphor={activeTabData?.dbMetaphor} />}
+                {activeTabData?.component_id === 'elevator' && <ElevatorAccess language={language} dbMetaphor={activeTabData?.dbMetaphor} />}
+                {activeTabData?.component_id === 'library' && <LibraryBookshelf language={language} dbMetaphor={activeTabData?.dbMetaphor} />}
+                {activeTabData?.component_id === 'parking' && <ParkingLotGrid language={language} dbMetaphor={activeTabData?.dbMetaphor} />}
             </div>
 
             <p style={styles.footerNote}>

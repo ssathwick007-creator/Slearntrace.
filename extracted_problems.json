@@ -1,0 +1,3103 @@
+[
+  {
+    "id": 1,
+    "title": "Reverse an Array",
+    "description": "Reverse the given array [1, 2, 3, 4, 5] in place.",
+    "input": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "output": [
+      5,
+      4,
+      3,
+      2,
+      1
+    ],
+    "steps": [
+      {
+        "arr": [
+          5,
+          2,
+          3,
+          4,
+          1
+        ],
+        "msg": "Swap 1 and 5",
+        "highlights": [
+          0,
+          4
+        ]
+      },
+      {
+        "arr": [
+          5,
+          4,
+          3,
+          2,
+          1
+        ],
+        "msg": "Swap 2 and 4",
+        "highlights": [
+          1,
+          3
+        ]
+      },
+      {
+        "arr": [
+          5,
+          4,
+          3,
+          2,
+          1
+        ],
+        "msg": "Finished!",
+        "highlights": []
+      }
+    ],
+    "_sourceFile": "ArrayPracticeProblems.jsx"
+  },
+  {
+    "id": 2,
+    "title": "Find Maximum Element",
+    "description": "Find the largest number in [7, 2, 9, 4, 1].",
+    "input": [
+      7,
+      2,
+      9,
+      4,
+      1
+    ],
+    "output": 9,
+    "steps": [
+      {
+        "arr": [
+          7,
+          2,
+          9,
+          4,
+          1
+        ],
+        "msg": "Start with 7 as Max",
+        "highlights": [
+          0
+        ]
+      },
+      {
+        "arr": [
+          7,
+          2,
+          9,
+          4,
+          1
+        ],
+        "msg": "Check 2: 7 is still Max",
+        "highlights": [
+          1
+        ]
+      },
+      {
+        "arr": [
+          7,
+          2,
+          9,
+          4,
+          1
+        ],
+        "msg": "Check 9: Update Max to 9",
+        "highlights": [
+          2
+        ]
+      },
+      {
+        "arr": [
+          7,
+          2,
+          9,
+          4,
+          1
+        ],
+        "msg": "Check 4: 9 is still Max",
+        "highlights": [
+          3
+        ]
+      },
+      {
+        "arr": [
+          7,
+          2,
+          9,
+          4,
+          1
+        ],
+        "msg": "Check 1: 9 is final Max",
+        "highlights": [
+          4
+        ]
+      }
+    ],
+    "_sourceFile": "ArrayPracticeProblems.jsx"
+  },
+  {
+    "id": 3,
+    "title": "Rotate Left by 2",
+    "description": "Shift all elements of [1, 2, 3, 4, 5] left by 2 positions.",
+    "input": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "output": [
+      3,
+      4,
+      5,
+      1,
+      2
+    ],
+    "steps": [
+      {
+        "arr": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "msg": "Original Array",
+        "highlights": [
+          0,
+          1
+        ]
+      },
+      {
+        "arr": [
+          3,
+          4,
+          5,
+          3,
+          4,
+          5
+        ],
+        "msg": "Shift elements left",
+        "highlights": [
+          0,
+          1,
+          2
+        ]
+      },
+      {
+        "arr": [
+          3,
+          4,
+          5,
+          1,
+          2
+        ],
+        "msg": "Wrap first two to end",
+        "highlights": [
+          3,
+          4
+        ]
+      }
+    ],
+    "_sourceFile": "ArrayPracticeProblems.jsx"
+  },
+  {
+    "id": 4,
+    "title": "Remove Duplicates",
+    "description": "Remove duplicate values from [1, 2, 2, 3, 1, 4].",
+    "input": [
+      1,
+      2,
+      2,
+      3,
+      1,
+      4
+    ],
+    "output": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "steps": [
+      {
+        "arr": [
+          1,
+          2,
+          2,
+          3,
+          1,
+          4
+        ],
+        "msg": "Check 1: Unique",
+        "highlights": [
+          0
+        ]
+      },
+      {
+        "arr": [
+          1,
+          2,
+          2,
+          3,
+          1,
+          4
+        ],
+        "msg": "Check 2: Unique",
+        "highlights": [
+          1
+        ]
+      },
+      {
+        "arr": [
+          1,
+          2,
+          "X",
+          3,
+          1,
+          4
+        ],
+        "msg": "Check 2: Duplicate!",
+        "highlights": [
+          2
+        ]
+      },
+      {
+        "arr": [
+          1,
+          2,
+          "X",
+          3,
+          "X",
+          4
+        ],
+        "msg": "Check 1: Duplicate!",
+        "highlights": [
+          4
+        ]
+      },
+      {
+        "arr": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "msg": "Shift unique values",
+        "highlights": [
+          0,
+          1,
+          2,
+          3
+        ]
+      }
+    ],
+    "_sourceFile": "ArrayPracticeProblems.jsx"
+  },
+  {
+    "id": 5,
+    "title": "Two Sum (Pair for 10)",
+    "description": "Find two numbers in [2, 7, 11, 5, 3] that sum to 10.",
+    "input": [
+      2,
+      7,
+      11,
+      5,
+      3
+    ],
+    "output": [
+      7,
+      3
+    ],
+    "steps": [
+      {
+        "arr": [
+          2,
+          7,
+          11,
+          5,
+          3
+        ],
+        "msg": "Check 2 + 7 = 9",
+        "highlights": [
+          0,
+          1
+        ]
+      },
+      {
+        "arr": [
+          2,
+          7,
+          11,
+          5,
+          3
+        ],
+        "msg": "Check 2 + 11 = 13",
+        "highlights": [
+          0,
+          2
+        ]
+      },
+      {
+        "arr": [
+          2,
+          7,
+          11,
+          5,
+          3
+        ],
+        "msg": "Check 7 + 11 = 18",
+        "highlights": [
+          1,
+          2
+        ]
+      },
+      {
+        "arr": [
+          2,
+          7,
+          11,
+          5,
+          3
+        ],
+        "msg": "Check 7 + 3 = 10! Found it",
+        "highlights": [
+          1,
+          4
+        ]
+      }
+    ],
+    "_sourceFile": "ArrayPracticeProblems.jsx"
+  },
+  {
+    "id": 6,
+    "title": "Max Subarray Sum (Kadane)",
+    "description": "Find the maximum sum of a contiguous subarray in [-2, 1, -3, 4, -1, 2, 1, -5, 4].",
+    "input": [
+      -2,
+      1,
+      -3,
+      4,
+      -1,
+      2,
+      1,
+      -5,
+      4
+    ],
+    "output": 6,
+    "steps": [
+      {
+        "arr": [
+          -2,
+          1,
+          -3,
+          4,
+          -1,
+          2,
+          1,
+          -5,
+          4
+        ],
+        "msg": "Current Sum: -2, Max: -2",
+        "highlights": [
+          0
+        ]
+      },
+      {
+        "arr": [
+          -2,
+          1,
+          -3,
+          4,
+          -1,
+          2,
+          1,
+          -5,
+          4
+        ],
+        "msg": "Current Sum: 1, Max: 1",
+        "highlights": [
+          1
+        ]
+      },
+      {
+        "arr": [
+          -2,
+          1,
+          -3,
+          4,
+          -1,
+          2,
+          1,
+          -5,
+          4
+        ],
+        "msg": "Sum becomes -2, Reset to 0",
+        "highlights": [
+          2
+        ]
+      },
+      {
+        "arr": [
+          -2,
+          1,
+          -3,
+          4,
+          -1,
+          2,
+          1,
+          -5,
+          4
+        ],
+        "msg": "New Start: 4, Max: 4",
+        "highlights": [
+          3
+        ]
+      },
+      {
+        "arr": [
+          -2,
+          1,
+          -3,
+          4,
+          -1,
+          2,
+          1,
+          -5,
+          4
+        ],
+        "msg": "Window [4, -1, 2, 1]. Max: 6",
+        "highlights": [
+          3,
+          4,
+          5,
+          6
+        ]
+      }
+    ],
+    "_sourceFile": "ArrayPracticeProblems.jsx"
+  },
+  {
+    "id": "path-exists",
+    "title": "🔗 Find if Path Exists",
+    "difficulty": "Easy",
+    "desc": "Given a directed graph and two nodes (u, v), determine if there is a path from u to v.",
+    "input": "Graph nodes, Start, Target",
+    "output": "Boolean (True/False)",
+    "algorithm": "BFS or DFS",
+    "timeComplexity": "O(V + E)",
+    "_sourceFile": "GraphsPracticeProblems.jsx"
+  },
+  {
+    "id": "num-islands",
+    "title": "🏝️ Number of Islands",
+    "difficulty": "Medium",
+    "desc": "Count the number of connected components ('islands') in a 2D binary grid of land ('1') and water ('0').",
+    "input": "2D Grid of '1's and '0's",
+    "output": "Integer (Count of islands)",
+    "algorithm": "DFS / BFS / Union-Find",
+    "timeComplexity": "O(R * C)",
+    "_sourceFile": "GraphsPracticeProblems.jsx"
+  },
+  {
+    "id": "course-schedule",
+    "title": "📚 Course Schedule",
+    "difficulty": "Medium",
+    "desc": "Determine if it is possible to finish all courses given pre-requisite dependencies.",
+    "input": "Number of courses, Prerequisites list",
+    "output": "Boolean (Can complete all?)",
+    "algorithm": "Kahn's Algorithm (Topo Sort)",
+    "timeComplexity": "O(V + E)",
+    "_sourceFile": "GraphsPracticeProblems.jsx"
+  },
+  {
+    "id": "redundant-connection",
+    "title": "⚡ Redundant Connection",
+    "difficulty": "Medium",
+    "desc": "Identify an edge that can be removed so that the resulting graph is a tree with no cycles.",
+    "input": "List of edges in a graph",
+    "output": "Edge [u, v]",
+    "algorithm": "Union-Find",
+    "timeComplexity": "O(N * α(N))",
+    "_sourceFile": "GraphsPracticeProblems.jsx"
+  },
+  {
+    "id": "shortest-path-matrix",
+    "title": "🗺️ Shortest Path in Binary Matrix",
+    "difficulty": "Medium",
+    "desc": "Find the shortest clear path from top-left to bottom-right in a binary matrix.",
+    "input": "2D Binary Matrix (0 = path, 1 = wall)",
+    "output": "Integer (Path length)",
+    "algorithm": "BFS (Breadth-First Search)",
+    "timeComplexity": "O(N^2)",
+    "_sourceFile": "GraphsPracticeProblems.jsx"
+  },
+  {
+    "id": "word-ladder",
+    "title": "🪜 Word Ladder",
+    "difficulty": "Hard",
+    "desc": "Find the shortest transformation sequence from a begin word to an end word using a word list.",
+    "input": "Begin, End, Word list",
+    "output": "Integer (Steps)",
+    "algorithm": "BFS",
+    "timeComplexity": "O(M^2 * N)",
+    "_sourceFile": "GraphsPracticeProblems.jsx"
+  },
+  {
+    "id": "clone-graph",
+    "title": "🧬 Clone Graph",
+    "difficulty": "Medium",
+    "desc": "Create a deep copy of a connected undirected graph.",
+    "input": "Reference to a node",
+    "output": "Reference to the cloned node",
+    "algorithm": "DFS / BFS with Hashmap",
+    "timeComplexity": "O(V + E)",
+    "_sourceFile": "GraphsPracticeProblems.jsx"
+  },
+  {
+    "id": "network-delay",
+    "title": "📡 Network Delay Time",
+    "difficulty": "Hard",
+    "desc": "Calculate the time it takes for all nodes in a network to receive a signal from a source.",
+    "input": "Edges with weights, Number of nodes, Source",
+    "output": "Integer (Minimum time)",
+    "algorithm": "Dijkstra's Algorithm",
+    "timeComplexity": "O(E log V)",
+    "_sourceFile": "GraphsPracticeProblems.jsx"
+  },
+  {
+    "id": 1,
+    "title": "Two Sum",
+    "difficulty": "Easy",
+    "description": "Given an array of numbers and a target value, find two indices whose values add up to the target. Use a hash map to store visited numbers.",
+    "_sourceFile": "HashTablePracticeProblems.jsx"
+  },
+  {
+    "id": 2,
+    "title": "Contains Duplicate",
+    "difficulty": "Easy",
+    "description": "Determine whether the array contains duplicate elements. Use a hash set to track visited values.",
+    "_sourceFile": "HashTablePracticeProblems.jsx"
+  },
+  {
+    "id": 3,
+    "title": "First Non-Repeating Character",
+    "difficulty": "Easy",
+    "description": "Find the first character that appears only once in a string. Use a hash table to count frequencies.",
+    "_sourceFile": "HashTablePracticeProblems.jsx"
+  },
+  {
+    "id": 4,
+    "title": "Group Anagrams",
+    "difficulty": "Medium",
+    "description": "Group words that are anagrams of each other. Use a hash table with sorted strings as keys.",
+    "_sourceFile": "HashTablePracticeProblems.jsx"
+  },
+  {
+    "id": 5,
+    "title": "Longest Consecutive Sequence",
+    "difficulty": "Medium",
+    "description": "Find the length of the longest consecutive elements sequence. Use a hash set for O(n) lookup.",
+    "_sourceFile": "HashTablePracticeProblems.jsx"
+  },
+  {
+    "id": 6,
+    "title": "Subarray Sum Equals K",
+    "difficulty": "Medium",
+    "description": "Find the number of continuous subarrays whose sum equals k. Use prefix sums and a hash map.",
+    "_sourceFile": "HashTablePracticeProblems.jsx"
+  },
+  {
+    "id": 7,
+    "title": "Top K Frequent Elements",
+    "difficulty": "Medium",
+    "description": "Return the k most frequent elements in an array. Use a hash map to count frequencies.",
+    "_sourceFile": "HashTablePracticeProblems.jsx"
+  },
+  {
+    "id": 8,
+    "title": "Design HashMap",
+    "difficulty": "Hard",
+    "description": "Implement a hash map data structure without using built-in libraries.",
+    "_sourceFile": "HashTablePracticeProblems.jsx"
+  },
+  {
+    "id": 1,
+    "title": "Reverse Linked List",
+    "description": "Reverse the link direction of all nodes in the list.",
+    "input": "1→2→3→4→5",
+    "output": "5→4→3→2→1",
+    "nodes": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "steps": [
+      {
+        "nodes": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "msg": "Start from head (1)",
+        "highlights": [
+          0
+        ],
+        "reversed": []
+      },
+      {
+        "nodes": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "msg": "Reverse 1 → 2 to 2 → 1",
+        "highlights": [
+          0,
+          1
+        ],
+        "reversed": [
+          0
+        ]
+      },
+      {
+        "nodes": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "msg": "Reverse 2 → 3 to 3 → 2",
+        "highlights": [
+          1,
+          2
+        ],
+        "reversed": [
+          0,
+          1
+        ]
+      },
+      {
+        "nodes": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "msg": "Reverse 3 → 4 to 4 → 3",
+        "highlights": [
+          2,
+          3
+        ],
+        "reversed": [
+          0,
+          1,
+          2
+        ]
+      },
+      {
+        "nodes": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "msg": "Reverse 4 → 5 to 5 → 4",
+        "highlights": [
+          3,
+          4
+        ],
+        "reversed": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "nodes": [
+          5,
+          4,
+          3,
+          2,
+          1
+        ],
+        "msg": "New List reversed!",
+        "highlights": [],
+        "reversed": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    ],
+    "_sourceFile": "LinkedListPractice.jsx"
+  },
+  {
+    "id": 2,
+    "title": "Find Middle of List",
+    "description": "Find the middle node using slow and fast pointers.",
+    "input": "10→20→30→40→50→60",
+    "output": "40",
+    "nodes": [
+      10,
+      20,
+      30,
+      40,
+      50,
+      60
+    ],
+    "steps": [
+      {
+        "nodes": [
+          10,
+          20,
+          30,
+          40,
+          50,
+          60
+        ],
+        "msg": "Slow & Fast start at 10",
+        "highlights": [
+          0
+        ]
+      },
+      {
+        "nodes": [
+          10,
+          20,
+          30,
+          40,
+          50,
+          60
+        ],
+        "msg": "Slow: 20, Fast: 30",
+        "highlights": [
+          1,
+          2
+        ]
+      },
+      {
+        "nodes": [
+          10,
+          20,
+          30,
+          40,
+          50,
+          60
+        ],
+        "msg": "Slow: 30, Fast: 50",
+        "highlights": [
+          2,
+          4
+        ]
+      },
+      {
+        "nodes": [
+          10,
+          20,
+          30,
+          40,
+          50,
+          60
+        ],
+        "msg": "Slow: 40, Fast: null",
+        "highlights": [
+          3,
+          5
+        ]
+      },
+      {
+        "nodes": [
+          10,
+          20,
+          30,
+          40,
+          50,
+          60
+        ],
+        "msg": "Middle node is 40",
+        "highlights": [
+          3
+        ]
+      }
+    ],
+    "_sourceFile": "LinkedListPractice.jsx"
+  },
+  {
+    "id": 3,
+    "title": "Detect Cycle",
+    "description": "Check if node 5 points back to node 3.",
+    "input": "1→2→3→4→5→3",
+    "output": "Cycle at 3",
+    "nodes": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "steps": [
+      {
+        "nodes": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "msg": "Fast moves 2x faster",
+        "highlights": [
+          0
+        ]
+      },
+      {
+        "nodes": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "msg": "Slow at 2, Fast at 3",
+        "highlights": [
+          1,
+          2
+        ]
+      },
+      {
+        "nodes": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "msg": "Slow at 3, Fast at 5",
+        "highlights": [
+          2,
+          4
+        ]
+      },
+      {
+        "nodes": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "msg": "Fast loops back to 3",
+        "highlights": [
+          2,
+          3
+        ]
+      },
+      {
+        "nodes": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "msg": "Slow & Fast meet at 3!",
+        "highlights": [
+          2
+        ]
+      }
+    ],
+    "_sourceFile": "LinkedListPractice.jsx"
+  },
+  {
+    "id": 4,
+    "title": "Remove N-th from End",
+    "description": "Remove 2nd node from end (5).",
+    "input": "1→2→3→4→5→6, n=2",
+    "output": "1→2→3→4→6",
+    "nodes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "steps": [
+      {
+        "nodes": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "msg": "Move fast n=2 steps ahead",
+        "highlights": [
+          0,
+          2
+        ]
+      },
+      {
+        "nodes": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "msg": "Move both until fast hits end",
+        "highlights": [
+          3,
+          5
+        ]
+      },
+      {
+        "nodes": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "msg": "Slow is before target (5)",
+        "highlights": [
+          3,
+          4
+        ]
+      },
+      {
+        "nodes": [
+          1,
+          2,
+          3,
+          4,
+          6
+        ],
+        "msg": "Link 4 directly to 6",
+        "highlights": [
+          3,
+          5
+        ]
+      }
+    ],
+    "_sourceFile": "LinkedListPractice.jsx"
+  },
+  {
+    "id": 5,
+    "title": "Merge Two Sorted",
+    "description": "Combine [1,3,5] and [2,4,6].",
+    "input": "[1,3,5], [2,4,6]",
+    "output": "1→2→3→4→5→6",
+    "nodes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "steps": [
+      {
+        "nodes": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "msg": "Compare 1 and 2 → Take 1",
+        "highlights": [
+          0
+        ]
+      },
+      {
+        "nodes": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "msg": "Compare 3 and 2 → Take 2",
+        "highlights": [
+          1,
+          2
+        ]
+      },
+      {
+        "nodes": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "msg": "Compare 3 and 4 → Take 3",
+        "highlights": [
+          2,
+          3
+        ]
+      },
+      {
+        "nodes": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "msg": "Final Sorted List Result",
+        "highlights": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      }
+    ],
+    "_sourceFile": "LinkedListPractice.jsx"
+  },
+  {
+    "id": 6,
+    "title": "Find Intersection",
+    "description": "Find where A and B meet.",
+    "input": "A:1→2→3... B:6→7→3...",
+    "output": "Node 3",
+    "nodes": [
+      1,
+      2,
+      6,
+      7,
+      3,
+      4,
+      5
+    ],
+    "steps": [
+      {
+        "nodes": [
+          1,
+          2,
+          6,
+          7,
+          3,
+          4,
+          5
+        ],
+        "msg": "Pointer A starts at 1, B at 6",
+        "highlights": [
+          0,
+          2
+        ]
+      },
+      {
+        "nodes": [
+          1,
+          2,
+          6,
+          7,
+          3,
+          4,
+          5
+        ],
+        "msg": "Advance until same node",
+        "highlights": [
+          1,
+          3
+        ]
+      },
+      {
+        "nodes": [
+          1,
+          2,
+          6,
+          7,
+          3,
+          4,
+          5
+        ],
+        "msg": "Meet at node 3!",
+        "highlights": [
+          4
+        ]
+      }
+    ],
+    "_sourceFile": "LinkedListPractice.jsx"
+  },
+  {
+    "id": 7,
+    "title": "Add 1 to Number",
+    "description": "9→9→9→9 + 1.",
+    "input": "9→9→9→9",
+    "output": "1→0→0→0→0",
+    "nodes": [
+      9,
+      9,
+      9,
+      9
+    ],
+    "steps": [
+      {
+        "nodes": [
+          9,
+          9,
+          9,
+          9
+        ],
+        "msg": "Add 1 to last 9 → 10",
+        "highlights": [
+          3
+        ]
+      },
+      {
+        "nodes": [
+          9,
+          9,
+          9,
+          0
+        ],
+        "msg": "Carry 1 up to next 9",
+        "highlights": [
+          2,
+          3
+        ]
+      },
+      {
+        "nodes": [
+          9,
+          9,
+          0,
+          0
+        ],
+        "msg": "Carry ripples through",
+        "highlights": [
+          1,
+          2
+        ]
+      },
+      {
+        "nodes": [
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "msg": "New Head created for carry!",
+        "highlights": [
+          0
+        ]
+      }
+    ],
+    "_sourceFile": "LinkedListPractice.jsx"
+  },
+  {
+    "id": 8,
+    "title": "Clone with Random",
+    "description": "A→B→C with random links.",
+    "input": "Nodes with random pointers",
+    "output": "Full copy with links",
+    "nodes": [
+      "A",
+      "A'",
+      "B",
+      "B'",
+      "C",
+      "C'"
+    ],
+    "steps": [
+      {
+        "nodes": [
+          "A",
+          "B",
+          "C"
+        ],
+        "msg": "Map original nodes",
+        "highlights": [
+          0,
+          1,
+          2
+        ]
+      },
+      {
+        "nodes": [
+          "A",
+          "A'",
+          "B",
+          "B'",
+          "C",
+          "C'"
+        ],
+        "msg": "Insert copies between originals",
+        "highlights": [
+          1,
+          3,
+          5
+        ]
+      },
+      {
+        "nodes": [
+          "A",
+          "A'",
+          "B",
+          "B'",
+          "C",
+          "C'"
+        ],
+        "msg": "Set random links for copies",
+        "highlights": [
+          1,
+          5
+        ]
+      },
+      {
+        "nodes": [
+          "A'",
+          "B'",
+          "C'"
+        ],
+        "msg": "Isolate clone list",
+        "highlights": [
+          0,
+          1,
+          2
+        ]
+      }
+    ],
+    "_sourceFile": "LinkedListPractice.jsx"
+  },
+  {
+    "id": 9,
+    "title": "LRU Cache Move",
+    "description": "Access node 3 → move to front.",
+    "input": "1↔2↔3↔4",
+    "output": "3↔1↔2↔4",
+    "nodes": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "steps": [
+      {
+        "nodes": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "msg": "Find node 3 in middle",
+        "highlights": [
+          2
+        ]
+      },
+      {
+        "nodes": [
+          1,
+          2,
+          4
+        ],
+        "msg": "Detach 3 from current spot",
+        "highlights": [
+          1,
+          3
+        ]
+      },
+      {
+        "nodes": [
+          3,
+          1,
+          2,
+          4
+        ],
+        "msg": "Insert node 3 at MRU (head)",
+        "highlights": [
+          0
+        ]
+      }
+    ],
+    "_sourceFile": "LinkedListPractice.jsx"
+  },
+  {
+    "id": 10,
+    "title": "Flatten Multilevel",
+    "description": "Flatten hierarchy to linear.",
+    "input": "List with child pointers",
+    "output": "1→2→4→5→6→3",
+    "nodes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "steps": [
+      {
+        "nodes": [
+          1,
+          2,
+          3
+        ],
+        "msg": "Check node 2, has child 4",
+        "highlights": [
+          1,
+          3
+        ]
+      },
+      {
+        "nodes": [
+          1,
+          2,
+          4,
+          5,
+          3
+        ],
+        "msg": "Merge child list into main",
+        "highlights": [
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "nodes": [
+          1,
+          2,
+          4,
+          5,
+          6,
+          3
+        ],
+        "msg": "Continue until all flattened",
+        "highlights": [
+          5
+        ]
+      }
+    ],
+    "_sourceFile": "LinkedListPractice.jsx"
+  },
+  {
+    "id": 11,
+    "title": "Check Palindrome",
+    "description": "Is 1→2→2→1 symmetric?",
+    "input": "1→2→2→1",
+    "output": "Yes (True)",
+    "nodes": [
+      1,
+      2,
+      2,
+      1
+    ],
+    "steps": [
+      {
+        "nodes": [
+          1,
+          2,
+          2,
+          1
+        ],
+        "msg": "Find middle and reverse half",
+        "highlights": [
+          2,
+          3
+        ]
+      },
+      {
+        "nodes": [
+          1,
+          2,
+          2,
+          1
+        ],
+        "msg": "Compare front (1) and back (1)",
+        "highlights": [
+          0,
+          3
+        ]
+      },
+      {
+        "nodes": [
+          1,
+          2,
+          2,
+          1
+        ],
+        "msg": "Compare front (2) and back (2)",
+        "highlights": [
+          1,
+          2
+        ]
+      },
+      {
+        "nodes": [
+          1,
+          2,
+          2,
+          1
+        ],
+        "msg": "Matches! Palindrome detected",
+        "highlights": []
+      }
+    ],
+    "_sourceFile": "LinkedListPractice.jsx"
+  },
+  {
+    "id": 12,
+    "title": "Merge Sort List",
+    "description": "Sort [4, 2, 1, 3].",
+    "input": "4→2→1→3",
+    "output": "1→2→3→4",
+    "nodes": [
+      4,
+      2,
+      1,
+      3
+    ],
+    "steps": [
+      {
+        "nodes": [
+          4,
+          2,
+          1,
+          3
+        ],
+        "msg": "Split into [4,2] and [1,3]",
+        "highlights": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "nodes": [
+          2,
+          4,
+          1,
+          3
+        ],
+        "msg": "Sort left and right sublists",
+        "highlights": [
+          0,
+          1
+        ]
+      },
+      {
+        "nodes": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "msg": "Merge sorted sublists",
+        "highlights": [
+          0,
+          1,
+          2,
+          3
+        ]
+      }
+    ],
+    "_sourceFile": "LinkedListPractice.jsx"
+  },
+  {
+    "id": 1,
+    "title": "Process Scheduling Order",
+    "difficulty": "Easy",
+    "icon": "🍳",
+    "time": "2 min",
+    "description": "Given processes P1 (5ms), P2 (2ms), P3 (4ms) arriving at t=0, what is the completion order in FCFS?",
+    "input": "Processes: P1:5, P2:2, P3:4",
+    "output": "Order: P1 → P2 → P3",
+    "type": "scheduling",
+    "steps": [
+      "P1 arrives first and starts cooking for 5ms.",
+      "P2 arrives but waits until P1 is finished.",
+      "P3 finishes last after P2, following the arrival order."
+    ],
+    "_sourceFile": "OSPracticeProblems.jsx"
+  },
+  {
+    "id": 2,
+    "title": "Round Robin Simulation",
+    "difficulty": "Easy",
+    "icon": "⏲️",
+    "time": "3 min",
+    "description": "P1 (6ms) and P2 (4ms) arrive at t=0. Quantum = 3ms. Show the execution steps.",
+    "input": "P1:6, P2:4 | Q:3",
+    "output": "P1(3) → P2(3) → P1(3) → P2(1)",
+    "type": "rr",
+    "steps": [
+      "P1 runs for 3ms (quantum), then context switches.",
+      "P2 runs for 3ms, then context switches.",
+      "P1 finishes its remaining 3ms.",
+      "P2 finishes its last 1ms."
+    ],
+    "_sourceFile": "OSPracticeProblems.jsx"
+  },
+  {
+    "id": 3,
+    "title": "Identify Deadlock Condition",
+    "difficulty": "Medium",
+    "icon": "🚗",
+    "time": "2 min",
+    "description": "Which of the 4 conditions is missing if resources can be forcibly taken from a process?",
+    "input": "Can forcibly take resources",
+    "output": "No Preemption is missing",
+    "type": "deadlock",
+    "steps": [
+      "Identify the four conditions: Mutual Exclusion, Hold & Wait, No Preemption, Circular Wait.",
+      "Forcible removal of resources means we CAN preempt.",
+      "Therefore, the 'No Preemption' condition is not met."
+    ],
+    "_sourceFile": "OSPracticeProblems.jsx"
+  },
+  {
+    "id": 4,
+    "title": "Memory Fragmentation",
+    "difficulty": "Medium",
+    "icon": "🏨",
+    "time": "4 min",
+    "description": "A 10KB hole is available. A 4KB block is allocated. What is the resulting internal fragmentation?",
+    "input": "Hole: 10KB, Req: 4KB (Fixed Partitioning)",
+    "output": "6KB Internal Fragmentation",
+    "type": "memory",
+    "steps": [
+      "Fixed partitioning allocates a set block size (10KB).",
+      "The process only uses 4KB of that 10KB block.",
+      "10KB - 4KB = 6KB of wasted space inside the block."
+    ],
+    "_sourceFile": "OSPracticeProblems.jsx"
+  },
+  {
+    "id": 5,
+    "title": "Paging Calculation",
+    "difficulty": "Medium",
+    "icon": "📚",
+    "time": "3 min",
+    "description": "Page size 4KB. Logical Address 13000. What is the Page Number and Offset?",
+    "input": "LA: 13000, PS: 4096",
+    "output": "Page: 3, Offset: 712",
+    "type": "paging",
+    "steps": [
+      "Calculate Page Number: 13000 / 4096 = 3.17 -> Page 3.",
+      "Calculate Offset: 13000 % 4096 = 712.",
+      "Logical Address = (Page 3, Offset 712)."
+    ],
+    "_sourceFile": "OSPracticeProblems.jsx"
+  },
+  {
+    "id": 6,
+    "title": "Race Condition Check",
+    "difficulty": "Medium",
+    "icon": "👨‍🍳",
+    "time": "5 min",
+    "description": "Two threads T1 and T2 increment a global variable X=0 without sync. What is a possible final value of X?",
+    "input": "X = 0; T1: X++; T2: X++",
+    "output": "Final X: 1 (Race Condition)",
+    "type": "threads",
+    "steps": [
+      "T1 reads X=0.",
+      "T2 reads X=0 before T1 writes back.",
+      "T1 writes X=1. T2 writes X=1. (X should have been 2)."
+    ],
+    "_sourceFile": "OSPracticeProblems.jsx"
+  },
+  {
+    "id": 7,
+    "title": "Producer-Consumer",
+    "difficulty": "Hard",
+    "icon": "📦",
+    "time": "6 min",
+    "description": "Buffer size 2. Producer adds A, then B. Consumer tries to take 3 items. What happens?",
+    "input": "Size: 2, Prod: 2, Cons: 3",
+    "output": "Consumer blocks on empty buffer",
+    "type": "pc",
+    "steps": [
+      "Producer fills buffer with A and B (Size 2).",
+      "Consumer takes A and B. Buffer is now empty.",
+      "Consumer tries to take 3rd item and enters 'Blocked' state."
+    ],
+    "_sourceFile": "OSPracticeProblems.jsx"
+  },
+  {
+    "id": 8,
+    "title": "Banker's Algorithm",
+    "difficulty": "Hard",
+    "icon": "🏦",
+    "time": "8 min",
+    "description": "Is it a safe state to grant (1,0,2) to P1 with Avail: (3,3,2)?",
+    "input": "Avail: 332, Need: 753, Alloc: 010, Req: 102",
+    "output": "Yes, Safe State",
+    "type": "banker",
+    "steps": [
+      "P1 requests (1,0,2). Subtract from Available: (3,3,2)-(1,0,2) = (2,3,0).",
+      "Update P1's allocation: (0,1,0)+(1,0,2) = (1,1,2).",
+      "Find a safe sequence where all needs can be met. (Success)."
+    ],
+    "_sourceFile": "OSPracticeProblems.jsx"
+  },
+  {
+    "id": 1,
+    "title": "Implement basic queue using array",
+    "problem": "Enqueue 1, 2, 3, then dequeue once. What is at the front?",
+    "input": "Enqueue(1), Enqueue(2), Enqueue(3), Dequeue()",
+    "output": "Front: 2",
+    "steps": [
+      {
+        "op": "enqueue",
+        "val": "1",
+        "msg": "Enqueue 1"
+      },
+      {
+        "op": "enqueue",
+        "val": "2",
+        "msg": "Enqueue 2"
+      },
+      {
+        "op": "enqueue",
+        "val": "3",
+        "msg": "Enqueue 3"
+      },
+      {
+        "op": "dequeue",
+        "val": "1",
+        "msg": "Dequeue 1 (Remove from front)"
+      },
+      {
+        "op": "highlight",
+        "val": "2",
+        "msg": "Front is now 2"
+      }
+    ],
+    "_sourceFile": "QueuesPracticeProblems.jsx"
+  },
+  {
+    "id": 2,
+    "title": "Reverse first k elements of queue",
+    "problem": "Reverse first 3 elements of [1, 2, 3, 4, 5].",
+    "input": "[1, 2, 3, 4, 5], k=3",
+    "output": "[3, 2, 1, 4, 5]",
+    "steps": [
+      {
+        "op": "init",
+        "val": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "msg": "Initial queue"
+      },
+      {
+        "op": "highlight",
+        "val": "1,2,3",
+        "msg": "Extract first 3 to stack"
+      },
+      {
+        "op": "update",
+        "val": [
+          3,
+          2,
+          1,
+          4,
+          5
+        ],
+        "msg": "Push back from stack to reverse"
+      }
+    ],
+    "_sourceFile": "QueuesPracticeProblems.jsx"
+  },
+  {
+    "id": 3,
+    "title": "Generate binary numbers 1 to n",
+    "problem": "Generate binary numbers from 1 to 3 using a queue.",
+    "input": "n=3",
+    "output": "1, 10, 11",
+    "steps": [
+      {
+        "op": "enqueue",
+        "val": "1",
+        "msg": "Start with 1"
+      },
+      {
+        "op": "dequeue",
+        "val": "1",
+        "msg": "Process 1. Append 0 and 1."
+      },
+      {
+        "op": "enqueue",
+        "val": "10",
+        "msg": "Enqueue 10"
+      },
+      {
+        "op": "enqueue",
+        "val": "11",
+        "msg": "Enqueue 11"
+      },
+      {
+        "op": "done",
+        "val": "1, 10, 11",
+        "msg": "Binary sequence generated!"
+      }
+    ],
+    "_sourceFile": "QueuesPracticeProblems.jsx"
+  },
+  {
+    "id": 4,
+    "title": "First non-repeating character",
+    "problem": "Find first non-repeating in 'aabcb'.",
+    "input": "'aabcb'",
+    "output": "'c'",
+    "steps": [
+      {
+        "op": "enqueue",
+        "val": "a",
+        "msg": "Found a"
+      },
+      {
+        "op": "enqueue",
+        "val": "a",
+        "msg": "Found a (Repeating!)"
+      },
+      {
+        "op": "dequeue",
+        "val": "a",
+        "msg": "Remove a"
+      },
+      {
+        "op": "enqueue",
+        "val": "b",
+        "msg": "Found b"
+      },
+      {
+        "op": "enqueue",
+        "val": "c",
+        "msg": "Found c"
+      },
+      {
+        "op": "highlight",
+        "val": "b",
+        "msg": "b is first non-repeating"
+      }
+    ],
+    "_sourceFile": "QueuesPracticeProblems.jsx"
+  },
+  {
+    "id": 5,
+    "title": "Implement queue using two stacks",
+    "problem": "Enqueue 1, 2, then Dequeue.",
+    "input": "Enq(1), Enq(2), Deq()",
+    "output": "1",
+    "steps": [
+      {
+        "op": "enqueue",
+        "val": "1",
+        "msg": "Stack1: [1]"
+      },
+      {
+        "op": "enqueue",
+        "val": "2",
+        "msg": "Stack1: [1, 2]"
+      },
+      {
+        "op": "dequeue",
+        "val": "1",
+        "msg": "Move S1 to S2, then Pop from S2: 1"
+      }
+    ],
+    "_sourceFile": "QueuesPracticeProblems.jsx"
+  },
+  {
+    "id": 6,
+    "title": "Check if queue is palindrome",
+    "problem": "Check if [1, 2, 2, 1] is palindrome.",
+    "input": "[1, 2, 2, 1]",
+    "output": "True",
+    "steps": [
+      {
+        "op": "init",
+        "val": [
+          1,
+          2,
+          2,
+          1
+        ],
+        "msg": "Queue: [1,2,2,1]"
+      },
+      {
+        "op": "compare",
+        "val": "1=1",
+        "msg": "Front 1 matches Back 1"
+      },
+      {
+        "op": "compare",
+        "val": "2=2",
+        "msg": "Middle 2 matches Middle 2"
+      },
+      {
+        "op": "done",
+        "val": "Palindrome",
+        "msg": "Queue is a palindrome!"
+      }
+    ],
+    "_sourceFile": "QueuesPracticeProblems.jsx"
+  },
+  {
+    "id": 7,
+    "title": "Circular tour (Gas Station)",
+    "problem": "Find starting gas station to complete loop.",
+    "input": "4 stations",
+    "output": "Index 3",
+    "steps": [
+      {
+        "op": "try",
+        "val": "0",
+        "msg": "Start 0: Stuck"
+      },
+      {
+        "op": "try",
+        "val": "1",
+        "msg": "Start 1: Stuck"
+      },
+      {
+        "op": "try",
+        "val": "3",
+        "msg": "Start 3: Sufficient gas!"
+      },
+      {
+        "op": "done",
+        "val": "Success",
+        "msg": "Loop completed from index 3"
+      }
+    ],
+    "_sourceFile": "QueuesPracticeProblems.jsx"
+  },
+  {
+    "id": 8,
+    "title": "Rotten oranges (BFS)",
+    "problem": "Time to rot all oranges in a grid.",
+    "input": "Grid 3x3",
+    "output": "4 Minutes",
+    "steps": [
+      {
+        "op": "enqueue",
+        "val": "R(0,0)",
+        "msg": "Day 0: Initial rotten"
+      },
+      {
+        "op": "enqueue",
+        "val": "R(0,1)",
+        "msg": "Day 1: neighbors rot"
+      },
+      {
+        "op": "enqueue",
+        "val": "R(1,1)",
+        "msg": "Day 2: spreading"
+      },
+      {
+        "op": "done",
+        "val": "4 mins",
+        "msg": "All oranges rotten!"
+      }
+    ],
+    "_sourceFile": "QueuesPracticeProblems.jsx"
+  },
+  {
+    "id": 9,
+    "title": "Implement deque using DLL",
+    "problem": "Insert at front and rear.",
+    "input": "addFront(1), addRear(2)",
+    "output": "[1, 2]",
+    "steps": [
+      {
+        "op": "enqueue",
+        "val": "1",
+        "msg": "Head <-> 1 <-> Tail"
+      },
+      {
+        "op": "enqueue",
+        "val": "2",
+        "msg": "Head <-> 1 <-> 2 <-> Tail"
+      },
+      {
+        "op": "done",
+        "val": "[1, 2]",
+        "msg": "DLL Deque formed"
+      }
+    ],
+    "_sourceFile": "QueuesPracticeProblems.jsx"
+  },
+  {
+    "id": 10,
+    "title": "LRU Cache using queue",
+    "problem": "Recently used elements move to rear.",
+    "input": "Access(1), Access(2)",
+    "output": "Rear: 2",
+    "steps": [
+      {
+        "op": "enqueue",
+        "val": "1",
+        "msg": "Cache: [1]"
+      },
+      {
+        "op": "enqueue",
+        "val": "2",
+        "msg": "Cache: [1, 2]"
+      },
+      {
+        "op": "init",
+        "val": [
+          2,
+          1
+        ],
+        "msg": "Access 1: move to rear"
+      },
+      {
+        "op": "done",
+        "val": "[2, 1]",
+        "msg": "1 is now MRU"
+      }
+    ],
+    "_sourceFile": "QueuesPracticeProblems.jsx"
+  },
+  {
+    "id": 11,
+    "title": "Sliding window max using deque",
+    "problem": "Find max in window size 3 for [1, 3, -1, -3, 5].",
+    "input": "[1, 3, -1, -3, 5], k=3",
+    "output": "[3, 3, 5]",
+    "steps": [
+      {
+        "op": "init",
+        "val": [
+          1,
+          3,
+          -1
+        ],
+        "msg": "Window 1: Max is 3"
+      },
+      {
+        "op": "init",
+        "val": [
+          3,
+          -1,
+          -3
+        ],
+        "msg": "Window 2: Max is 3"
+      },
+      {
+        "op": "init",
+        "val": [
+          -1,
+          -3,
+          5
+        ],
+        "msg": "Window 3: Max is 5"
+      }
+    ],
+    "_sourceFile": "QueuesPracticeProblems.jsx"
+  },
+  {
+    "id": 12,
+    "title": "Design bounded blocking queue",
+    "problem": "Producer-Consumer with capacity 2.",
+    "input": "Put(1), Put(2), Put(3)",
+    "output": "Wait(3)",
+    "steps": [
+      {
+        "op": "enqueue",
+        "val": "1",
+        "msg": "Placed 1"
+      },
+      {
+        "op": "enqueue",
+        "val": "2",
+        "msg": "Placed 2 (Full!)"
+      },
+      {
+        "op": "highlight",
+        "val": "3",
+        "msg": "Put(3) blocks - queue is full"
+      }
+    ],
+    "_sourceFile": "QueuesPracticeProblems.jsx"
+  },
+  {
+    "id": "two-sum",
+    "title": "Two Sum",
+    "desc": "Given an array of integers and a target sum, find two numbers that add up to the target using a hash map or two pointers.",
+    "difficulty": "Easy",
+    "tag": "🎯",
+    "_sourceFile": "SearchingPracticeProblems.jsx"
+  },
+  {
+    "id": "binary-search",
+    "title": "Binary Search in Sorted Array",
+    "desc": "Implement standard binary search to find a target value in a sorted array in O(log n) time.",
+    "difficulty": "Easy",
+    "tag": "🔍",
+    "_sourceFile": "SearchingPracticeProblems.jsx"
+  },
+  {
+    "id": "first-bad-version",
+    "title": "First Bad Version",
+    "desc": "Find the first bad version in an API using binary search to minimize API calls.",
+    "difficulty": "Easy",
+    "tag": "🐛",
+    "_sourceFile": "SearchingPracticeProblems.jsx"
+  },
+  {
+    "id": "find-peak",
+    "title": "Find Peak Element",
+    "desc": "Find any peak element (an element greater than its neighbors) using binary search.",
+    "difficulty": "Medium",
+    "tag": "⛰️",
+    "_sourceFile": "SearchingPracticeProblems.jsx"
+  },
+  {
+    "id": "search-rotated",
+    "title": "Search in Rotated Sorted Array",
+    "desc": "Find a target in a sorted array that has been rotated, still strictly using O(log n) time.",
+    "difficulty": "Medium",
+    "tag": "🔄",
+    "_sourceFile": "SearchingPracticeProblems.jsx"
+  },
+  {
+    "id": "min-rotated",
+    "title": "Minimum in Rotated Sorted Array",
+    "desc": "Find the minimum element in a rotated sorted array using binary search.",
+    "difficulty": "Medium",
+    "tag": "⬇️",
+    "_sourceFile": "SearchingPracticeProblems.jsx"
+  },
+  {
+    "id": "k-closest",
+    "title": "K Closest Elements",
+    "desc": "Find the k closest elements to a given value x in a sorted array using binary search and two pointers.",
+    "difficulty": "Medium",
+    "tag": "🤏",
+    "_sourceFile": "SearchingPracticeProblems.jsx"
+  },
+  {
+    "id": "median-two-sorted",
+    "title": "Median of Two Sorted Arrays",
+    "desc": "Find the median of two sorted arrays of different sizes in O(log(min(m, n))) time.",
+    "difficulty": "Hard",
+    "tag": "📊",
+    "_sourceFile": "SearchingPracticeProblems.jsx"
+  },
+  {
+    "id": "sort-colors",
+    "title": "Sort Colors",
+    "desc": "Sort an array containing 0s, 1s, and 2s using the Dutch National Flag algorithm in O(n) with a single pass.",
+    "difficulty": "Easy",
+    "tag": "🎨",
+    "_sourceFile": "SortingPracticeProblems.jsx"
+  },
+  {
+    "id": "merge-sorted",
+    "title": "Merge Two Sorted Arrays",
+    "desc": "Merge two sorted arrays into a single sorted array using a two-pointer technique.",
+    "difficulty": "Easy",
+    "tag": "🔗",
+    "_sourceFile": "SortingPracticeProblems.jsx"
+  },
+  {
+    "id": "kth-largest",
+    "title": "Kth Largest Element",
+    "desc": "Find the kth largest element in an unsorted array using a min-heap of size k.",
+    "difficulty": "Medium",
+    "tag": "🏆",
+    "_sourceFile": "SortingPracticeProblems.jsx"
+  },
+  {
+    "id": "top-k-frequent",
+    "title": "Top K Frequent Elements",
+    "desc": "Return the k most frequent elements using a frequency map and heap sorting.",
+    "difficulty": "Medium",
+    "tag": "📊",
+    "_sourceFile": "SortingPracticeProblems.jsx"
+  },
+  {
+    "id": "merge-intervals",
+    "title": "Merge Intervals",
+    "desc": "Sort intervals by start time, then merge all overlapping intervals into one.",
+    "difficulty": "Medium",
+    "tag": "📐",
+    "_sourceFile": "SortingPracticeProblems.jsx"
+  },
+  {
+    "id": "quickselect",
+    "title": "QuickSelect Kth Element",
+    "desc": "Use QuickSelect partitioning to find the kth smallest element in O(n) average time.",
+    "difficulty": "Medium",
+    "tag": "⚡",
+    "_sourceFile": "SortingPracticeProblems.jsx"
+  },
+  {
+    "id": "sort-linked-list",
+    "title": "Sort a Linked List",
+    "desc": "Sort a singly linked list using Merge Sort — split into halves, sort each, then merge.",
+    "difficulty": "Hard",
+    "tag": "🔗",
+    "_sourceFile": "SortingPracticeProblems.jsx"
+  },
+  {
+    "id": "count-inversions",
+    "title": "Count Inversions",
+    "desc": "Count pairs (i,j) where i<j but arr[i]>arr[j] — solved efficiently with Merge Sort.",
+    "difficulty": "Hard",
+    "tag": "🔢",
+    "_sourceFile": "SortingPracticeProblems.jsx"
+  },
+  {
+    "id": 1,
+    "title": "Reverse a string using stack",
+    "problem": "Reverse the string 'hello' using a stack.",
+    "input": "'hello'",
+    "output": "'olleh'",
+    "steps": [
+      {
+        "op": "push",
+        "val": "h",
+        "msg": "Push h"
+      },
+      {
+        "op": "push",
+        "val": "e",
+        "msg": "Push e"
+      },
+      {
+        "op": "push",
+        "val": "l",
+        "msg": "Push l"
+      },
+      {
+        "op": "push",
+        "val": "l",
+        "msg": "Push l"
+      },
+      {
+        "op": "push",
+        "val": "o",
+        "msg": "Push o"
+      },
+      {
+        "op": "pop",
+        "val": "o",
+        "msg": "Pop o (Start of reversed string)"
+      },
+      {
+        "op": "pop",
+        "val": "l",
+        "msg": "Pop l"
+      },
+      {
+        "op": "pop",
+        "val": "l",
+        "msg": "Pop l"
+      },
+      {
+        "op": "pop",
+        "val": "e",
+        "msg": "Pop e"
+      },
+      {
+        "op": "pop",
+        "val": "h",
+        "msg": "Pop h (Reversed result: olleh)"
+      }
+    ],
+    "_sourceFile": "StacksPracticeProblems.jsx"
+  },
+  {
+    "id": 2,
+    "title": "Check balanced parentheses",
+    "problem": "Check if '()[]{}' is valid.",
+    "input": "'()[]{}'",
+    "output": "Valid",
+    "steps": [
+      {
+        "op": "push",
+        "val": "(",
+        "msg": "Found ( - push to stack"
+      },
+      {
+        "op": "pop",
+        "val": "(",
+        "msg": "Found ) - matches top ( - pop"
+      },
+      {
+        "op": "push",
+        "val": "[",
+        "msg": "Found [ - push"
+      },
+      {
+        "op": "pop",
+        "val": "[",
+        "msg": "Found ] - matches top [ - pop"
+      },
+      {
+        "op": "push",
+        "val": "{",
+        "msg": "Found { - push"
+      },
+      {
+        "op": "pop",
+        "val": "{",
+        "msg": "Found } - matches top { - pop"
+      },
+      {
+        "op": "done",
+        "val": "Valid",
+        "msg": "Stack empty - Expression is valid!"
+      }
+    ],
+    "_sourceFile": "StacksPracticeProblems.jsx"
+  },
+  {
+    "id": 3,
+    "title": "Next greater element",
+    "problem": "Find next greater for [4, 5, 2, 25].",
+    "input": "[4, 5, 2, 25]",
+    "output": "[5, 25, 25, -1]",
+    "steps": [
+      {
+        "op": "push",
+        "val": "4",
+        "msg": "Push 4"
+      },
+      {
+        "op": "pop",
+        "val": "4",
+        "msg": "Next is 5 > 4. Result for 4 is 5. Pop 4."
+      },
+      {
+        "op": "push",
+        "val": "5",
+        "msg": "Push 5"
+      },
+      {
+        "op": "push",
+        "val": "2",
+        "msg": "2 < 5. Push 2."
+      },
+      {
+        "op": "pop",
+        "val": "2",
+        "msg": "Next is 25 > 2. Result for 2 is 25. Pop 2."
+      },
+      {
+        "op": "pop",
+        "val": "5",
+        "msg": "Next is 25 > 5. Result for 5 is 25. Pop 5."
+      },
+      {
+        "op": "push",
+        "val": "25",
+        "msg": "Push 25"
+      },
+      {
+        "op": "done",
+        "val": "-1",
+        "msg": "No elements left for 25. Result is -1."
+      }
+    ],
+    "_sourceFile": "StacksPracticeProblems.jsx"
+  },
+  {
+    "id": 4,
+    "title": "Implement min-stack",
+    "problem": "Keep track of minimum element in O(1).",
+    "input": "Push 10, 5, 12; getMin()",
+    "output": "Min: 5",
+    "steps": [
+      {
+        "op": "push",
+        "val": "10 (min:10)",
+        "msg": "Push 10"
+      },
+      {
+        "op": "push",
+        "val": "5 (min:5)",
+        "msg": "Push 5 (New Min!)"
+      },
+      {
+        "op": "push",
+        "val": "12 (min:5)",
+        "msg": "Push 12"
+      },
+      {
+        "op": "highlight",
+        "val": "Min: 5",
+        "msg": "getMin() returns 5 instantly from stack state."
+      }
+    ],
+    "_sourceFile": "StacksPracticeProblems.jsx"
+  },
+  {
+    "id": 5,
+    "title": "Evaluate postfix",
+    "problem": "Evaluate '2 3 + 4 *'.",
+    "input": "'2 3 + 4 *'",
+    "output": "20",
+    "steps": [
+      {
+        "op": "push",
+        "val": "2",
+        "msg": "Push 2"
+      },
+      {
+        "op": "push",
+        "val": "3",
+        "msg": "Push 3"
+      },
+      {
+        "op": "pop",
+        "val": "2,3",
+        "msg": "Hit +. Pop 2 and 3. Add."
+      },
+      {
+        "op": "push",
+        "val": "5",
+        "msg": "Push 5"
+      },
+      {
+        "op": "push",
+        "val": "4",
+        "msg": "Push 4"
+      },
+      {
+        "op": "pop",
+        "val": "5,4",
+        "msg": "Hit *. Pop 5 and 4. Multiply."
+      },
+      {
+        "op": "push",
+        "val": "20",
+        "msg": "Push result: 20"
+      }
+    ],
+    "_sourceFile": "StacksPracticeProblems.jsx"
+  },
+  {
+    "id": 6,
+    "title": "Sort a stack using temp stack",
+    "problem": "Sort [3, 1, 4, 2] to [1, 2, 3, 4].",
+    "input": "[3, 1, 4, 2]",
+    "output": "[1, 2, 3, 4]",
+    "steps": [
+      {
+        "op": "push",
+        "val": "3",
+        "msg": "Push 3 to Main"
+      },
+      {
+        "op": "push",
+        "val": "1",
+        "msg": "Push 1 to Main"
+      },
+      {
+        "op": "pop",
+        "val": "1",
+        "msg": "Temp stack logic: move 1 safely."
+      },
+      {
+        "op": "push",
+        "val": "2",
+        "msg": "Push 2 to Main"
+      },
+      {
+        "op": "push",
+        "val": "4",
+        "msg": "Push 4 to Main"
+      },
+      {
+        "op": "done",
+        "val": "Sorted",
+        "msg": "Using a second stack, we can sort LIFO elements."
+      }
+    ],
+    "_sourceFile": "StacksPracticeProblems.jsx"
+  },
+  {
+    "id": 7,
+    "title": "Stock span problem",
+    "problem": "Prices: [100, 80, 60, 70, 60, 75, 85].",
+    "input": "[100, 80, 60, 70, 60, 75, 85]",
+    "output": "[1, 1, 1, 2, 1, 4, 6]",
+    "steps": [
+      {
+        "op": "push",
+        "val": "100",
+        "msg": "Day 1: 100. Span 1."
+      },
+      {
+        "op": "push",
+        "val": "80",
+        "msg": "Day 2: 80 < 100. Span 1."
+      },
+      {
+        "op": "push",
+        "val": "70",
+        "msg": "Day 4: 70 > 60. Pop 60. Span 2."
+      },
+      {
+        "op": "push",
+        "val": "85",
+        "msg": "Day 7: 85 > all except 100. Pop back to 100. Span 6."
+      }
+    ],
+    "_sourceFile": "StacksPracticeProblems.jsx"
+  },
+  {
+    "id": 8,
+    "title": "Largest rectangle in histogram",
+    "problem": "Heights [2, 1, 5, 6, 2, 3].",
+    "input": "[2,1,5,6,2,3]",
+    "output": "Area: 10",
+    "steps": [
+      {
+        "op": "push",
+        "val": "2 (idx:0)",
+        "msg": "Increasing heights - push"
+      },
+      {
+        "op": "pop",
+        "val": "2",
+        "msg": "Decr. height 1 - calculate area for 2"
+      },
+      {
+        "op": "push",
+        "val": "5",
+        "msg": "Push 5"
+      },
+      {
+        "op": "push",
+        "val": "6",
+        "msg": "Push 6"
+      },
+      {
+        "op": "pop",
+        "val": "6",
+        "msg": "Calculate width for bar 6 x height 5 = Area 10"
+      }
+    ],
+    "_sourceFile": "StacksPracticeProblems.jsx"
+  },
+  {
+    "id": 9,
+    "title": "Implement two stacks in one array",
+    "problem": "Store two stacks efficiently in a single fixed array.",
+    "input": "Array Size 10",
+    "output": "Symmetry",
+    "steps": [
+      {
+        "op": "push",
+        "val": "S1 Item (idx 0)",
+        "msg": "Stack 1 grows from left"
+      },
+      {
+        "op": "push",
+        "val": "S2 Item (idx 9)",
+        "msg": "Stack 2 grows from right"
+      },
+      {
+        "op": "push",
+        "val": "S1 Item (idx 1)",
+        "msg": "Towards each other"
+      },
+      {
+        "op": "done",
+        "val": "Efficient",
+        "msg": "Space shared until they meet in the middle!"
+      }
+    ],
+    "_sourceFile": "StacksPracticeProblems.jsx"
+  },
+  {
+    "id": 10,
+    "title": "Check redundant brackets",
+    "problem": "Expression '((a+b)+c)' vs '((a+b))'.",
+    "input": "'((a+b))'",
+    "output": "Redundant",
+    "steps": [
+      {
+        "op": "push",
+        "val": "(",
+        "msg": "Push ("
+      },
+      {
+        "op": "push",
+        "val": "(",
+        "msg": "Push ("
+      },
+      {
+        "op": "push",
+        "val": "a+b",
+        "msg": "Push operands"
+      },
+      {
+        "op": "pop",
+        "val": "a+b",
+        "msg": "Pop a+b"
+      },
+      {
+        "op": "pop",
+        "val": "(",
+        "msg": "Matched ( - No operator between! Redundant."
+      }
+    ],
+    "_sourceFile": "StacksPracticeProblems.jsx"
+  },
+  {
+    "id": 11,
+    "title": "Design stack with increment",
+    "problem": "Custom stack: push, pop, increment(k, val).",
+    "input": "inc(3, 100)",
+    "output": "Updated",
+    "steps": [
+      {
+        "op": "push",
+        "val": "1",
+        "msg": "Push 1"
+      },
+      {
+        "op": "push",
+        "val": "2",
+        "msg": "Push 2"
+      },
+      {
+        "op": "push",
+        "val": "3",
+        "msg": "Push 3"
+      },
+      {
+        "op": "highlight",
+        "val": "+100",
+        "msg": "inc(3, 100) added 100 to bottom 3 elements."
+      }
+    ],
+    "_sourceFile": "StacksPracticeProblems.jsx"
+  },
+  {
+    "id": 12,
+    "title": "Celebrity problem",
+    "problem": "Find a person everyone knows, but they know no one.",
+    "input": "4 People Matrix",
+    "output": "Person 2",
+    "steps": [
+      {
+        "op": "push",
+        "val": "P0,P1,P2,P3",
+        "msg": "Push all candidates to stack"
+      },
+      {
+        "op": "pop",
+        "val": "P0,P1",
+        "msg": "Compare P0 & P1 -> keep candidate"
+      },
+      {
+        "op": "pop",
+        "val": "P2,P3",
+        "msg": "Compare till 1 remains"
+      },
+      {
+        "op": "done",
+        "val": "Found Celebrity",
+        "msg": "Final candidate is the celebrity!"
+      }
+    ],
+    "_sourceFile": "StacksPracticeProblems.jsx"
+  },
+  {
+    "id": 1,
+    "title": "Find Height of Tree",
+    "desc": "Calculate the height of the binary tree.",
+    "input": "Tree structure",
+    "output": "Height = 3",
+    "steps": [
+      {
+        "id": "1",
+        "msg": "Highlight root node",
+        "labels": {
+          "1": "H:?"
+        }
+      },
+      {
+        "id": "2",
+        "msg": "Traverse left subtree",
+        "visited": [
+          "2",
+          "4",
+          "5"
+        ],
+        "labels": {
+          "2": "H:2"
+        }
+      },
+      {
+        "id": "3",
+        "msg": "Traverse right subtree",
+        "visited": [
+          "2",
+          "4",
+          "5",
+          "3",
+          "6"
+        ],
+        "labels": {
+          "3": "H:1"
+        }
+      },
+      {
+        "id": "4",
+        "msg": "Calculate height = max(2, 1) + 1",
+        "highlighted": [
+          "1"
+        ],
+        "labels": {
+          "1": "Height: 3"
+        }
+      }
+    ],
+    "code": {
+      "python": "def get_height(node):\n    if not node: return 0\n    return 1 + max(get_height(node.left), get_height(node.right))",
+      "javascript": "function getHeight(node) {\n    if (!node) return 0;\n    return 1 + Math.max(getHeight(node.left), getHeight(node.right));\n}",
+      "cpp": "int getHeight(Node* node) {\n    if (node == NULL) return 0;\n    return 1 + max(getHeight(node->left), getHeight(node->right));\n}"
+    },
+    "_sourceFile": "TreesPracticeProblems.jsx"
+  },
+  {
+    "id": 2,
+    "title": "Count Total Nodes",
+    "desc": "Count how many nodes exist in the tree.",
+    "input": "Binary tree",
+    "output": "Total nodes = 6",
+    "steps": [
+      {
+        "id": "1",
+        "msg": "Count: 1",
+        "visited": [
+          "1"
+        ]
+      },
+      {
+        "id": "2",
+        "msg": "Count: 2",
+        "visited": [
+          "1",
+          "2"
+        ]
+      },
+      {
+        "id": "3",
+        "msg": "Count: 3",
+        "visited": [
+          "1",
+          "2",
+          "4"
+        ]
+      },
+      {
+        "id": "4",
+        "msg": "Count: 4",
+        "visited": [
+          "1",
+          "2",
+          "4",
+          "5"
+        ]
+      },
+      {
+        "id": "5",
+        "msg": "Count: 5",
+        "visited": [
+          "1",
+          "2",
+          "4",
+          "5",
+          "3"
+        ]
+      },
+      {
+        "id": "6",
+        "msg": "Count: 6",
+        "visited": [
+          "1",
+          "2",
+          "4",
+          "5",
+          "3",
+          "6"
+        ]
+      }
+    ],
+    "code": {
+      "python": "def get_size(node):\n    if not node: return 0\n    return 1 + get_size(node.left) + get_size(node.right)",
+      "javascript": "function getSize(node) {\n    if (!node) return 0;\n    return 1 + getSize(node.left) + getSize(node.right);\n}",
+      "cpp": "int getSize(Node* node) {\n    if (node == NULL) return 0;\n    return 1 + getSize(node->left) + getSize(node->right);\n}"
+    },
+    "_sourceFile": "TreesPracticeProblems.jsx"
+  },
+  {
+    "id": 3,
+    "title": "Count Leaf Nodes",
+    "desc": "Find how many leaf nodes exist.",
+    "input": "Binary tree",
+    "output": "Leaf nodes = 3",
+    "steps": [
+      {
+        "id": "1",
+        "msg": "Visit Grandparent (Internal)",
+        "visited": [
+          "1"
+        ]
+      },
+      {
+        "id": "2",
+        "msg": "Visit Parent A (Internal)",
+        "visited": [
+          "1",
+          "2"
+        ]
+      },
+      {
+        "id": "3",
+        "msg": "Found Leaf: Child A1",
+        "visited": [
+          "1",
+          "2",
+          "4"
+        ],
+        "highlighted": [
+          "4"
+        ]
+      },
+      {
+        "id": "4",
+        "msg": "Found Leaf: Child A2",
+        "visited": [
+          "1",
+          "2",
+          "4",
+          "5"
+        ],
+        "highlighted": [
+          "4",
+          "5"
+        ]
+      },
+      {
+        "id": "5",
+        "msg": "Visit Parent B (Internal)",
+        "visited": [
+          "1",
+          "2",
+          "4",
+          "5",
+          "3"
+        ]
+      },
+      {
+        "id": "6",
+        "msg": "Found Leaf: Child B1",
+        "visited": [
+          "1",
+          "2",
+          "4",
+          "5",
+          "3",
+          "6"
+        ],
+        "highlighted": [
+          "4",
+          "5",
+          "6"
+        ]
+      }
+    ],
+    "code": {
+      "python": "def count_leaves(node):\n    if not node: return 0\n    if not node.left and not node.right: return 1\n    return count_leaves(node.left) + count_leaves(node.right)",
+      "javascript": "function countLeaves(node) {\n    if (!node) return 0;\n    if (!node.left && !node.right) return 1;\n    return countLeaves(node.left) + countLeaves(node.right);\n}",
+      "cpp": "int countLeaves(Node* node) {\n    if (node == NULL) return 0;\n    if (!node->left && !node->right) return 1;\n    return countLeaves(node->left) + countLeaves(node->right);\n}"
+    },
+    "_sourceFile": "TreesPracticeProblems.jsx"
+  },
+  {
+    "id": 4,
+    "title": "Level Order Traversal",
+    "desc": "Traverse the tree level by level.",
+    "input": "Binary tree",
+    "output": "[Grandparent, Parent A, Parent B, Child A1, Child A2, Child B1]",
+    "steps": [
+      {
+        "id": "1",
+        "msg": "Visit Level 0: Grandparent",
+        "visited": [
+          "1"
+        ],
+        "output": [
+          "Grandparent"
+        ]
+      },
+      {
+        "id": "2",
+        "msg": "Visit Level 1: Parent A",
+        "visited": [
+          "1",
+          "2"
+        ],
+        "output": [
+          "Grandparent",
+          "Parent A"
+        ]
+      },
+      {
+        "id": "3",
+        "msg": "Visit Level 1: Parent B",
+        "visited": [
+          "1",
+          "2",
+          "3"
+        ],
+        "output": [
+          "Grandparent",
+          "Parent A",
+          "Parent B"
+        ]
+      },
+      {
+        "id": "4",
+        "msg": "Visit Level 2: Child A1, Child A2, Child B1",
+        "visited": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+        ],
+        "output": [
+          "Grandparent",
+          "Parent A",
+          "Parent B",
+          "Child A1",
+          "Child A2",
+          "Child B1"
+        ]
+      }
+    ],
+    "code": {
+      "python": "def level_order(root):\n    if not root: return\n    queue = [root]\n    while queue:\n        node = queue.pop(0)\n        print(node.val)\n        if node.left: queue.append(node.left)\n        if node.right: queue.append(node.right)",
+      "javascript": "function levelOrder(root) {\n    if (!root) return;\n    let queue = [root];\n    while (queue.length > 0) {\n        let node = queue.shift();\n        console.log(node.val);\n        if (node.left) queue.push(node.left);\n        if (node.right) queue.push(node.right);\n    }\n}",
+      "cpp": "void levelOrder(Node* root) {\n    if (root == NULL) return;\n    queue<Node*> q;\n    q.push(root);\n    while (!q.empty()) {\n        Node* node = q.front(); q.pop();\n        cout << node->data << \" \";\n        if (node->left) q.push(node->left);\n        if (node->right) q.push(node->right);\n    }\n}"
+    },
+    "_sourceFile": "TreesPracticeProblems.jsx"
+  },
+  {
+    "id": 5,
+    "title": "Find Lowest Common Ancestor",
+    "desc": "Find the closest shared ancestor of two nodes.",
+    "input": "Node1 = Child A1, Node2 = Child A2",
+    "output": "Parent A",
+    "steps": [
+      {
+        "id": "1",
+        "msg": "Node 1 path: Child A1 -> Parent A -> Grandparent",
+        "visited": [
+          "1",
+          "2",
+          "4"
+        ]
+      },
+      {
+        "id": "2",
+        "msg": "Node 2 path: Child A2 -> Parent A -> Grandparent",
+        "visited": [
+          "1",
+          "2",
+          "5"
+        ]
+      },
+      {
+        "id": "3",
+        "msg": "LCA is Parent A!",
+        "highlighted": [
+          "2"
+        ]
+      }
+    ],
+    "code": {
+      "python": "def find_lca(root, p, q):\n    if not root or root == p or root == q: return root\n    left = find_lca(root.left, p, q)\n    right = find_lca(root.right, p, q)\n    if left and right: return root\n    return left or right",
+      "javascript": "function findLCA(root, p, q) {\n    if (!root || root === p || root === q) return root;\n    let left = findLCA(root.left, p, q);\n    let right = findLCA(root.right, p, q);\n    if (left && right) return root;\n    return left || right;\n}",
+      "cpp": "Node* findLCA(Node* root, Node* p, Node* q) {\n    if (root == NULL || root == p || root == q) return root;\n    Node* left = findLCA(root->left, p, q);\n    Node* right = findLCA(root->right, p, q);\n    if (left && right) return root;\n    if (left) return left;\n    return right;\n}"
+    },
+    "_sourceFile": "TreesPracticeProblems.jsx"
+  },
+  {
+    "id": 6,
+    "title": "Find Tree Diameter",
+    "desc": "Find the longest path between any two nodes.",
+    "input": "Binary tree",
+    "output": "Diameter = 4",
+    "steps": [
+      {
+        "id": "1",
+        "msg": "Left Height = 2, Right Height = 1",
+        "labels": {
+          "1": "L:2, R:1"
+        }
+      },
+      {
+        "id": "2",
+        "msg": "Diameter via Root = 2 + 1 + 1 = 4 nodes",
+        "highlighted": [
+          "4",
+          "2",
+          "1",
+          "3",
+          "6"
+        ]
+      },
+      {
+        "id": "3",
+        "msg": "Diameter is 4",
+        "labels": {
+          "1": "Diameter: 4"
+        }
+      }
+    ],
+    "code": {
+      "python": "def diameter(root):\n    ans = 0\n    def depth(p):\n        nonlocal ans\n        if not p: return 0\n        left, right = depth(p.left), depth(p.right)\n        ans = max(ans, left + right)\n        return 1 + max(left, right)\n    depth(root)\n    return ans",
+      "javascript": "let ans = 0;\nfunction depth(p) {\n    if (!p) return 0;\n    let left = depth(p.left);\n    let right = depth(p.right);\n    ans = Math.max(ans, left + right);\n    return 1 + Math.max(left, right);\n}",
+      "cpp": "int ans = 0;\nint depth(Node* p) {\n    if (p == NULL) return 0;\n    int left = depth(p->left);\n    int right = depth(p->right);\n    ans = max(ans, left + right);\n    return 1 + max(left, right);\n}"
+    },
+    "_sourceFile": "TreesPracticeProblems.jsx"
+  },
+  {
+    "id": 7,
+    "title": "Root to Leaf Paths",
+    "desc": "List all root to leaf paths.",
+    "input": "Binary tree",
+    "output": "3 Paths found",
+    "steps": [
+      {
+        "id": "1",
+        "msg": "Path 1: Grandparent → Parent A → Child A1",
+        "visited": [
+          "1",
+          "2",
+          "4"
+        ],
+        "output": [
+          "Grandparent → Parent A → Child A1"
+        ]
+      },
+      {
+        "id": "2",
+        "msg": "Path 2: Grandparent → Parent A → Child A2",
+        "visited": [
+          "1",
+          "2",
+          "5"
+        ],
+        "output": [
+          "Grandparent → Parent A → Child A1",
+          "Grandparent → Parent A → Child A2"
+        ]
+      },
+      {
+        "id": "3",
+        "msg": "Path 3: Grandparent → Parent B → Child B1",
+        "visited": [
+          "1",
+          "3",
+          "6"
+        ],
+        "output": [
+          "Grandparent → Parent A → Child A1",
+          "Grandparent → Parent A → Child A2",
+          "Grandparent → Parent B → Child B1"
+        ]
+      }
+    ],
+    "code": {
+      "python": "def binaryTreePaths(root):\n    res = []\n    def dfs(node, path):\n        if not node: return\n        if not node.left and not node.right:\n            res.append(path + str(node.val))\n            return\n        dfs(node.left, path + str(node.val) + '->')\n        dfs(node.right, path + str(node.val) + '->')\n    dfs(root, \"\")\n    return res",
+      "javascript": "function binaryTreePaths(root) {\n    let res = [];\n    function dfs(node, path) {\n        if (!node) return;\n        if (!node.left && !node.right) {\n            res.push(path + node.val);\n            return;\n        }\n        dfs(node.left, path + node.val + '->');\n        dfs(node.right, path + node.val + '->');\n    }\n    dfs(root, \"\");\n    return res;\n}",
+      "cpp": "vector<string> binaryTreePaths(TreeNode* root) {\n    vector<string> res;\n    if (root) dfs(root, \"\", res);\n    return res;\n}"
+    },
+    "_sourceFile": "TreesPracticeProblems.jsx"
+  },
+  {
+    "id": 8,
+    "title": "Search Node in Tree",
+    "desc": "Search whether a value exists in the tree.",
+    "input": "Search value = 12",
+    "output": "Found",
+    "steps": [
+      {
+        "id": "1",
+        "msg": "Visiting Grandparent (10)",
+        "visited": [
+          "1"
+        ]
+      },
+      {
+        "id": "2",
+        "msg": "Visiting Parent B (15)",
+        "visited": [
+          "1",
+          "3"
+        ]
+      },
+      {
+        "id": "3",
+        "msg": "Found 12 at Child B1!",
+        "visited": [
+          "1",
+          "3",
+          "6"
+        ],
+        "highlighted": [
+          "6"
+        ]
+      }
+    ],
+    "code": {
+      "python": "def search(root, target):\n    if not root: return False\n    if root.val == target: return True\n    return search(root.left, target) or search(root.right, target)",
+      "javascript": "function search(root, target) {\n    if (!root) return false;\n    if (root.val === target) return true;\n    return search(root.left, target) || search(root.right, target);\n}",
+      "cpp": "bool search(Node* root, int target) {\n    if (root == NULL) return false;\n    if (root->data == target) return true;\n    return search(root->left, target) || search(root->right, target);\n}"
+    },
+    "_sourceFile": "TreesPracticeProblems.jsx"
+  }
+]

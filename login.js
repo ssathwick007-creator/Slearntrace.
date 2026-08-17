@@ -4,10 +4,12 @@ import {
   signUpWithEmail,
   signInWithEmail,
   sendPasswordReset,
+  updatePassword,
 } from './auth.js';
 
 const loginForm = document.getElementById('loginForm');
 const signUpForm = document.getElementById('signUpForm');
+const resetPasswordForm = document.getElementById('resetPasswordForm');
 const toggleToSignUp = document.getElementById('toggleToSignUp');
 const toggleToSignIn = document.getElementById('toggleToSignIn');
 const googleSignInBtn = document.getElementById('googleSignInBtn');
@@ -21,6 +23,9 @@ const passwordInput = document.getElementById('password');
 const forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
 const signUpEmailInput = document.getElementById('signUpEmail');
 const signUpPasswordInput = document.getElementById('signUpPassword');
+const resetPasswordInput = document.getElementById('resetPassword');
+const resetPasswordBtn = document.getElementById('resetPasswordBtn');
+
 
 // ─── Error helpers ────────────────────────────────────────────────────────────
 
@@ -49,34 +54,85 @@ function hideError() {
 }
 
 function getErrorMessage(error) {
-  const code = error && error.code;
-  switch (code) {
-    case 'auth/user-not-found': return 'No account found with this email.';
-    case 'auth/wrong-password': return 'Incorrect password.';
-    case 'auth/invalid-credential': return 'Invalid email or password.';
-    case 'auth/email-already-in-use': return 'An account with this email already exists.';
-    case 'auth/weak-password': return 'Password should be at least 6 characters.';
-    case 'auth/invalid-email': return 'Please enter a valid email address.';
-    case 'auth/too-many-requests': return 'Too many attempts. Try again later.';
-    case 'auth/missing-email': return 'Please enter your email address first.';
-    // Reset-specific: Firebase may return user-not-found or invalid-email for unknown addresses
-    case 'auth/popup-closed-by-user':
-    case 'auth/cancelled-popup-request': return 'Sign-in was cancelled.';
-    case 'auth/popup-blocked': return 'Popup was blocked. Allow popups for this site.';
-    case 'auth/network-request-failed': return 'Network error. Check your connection.';
-    default: return (error && error.message) || 'An error occurred. Please try again.';
+  const message = (error && error.message) || '';
+  const msgLower = message.toLowerCase();
+  
+  if (msgLower.includes('invalid login credentials') || msgLower.includes('invalid credentials')) {
+    return 'The email or password is incorrect.';
   }
+  if (msgLower.includes('user already registered') || msgLower.includes('email already in use')) {
+    return 'An account with this email already exists.';
+  }
+  if (msgLower.includes('email validation') || msgLower.includes('invalid email') || msgLower.includes('must be a valid email')) {
+    return 'Please enter a valid email address.';
+  }
+  if (msgLower.includes('password should be') || msgLower.includes('weak-password') || msgLower.includes('password is too short')) {
+    return 'Please choose a stronger password (at least 6 characters).';
+  }
+  if (msgLower.includes('email not confirmed') || msgLower.includes('email_not_confirmed')) {
+    return 'Please verify your email before signing in.';
+  }
+  if (msgLower.includes('network') || msgLower.includes('failed to fetch')) {
+    return 'Unable to connect right now. Please check your connection and try again.';
+  }
+  return message || 'An error occurred. Please try again.';
 }
 
 // ─── Form toggle ──────────────────────────────────────────────────────────────
 
+const loginHeaderTitle = document.querySelector('.login-header h1');
+const loginHeaderSub = document.querySelector('.login-header p');
+
 function showOnly(formName) {
   if (loginForm) loginForm.style.display = formName === 'loginForm' ? 'flex' : 'none';
   if (signUpForm) signUpForm.style.display = formName === 'signUpForm' ? 'flex' : 'none';
+  if (resetPasswordForm) resetPasswordForm.style.display = formName === 'resetPasswordForm' ? 'flex' : 'none';
+
+  if (loginHeaderTitle && loginHeaderSub) {
+    if (formName === 'signUpForm') {
+      loginHeaderTitle.textContent = 'Create an Account';
+      loginHeaderSub.textContent = 'Sign up to track your learning behavior';
+    } else if (formName === 'resetPasswordForm') {
+      loginHeaderTitle.textContent = 'Reset Password';
+      loginHeaderSub.textContent = 'Enter your new password below';
+    } else {
+      loginHeaderTitle.textContent = 'Welcome to LearnTrace';
+      loginHeaderSub.textContent = 'Sign in to track your learning behavior';
+    }
+  }
 }
 
-if (toggleToSignUp) toggleToSignUp.addEventListener('click', () => { showOnly('signUpForm'); hideError(); });
-if (toggleToSignIn) toggleToSignIn.addEventListener('click', () => { showOnly('loginForm'); hideError(); });
+if (toggleToSignUp) {
+  toggleToSignUp.addEventListener('click', () => {
+    if (signUpEmailInput && emailInput) signUpEmailInput.value = emailInput.value;
+    showOnly('signUpForm');
+    hideError();
+  });
+}
+
+if (toggleToSignIn) {
+  toggleToSignIn.addEventListener('click', () => {
+    if (emailInput && signUpEmailInput) emailInput.value = signUpEmailInput.value;
+    showOnly('loginForm');
+    hideError();
+  });
+}
+
+// Listen for password recovery trigger from Supabase Auth listener
+window.addEventListener('learntrace:password-recovery', () => {
+  showOnly('resetPasswordForm');
+  showSuccess('Please enter your new password.');
+});
+
+// Fallback check for URL parameter indicating password reset mode
+if (window.location.search.includes('reset=true') || window.location.hash.includes('type=recovery')) {
+  setTimeout(() => {
+    showOnly('resetPasswordForm');
+    showSuccess('Please enter your new password.');
+  }, 100);
+}
+
+
 
 // ─── Forgot password ───────────────────────────────────────────────────────────
 
@@ -166,10 +222,50 @@ if (signUpForm) {
     if (emailSignUpBtn) { emailSignUpBtn.disabled = true; emailSignUpBtn.textContent = 'Creating account…'; }
     try {
       await signUpWithEmail(email, password);
-      // auth-check.js listener fires → ensureUserProfile → redirect to index.html
+      setTimeout(() => {
+        if (window.__authState && window.__authState.user) {
+          showSuccess('Account created successfully! Redirecting...');
+        } else {
+          showSuccess('Registration successful! Please check your email inbox to verify your account.');
+          if (emailSignUpBtn) { emailSignUpBtn.disabled = false; emailSignUpBtn.textContent = 'Create Account'; }
+        }
+      }, 1200);
     } catch (err) {
       showError(getErrorMessage(err));
       if (emailSignUpBtn) { emailSignUpBtn.disabled = false; emailSignUpBtn.textContent = 'Create Account'; }
     }
   });
 }
+
+// ─── Reset Password Form submit handler ────────────────────────────────────────
+
+if (resetPasswordForm) {
+  resetPasswordForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const newPassword = resetPasswordInput ? resetPasswordInput.value : '';
+    if (!newPassword || newPassword.length < 6) {
+      showError('Password must be at least 6 characters.');
+      return;
+    }
+    hideError();
+    if (resetPasswordBtn) {
+      resetPasswordBtn.disabled = true;
+      resetPasswordBtn.textContent = 'Updating…';
+    }
+    try {
+      await updatePassword(newPassword);
+      showSuccess('Password updated successfully! Redirecting to login...');
+      setTimeout(() => {
+        // Clear recovery parameters from URL and reload login page
+        window.location.href = window.location.origin + window.location.pathname;
+      }, 2000);
+    } catch (err) {
+      showError(getErrorMessage(err));
+      if (resetPasswordBtn) {
+        resetPasswordBtn.disabled = false;
+        resetPasswordBtn.textContent = 'Update Password';
+      }
+    }
+  });
+}
+

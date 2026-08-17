@@ -1,13 +1,45 @@
 // Render CSE Topics and handle Topic Detail view
-document.addEventListener('DOMContentLoaded', () => {
-    const topics = [
-        { id: 'ds', name: 'Data Structures', desc: 'Arrays, Trees, Graphs, Hash Tables' },
-        { id: 'algo', name: 'Algorithms', desc: 'Sorting, Searching, Dynamic Programming' },
-        { id: 'os', name: 'Operating Systems', desc: 'Processes, Threads, Memory Management' },
-        { id: 'cn', name: 'Computer Networks', desc: 'OSI Model, TCP/IP, Routing' },
-        { id: 'dbms', name: 'DBMS', desc: 'SQL, Normalization, ACID Properties' },
-        { id: 'oop', name: 'Object Oriented Prog.', desc: 'Inheritance, Polymorphism, Abstraction' }
-    ];
+import { getSubjects } from './services/database/contentService.js';
+
+// Hardcoded fallback subjects (used if Supabase is unavailable)
+const FALLBACK_SUBJECTS = [
+    { id: 'ds', name: 'Data Structures', desc: 'Arrays, Trees, Graphs, Hash Tables' },
+    { id: 'algo', name: 'Algorithms', desc: 'Sorting, Searching, Dynamic Programming' },
+    { id: 'os', name: 'Operating Systems', desc: 'Processes, Threads, Memory Management' },
+    { id: 'cn', name: 'Computer Networks', desc: 'OSI Model, TCP/IP, Routing' },
+    { id: 'dbms', name: 'DBMS', desc: 'SQL, Normalization, ACID Properties' },
+    { id: 'oop', name: 'Object Oriented Prog.', desc: 'Inheritance, Polymorphism, Abstraction' }
+];
+
+document.addEventListener('DOMContentLoaded', async () => {
+    // Attempt to load subjects from Supabase, fall back to hardcoded data
+    let topics;
+    try {
+        const dbSubjects = await getSubjects();
+        if (dbSubjects && dbSubjects.length > 0) {
+            // Map Supabase subjects to match existing card format
+            topics = dbSubjects.map(s => ({
+                id: s.slug,
+                name: s.name,
+                desc: s.description || ''
+            }));
+            // Append any fallback-only subjects not yet in the database
+            // (e.g., OS, CN, DBMS, OOP are not seeded yet)
+            const dbNames = new Set(topics.map(t => t.name));
+            for (const fb of FALLBACK_SUBJECTS) {
+                if (!dbNames.has(fb.name)) {
+                    topics.push(fb);
+                }
+            }
+            console.log('[LearnTrace] Subjects loaded from Supabase:', topics.length);
+        } else {
+            topics = FALLBACK_SUBJECTS;
+            console.log('[LearnTrace] No subjects in DB, using fallback data');
+        }
+    } catch (err) {
+        console.warn('[LearnTrace] Supabase subjects fetch failed, using fallback:', err.message);
+        topics = FALLBACK_SUBJECTS;
+    }
 
     const grid = document.getElementById('learningHubGrid');
     const detailView = document.getElementById('learningHubDetail');
@@ -40,8 +72,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 h3.appendChild(spinner);
             }
 
-            // Small delay to ensure spinner is seen (300-600ms)
-            await new Promise(resolve => setTimeout(resolve, 600));
+            // Small delay removed for better navigation performance
+            // await new Promise(resolve => setTimeout(resolve, 600));
 
             grid.style.display = 'none';
             detailView.style.display = 'block';

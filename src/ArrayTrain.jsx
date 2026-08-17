@@ -4,7 +4,7 @@ import Draggable from 'react-draggable';
 
 const PASSENGERS = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸'];
 
-const ArrayTrain = ({ language = 'python' }) => {
+const ArrayTrain = ({ language = 'python', dbMetaphor }) => {
     const [wagons, setWagons] = useState(Array(10).fill(null).map((_, i) => ({
         id: i,
         passenger: Math.random() > 0.6 ? PASSENGERS[Math.floor(Math.random() * PASSENGERS.length)] : null
@@ -77,17 +77,19 @@ const ArrayTrain = ({ language = 'python' }) => {
         newWagons[wagons.length - 1].passenger = null;
         setWagons(newWagons);
     };
-
     const showError = (msg) => {
         setError(msg);
         setTimeout(() => setError(null), 3000);
     };
 
+    const title = dbMetaphor ? `Arrays – ${dbMetaphor.title}` : 'Arrays – Fixed Train with Passengers';
+    const intro = dbMetaphor ? `${dbMetaphor.description} — ${dbMetaphor.analogy}` : "Arrays are like a train with fixed compartments. You can't add more seats once the train leaves the station!";
+
     return (
         <div style={styles.container}>
             <div style={styles.header}>
-                <h2 style={styles.title}>Arrays – Fixed Train with Passengers</h2>
-                <p style={styles.intro}>Arrays are like a train with fixed compartments. You can't add more seats once the train leaves the station!</p>
+                <h2 style={styles.title}>{title}</h2>
+                <p style={styles.intro}>{intro}</p>
             </div>
 
             <div style={styles.station}>

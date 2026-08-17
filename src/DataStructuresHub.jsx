@@ -8,16 +8,19 @@ import TreesExplorer from './TreesExplorer.jsx';
 import GraphsExplorer from './GraphsExplorer.jsx';
 import HashTablesExplorer from './HashTablesExplorer.jsx';
 import TopicOverviewCard from './TopicOverviewCard.jsx';
-import { ProgressProvider, ProgressContext, topicsMeta } from './ProgressContext.jsx';
+import { ProgressProvider, ProgressContext, FALLBACK_TOPICS_META } from './ProgressContext.jsx';
 
 // ── Inner hub (has access to context) ──────────────────────────────────────
-const tabs = Object.entries(topicsMeta).map(([id, meta]) => ({ id, label: meta.title }));
 
 const HubInner = () => {
     const [topic, setTopic] = useState('arrays');
     const [hoveredTab, setHoveredTab] = useState(null);
     const [startedTopics, setStartedTopics] = useState({});
     const ctx = useContext(ProgressContext);
+
+    // Build tabs from context-provided topicsMeta (DB-loaded or fallback)
+    const currentMeta = ctx?.topicsMeta || FALLBACK_TOPICS_META;
+    const tabs = Object.entries(currentMeta).map(([id, meta]) => ({ id, label: meta.title }));
 
     // Expose window.AppProgress bridge so metaphor components can mark completions
     useEffect(() => {
@@ -44,7 +47,7 @@ const HubInner = () => {
 
     const renderContent = () => {
         if (!startedTopics[topic]) {
-            const meta = topicsMeta[topic];
+            const meta = currentMeta[topic];
             return (
                 <TopicOverviewCard
                     topic={{ id: topic, ...meta, concepts: meta.totalMetaphors, problems: meta.totalProblems }}
@@ -126,13 +129,13 @@ const HubInner = () => {
 
             {/* ── Content ── */}
             <div style={styles.contentArea}>
-                <AnimatePresence mode="wait">
+                <AnimatePresence>
                         <motion.div
                             key={`${topic}-${startedTopics[topic] || false}`}
-                            initial={{ opacity: 0, y: 12 }}
+                            initial={{ opacity: 0, y: 8 }}
                             animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.2, ease: 'easeOut' }}
+                            exit={{ opacity: 0, position: 'absolute', width: '100%' }}
+                            transition={{ duration: 0.15, ease: 'easeOut' }}
                         >
                             {renderContent()}
                         </motion.div>
