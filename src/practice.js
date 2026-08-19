@@ -219,11 +219,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             console.log(`Fetched ${data.length} problems for ${languageId} from database`);
+            updateTierProgressUI(false);
         } catch (error) {
             console.error('Error fetching problems:', error);
+            updateTierProgressUI(false, 'Error loading data');
         } finally {
             isLoadingProblems = false;
-            updateTierProgressUI(false);
         }
     }
 
@@ -528,7 +529,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return localStorage.getItem(key) === 'solved';
     }
 
-    function updateTierProgressUI(loading = false) {
+    function updateTierProgressUI(loading = false, errorMsg = null) {
         if (!currentLanguage) return;
         ['Foundation', 'Momentum', 'Mastery'].forEach(tier => {
             const progressDiv = document.getElementById(`progress${tier}`);
@@ -537,6 +538,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (loading) {
                 progressDiv.innerHTML = 'Loading...';
                 progressDiv.style.color = 'var(--text-muted)';
+                return;
+            }
+
+            if (errorMsg) {
+                progressDiv.innerHTML = errorMsg;
+                progressDiv.style.color = 'var(--error-color, #ef4444)';
                 return;
             }
 
