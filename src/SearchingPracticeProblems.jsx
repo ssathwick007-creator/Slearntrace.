@@ -107,7 +107,7 @@ const GenericStepViz = ({ title, steps, initState }) => {
                 <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-end', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '12px' }}>
                     {displayState.map((item, i) => (
                         <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                            <div style={{ ...v.cell, backgroundColor: item.color || '#F1F5F9', border: `2px solid ${item.border || '#cbd5e1'}`, minWidth: item.label ? '50px' : '40px', fontSize: item.label ? '0.7rem' : '0.9rem' }}>
+                            <div style={{ ...v.cell, backgroundColor: item.color || '#F1F5F9', border: '2px solid ' + (item.border || '#cbd5e1'), minWidth: item.label ? '50px' : '40px', fontSize: item.label ? '0.7rem' : '0.9rem' }}>
                                 {item.label || item.val}
                             </div>
                         </div>

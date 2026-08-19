@@ -101,6 +101,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Cleanup spinner for when user comes back
             const existingSpinner = h3.querySelector('.loading-spinner');
             if (existingSpinner) existingSpinner.remove();
+
+            // Track Learning Hub activity for profile
+            try {
+                const { getUserId } = await import('../userContext.js');
+                const { saveSession } = await import('./storage.js');
+                saveSession({
+                    userId: getUserId(),
+                    timestamp: Date.now(),
+                    taskType: 'Learning Hub',
+                    taskId: topic.id,
+                    pattern: 'Exploring Concept',
+                    sessionLabel: topic.name,
+                    metrics: {
+                        durationSeconds: 30, // base engagement
+                        edits: 0,
+                        retries: 0
+                    }
+                });
+            } catch (e) {
+                console.error('Failed to save Learning Hub session:', e);
+            }
         });
 
         grid.appendChild(card);

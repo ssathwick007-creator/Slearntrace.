@@ -8,8 +8,8 @@
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
   <meta name="description"
     content="LearnTrace tracks how students learn — effort, behavior, and process — not just whether they got the right answer." />
-  <script type="module" crossorigin src="/assets/main-BudWBCe1.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/main-BDayXKHr.css">
+  <script type="module" crossorigin src="/assets/main-DUBNWItj.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/main-t3DBU9A7.css">
 </head>
 
 <body>
@@ -19,7 +19,7 @@
         <div class="brand-logo">LT</div>
         <div class="brand-text">
           <h1>LearnTrace</h1>
-          <p>Understand how students learn, not what they answer.</p>
+          <p>Structured learning and coding workspace.</p>
         </div>
       </div>
 
@@ -50,8 +50,8 @@
         <!-- Shown when anonymous (auth-check.js toggles display) -->
         <a id="signInLink" href="login.html" class="btn btn-ghost small" style="display:none;">Sign in to save your
           progress</a>
-        <button id="themeToggle" class="btn-theme" aria-label="Toggle theme">
-          <span class="theme-icon" id="themeIcon">🌙</span>
+        <button id="themeToggle" class="btn-theme" aria-label="Switch to dark mode" title="Switch to dark mode">
+          <span class="theme-icon" id="themeIcon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg></span>
         </button>
       </div>
     </header>
@@ -64,43 +64,43 @@
 
           <div class="left-col">
             <!-- Task Card -->
-            <article class="card card-task">
-              <div class="card-header-row">
-                <h2>Learning Task</h2>
+            <article class="card card-task" style="background: var(--surface-2); border-left: 4px solid var(--accent); padding: 1.5rem; border-radius: 8px;">
+              <div class="card-header-row" style="margin-bottom: 1rem;">
+                <h2 style="font-size: 1.25rem; margin: 0; color: var(--text-main); font-weight: 600;">Learning Task</h2>
                 <div class="navigation-arrows">
                   <button id="prevQuestionBtn" class="btn-prev-q" aria-label="Previous Question"
-                    title="Previous Question">
+                    title="Previous Question" style="background: transparent; border: 1px solid var(--border-subtle); padding: 0.4rem 0.6rem; border-radius: 4px; cursor: pointer; color: var(--text-main);">
                     <span class="arrow-icon">←</span>
                   </button>
-                  <button id="nextQuestionBtn" class="btn-next-q" aria-label="Next Question" title="Next Question">
+                  <button id="nextQuestionBtn" class="btn-next-q" aria-label="Next Question" title="Next Question" style="background: transparent; border: 1px solid var(--border-subtle); padding: 0.4rem 0.6rem; border-radius: 4px; cursor: pointer; color: var(--text-main); margin-left: 0.5rem;">
                     <span class="arrow-icon">→</span>
                   </button>
                 </div>
               </div>
-              <p class="task-type" id="taskType"></p>
-              <p class="task-text" id="taskText"></p>
-              <p class="task-hint">
-                Focus on how you think through the concept. Your process matters more than the final wording.
+              <p class="task-type" id="taskType" style="text-transform: uppercase; font-size: 0.75rem; font-weight: 700; color: var(--accent); margin: 0 0 0.5rem 0; letter-spacing: 0.5px;"></p>
+              <p class="task-text" id="taskText" style="font-size: 1.1rem; line-height: 1.6; color: var(--text-main); margin: 0 0 1rem 0; font-weight: 500;"></p>
+              <p class="task-hint" style="font-size: 0.9rem; color: var(--text-muted); margin: 0; font-style: italic;">
+                Provide a complete explanation of the concept above.
               </p>
             </article>
 
             <!-- Editor -->
-            <article class="card card-editor">
-              <header class="card-header-row">
-                <h2>Your Explanation</h2>
-                <div class="pill" id="sessionStatusPill">Session: Not started</div>
+            <article class="card card-editor" style="padding: 1.5rem;">
+              <header class="card-header-row" style="margin-bottom: 1rem;">
+                <h2 style="font-size: 1.1rem; margin: 0; color: var(--text-main);">Your Explanation</h2>
+                <div class="pill" id="sessionStatusPill" style="font-size: 0.8rem; padding: 0.2rem 0.6rem; border-radius: 12px; background: var(--muted-surface); border: 1px solid var(--border-subtle); color: var(--text-muted);">Session: Not started</div>
               </header>
 
               <textarea id="responseInput" class="editor" placeholder="Press 'Start Session' to begin."
-                disabled></textarea>
+                disabled style="width: 100%; min-height: 200px; padding: 1rem; border: 1px solid var(--border-subtle); border-radius: 8px; background: var(--bg); color: var(--text-main); font-size: 1rem; line-height: 1.6; resize: vertical; margin-bottom: 1rem; outline: none; transition: border-color 0.2s ease;"></textarea>
 
-              <div class="controls">
-                <button id="startBtn" class="btn btn-primary">Start Session</button>
-                <button id="submitBtn" class="btn btn-secondary" disabled>Submit Response</button>
+              <div class="controls" style="display: flex; gap: 1rem;">
+                <button id="startBtn" class="btn btn-primary" style="flex: 1;">Start Session</button>
+                <button id="submitBtn" class="btn btn-secondary" disabled style="flex: 1;">Submit Response</button>
               </div>
 
               <p class="small-note">
-                LearnTrace observes <strong>how</strong> you learn, not correctness.
+                Your session activity is logged locally.
               </p>
             </article>
 
@@ -108,28 +108,24 @@
 
           <div class="right-col">
             <!-- Metrics -->
-            <article class="card card-metrics">
-              <h2>Live Session Metrics</h2>
-              <div class="metrics-grid">
-                <div class="metric">
-                  <div class="metric-label">Time elapsed</div>
-                  <div class="metric-value" id="timeSpentDisplay">0s</div>
+            <article class="card card-metrics" style="padding-bottom: 0;">
+              <h2 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--text-main);">Session Status</h2>
+              <div class="metrics-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem;">
+                <div class="metric" style="background: var(--surface-2); padding: 1rem; border-radius: 8px; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; border: 1px solid var(--border-subtle);">
+                  <span class="metric-label" style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Time Spent</span>
+                  <span class="metric-value" id="timeSpentDisplay" style="font-size: 1.4rem; font-weight: 600; color: var(--text-main); margin-top: 0.2rem;">0s</span>
                 </div>
-                <div class="metric">
-                  <div class="metric-label">Keystrokes</div>
-                  <div class="metric-value" id="keystrokesDisplay">0</div>
+                <div class="metric" style="background: var(--surface-2); padding: 1rem; border-radius: 8px; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; border: 1px solid var(--border-subtle);">
+                  <span class="metric-label" style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Keystrokes</span>
+                  <span class="metric-value" id="keystrokesDisplay" style="font-size: 1.4rem; font-weight: 600; color: var(--text-main); margin-top: 0.2rem;">0</span>
                 </div>
-                <div class="metric">
-                  <div class="metric-label">Edits</div>
-                  <div class="metric-value" id="editsDisplay">0</div>
+                <div class="metric" style="background: var(--surface-2); padding: 1rem; border-radius: 8px; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; border: 1px solid var(--border-subtle);">
+                  <span class="metric-label" style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Edits</span>
+                  <span class="metric-value" id="editsDisplay" style="font-size: 1.4rem; font-weight: 600; color: var(--text-main); margin-top: 0.2rem;">0</span>
                 </div>
-                <div class="metric">
-                  <div class="metric-label">Idle time</div>
-                  <div class="metric-value" id="idleTimeDisplay">0s</div>
-                </div>
-                <div class="metric">
-                  <div class="metric-label">Submit attempts</div>
-                  <div class="metric-value" id="retriesDisplay">0</div>
+                <div class="metric" style="background: var(--surface-2); padding: 1rem; border-radius: 8px; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; border: 1px solid var(--border-subtle);">
+                  <span class="metric-label" style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Idle Time</span>
+                  <span class="metric-value" id="idleTimeDisplay" style="font-size: 1.4rem; font-weight: 600; color: var(--text-main); margin-top: 0.2rem;">0s</span>
                 </div>
               </div>
             </article>
@@ -168,8 +164,8 @@
                         title="Export sessions as JSON">↓ JSON</button>
                     </div>
                   </header>
-                  <div id="historyList" class="history-list empty">
-                    <p class="empty-text">No past sessions yet. Your next submission will appear here.</p>
+                  <div id="historyList" class="history-list empty" style="padding: 2rem; text-align: center; background: var(--surface-2); border-radius: 8px; border: 1px dashed var(--border-subtle); margin-top: 1rem;">
+                    <p class="empty-text" style="color: var(--text-muted); font-size: 0.95rem; margin: 0;">No past sessions yet. Your next submission will appear here.</p>
                   </div>
                 </article>
               </div>
@@ -194,9 +190,9 @@
               <p style="font-size: 16px; color: #64748B; margin: 0 0 1.5rem 0;">Select a topic to explore core concepts.
               </p>
 
-              <!-- Topic Grid -->
+              <!-- Topic Syllabus List -->
               <div id="learningHubGrid"
-                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
+                style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1.5rem; max-width: 800px;">
                 <!-- Injected via learning.js -->
               </div>
 
@@ -226,11 +222,15 @@
               <header class="card-header-row">
                 <h2>Coding Practice</h2>
               </header>
-              <p class="task-hint">Select a language to practice coding.</p>
+              <p class="task-hint">Choose a language, write your solution, and test it in a real coding environment.</p>
+
+              <!-- Search/Filter Area -->
+              <div class="practice-controls" style="margin-bottom: 1.5rem; max-width: 300px;">
+                <input type="text" id="langSearch" class="input lang-search" placeholder="Search languages..." style="width: 100%;" />
+              </div>
 
               <!-- Language Grid -->
-              <div id="practiceGrid"
-                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
+              <div id="practiceGrid" class="lang-grid">
                 <!-- Injected via practice.js -->
               </div>
 
@@ -310,42 +310,49 @@
 
               <!-- Practice Detail View -->
               <div id="practiceDetail" style="display: none; margin-top: 1.5rem;">
-                <button id="backToPracticeGridBtn" class="btn btn-ghost small" style="margin-bottom: 1rem;">← Back to
-                  Languages</button>
+                <button id="backToPracticeGridBtn" class="btn btn-ghost small" style="margin-bottom: 1rem;">← Back to Languages</button>
 
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
-                  <h3 id="practiceLanguageTitle" style="margin: 0; font-size: 1.4rem;">Language Name</h3>
-                  <div style="display:flex; gap:0.5rem; align-items:center;">
-                    <button id="practiceClearCodeBtn" class="btn btn-ghost chat-action-btn small">Clear Code</button>
-                    <button id="practiceRunBtn" class="btn btn-primary small"
-                      style="padding: 0.4rem 1.2rem; display:flex; gap:0.4rem; align-items:center;">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M5 3L19 12L5 21V3Z" fill="currentColor" />
-                      </svg>
-                      Run
-                    </button>
+                <div id="practiceWorkspace" style="display: flex; gap: 1.5rem; align-items: stretch; width: 100%;">
+                  <!-- Left: Problem Description (hidden by default) -->
+                  <div id="practiceProblemContainer" style="display: none; flex: 1; max-width: 45%;">
+                    <!-- Problem containers injected here by practice.js -->
+                  </div>
+
+                  <!-- Right: Code Editor & Terminal -->
+                  <div id="practiceCodeContainer" style="flex: 1; display: flex; flex-direction: column; min-width: 0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+                      <h3 id="practiceLanguageTitle" style="margin: 0; font-size: 1.4rem;">Language Name</h3>
+                      <div style="display:flex; gap:0.5rem; align-items:center;">
+                        <button id="practiceClearCodeBtn" class="btn btn-ghost chat-action-btn small">Clear Code</button>
+                        <button id="practiceRunBtn" class="btn btn-primary small"
+                          style="padding: 0.4rem 1.2rem; display:flex; gap:0.4rem; align-items:center;">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 3L19 12L5 21V3Z" fill="currentColor" />
+                          </svg>
+                          Run
+                        </button>
+                      </div>
+                    </div>
+
+                    <div id="practiceEditor" class="editor practice-editor"
+                      style="padding: 0; overflow: hidden; text-align: left; min-height: 400px; border: 1px solid var(--border-subtle); border-radius: 4px;"></div>
+
+                    <!-- Program Input Section -->
+                    <div id="practiceInputContainer" style="margin-top: 1.5rem;">
+                      <h4 style="margin: 0; color:var(--text-main); font-size: 0.95rem; margin-bottom: 0.5rem;">Terminal Input (Standard In)</h4>
+                      <textarea id="practiceInput" class="execution-terminal"
+                        style="width: 100%; min-height: 100px; resize: vertical; border: 1px solid var(--border-subtle); outline: none; margin: 0; display: block; font-family: var(--font-mono); border-radius: 4px;"
+                        spellcheck="false" placeholder="Enter test case inputs here (newline separated)..."></textarea>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top: 1.5rem; margin-bottom: 0.5rem;">
+                      <h4 style="margin: 0; color:var(--text-main); font-size: 0.95rem;">Terminal Output</h4>
+                      <button id="practiceClearTermBtn" class="btn btn-ghost chat-action-btn small"
+                        style="padding: 0.2rem 0.6rem; font-size: 0.75rem;">Clear Console</button>
+                    </div>
+                    <div id="practiceTerminal" class="execution-terminal empty" style="border-radius: 4px;">Click "Run" to execute your code.</div>
                   </div>
                 </div>
-
-                <div id="practiceEditor" class="editor practice-editor"
-                  style="padding: 0; overflow: hidden; text-align: left; min-height: 250px;"></div>
-
-                <!-- Program Input Section -->
-                <div id="practiceInputContainer" style="margin-top: 1.5rem;">
-                  <h4 style="margin: 0; color:var(--text-main); font-size: 0.95rem; margin-bottom: 0.5rem;">Terminal
-                    Input (Standard In)</h4>
-                  <textarea id="practiceInput" class="execution-terminal"
-                    style="width: 100%; min-height: 100px; resize: vertical; border: 1px solid var(--border-subtle); outline: none; margin: 0; display: block; font-family: 'SF Mono', ui-monospace, Menlo, Monaco, Consolas, monospace;"
-                    spellcheck="false" placeholder="Enter test case inputs here (newline separated)..."></textarea>
-                </div>
-
-                <div
-                  style="display:flex; justify-content:space-between; align-items:baseline; margin-top: 1.5rem; margin-bottom: 0.5rem;">
-                  <h4 style="margin: 0; color:var(--text-main); font-size: 0.95rem;">Terminal Output</h4>
-                  <button id="practiceClearTermBtn" class="btn btn-ghost chat-action-btn small"
-                    style="padding: 0.2rem 0.6rem; font-size: 0.75rem;">Clear Console</button>
-                </div>
-                <div id="practiceTerminal" class="execution-terminal empty">Click "Run" to execute your code.</div>
               </div>
             </article>
           </div>
@@ -366,15 +373,13 @@
   <!-- Navigation & New Modules -->
   <!-- Load Monaco Editor -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
-  <!-- Floating AI Assistant button and slide-in panel -->
-  <button id="aiToggle" class="ai-toggle" aria-label="Open Study Assistant" aria-controls="assistantPanel"
-    aria-expanded="false">
-    <!-- simple chat icon -->
+
+  <!-- Floating AI Assistant button -->
+  <button id="aiToggle" class="ai-toggle" aria-label="Open Study Assistant" aria-controls="assistantPanel" aria-expanded="false">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10z" fill="currentColor" opacity="0.95" />
     </svg>
   </button>
-
   <!-- Mini floating timer (shows elapsed time when session active) -->
   <div id="miniTimer" class="mini-timer" aria-hidden="true">0s</div>
 
@@ -383,7 +388,7 @@
   <aside id="assistantPanel" class="assistant-panel" role="dialog" aria-label="Study Assistant" aria-hidden="true">
     <div class="assistant-panel-inner">
       <div class="assistant-panel-header">
-        <h2>Study Assistant (Preview)</h2>
+        <h2>Study Assistant</h2>
         <div class="assistant-header-actions">
           <button id="assistantExpandBtn" class="assistant-expand-btn" aria-label="Expand assistant"
             title="Expand / Collapse">&#x26F6;</button>

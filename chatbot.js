@@ -150,17 +150,26 @@
     setSendDisabled(true);
     showTypingIndicator();
 
+    const BACKEND_URL = import.meta.env?.VITE_BACKEND_URL || (['localhost', '127.0.0.1'].includes(window.location.hostname)
+      ? 'http://localhost:5000'
+      : 'https://learntrace-backend.onrender.com');
+
     // Use the AI proxy instead of the old rule-based system
     try {
-      const response = await fetch('/api/assistant', {
+      const historyToSend = chat.slice(0, -1);
+      const response = await fetch(`${BACKEND_URL}/api/assistant`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: q })
+        body: JSON.stringify({ message: q, history: historyToSend })
       });
 
       if (!response.ok) throw new Error(`Backend Error: ${response.status}`);
 
       const data = await response.json();
+      if (data.success === false) {
+        throw new Error(data.error || "Study Assistant is temporarily unavailable.");
+      }
+      
       let ans = data.reply || "Sorry, I received an empty response.";
 
       // Append tone hint if available

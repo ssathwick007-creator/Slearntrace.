@@ -3,16 +3,24 @@ import { getUserRole, getUserId } from '../userContext.js';
 // Render Programming Languages and handle Practice Detail view executing via Piston API
 document.addEventListener('DOMContentLoaded', () => {
     let currentLanguage = null;
+    let challenges = {
+        Foundation: [],
+        Momentum: [],
+        Mastery: []
+    };
+    let currentChallenge = null;
+    let currentTier = null;
+    let isLoadingProblems = false;
 
     const languages = [
-        { id: 'c', name: 'C', icon: '©️', requiresInput: true, inputMode: 'stdin', defaultCode: '#include <stdio.h>\n\nint main() {\n    printf("Hello, C!\\n");\n    return 0;\n}' },
-        { id: 'cpp', name: 'C++', icon: '⚙️', requiresInput: true, inputMode: 'stdin', defaultCode: '#include <iostream>\n\nint main() {\n    std::cout << "Hello, C++!" << std::endl;\n    return 0;\n}' },
-        { id: 'java', name: 'Java', icon: '☕', requiresInput: true, inputMode: 'stdin', defaultCode: 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, Java!");\n    }\n}' },
-        { id: 'python', name: 'Python', icon: '🐍', requiresInput: true, inputMode: 'stdin', defaultCode: 'print("Hello, Python!")' },
-        { id: 'javascript', name: 'JavaScript', icon: '💛', requiresInput: true, inputMode: 'stdin', defaultCode: 'console.log("Hello, JavaScript!");' },
-        { id: 'typescript', name: 'TypeScript', icon: '⚡', requiresInput: true, inputMode: 'stdin', defaultCode: 'const message: string = "Hello, TypeScript!";\nconsole.log(message);' },
-        { id: 'go', name: 'Go', icon: '🐹', requiresInput: true, inputMode: 'stdin', defaultCode: 'package main\n\nimport "fmt"\n\nfunc main() {\n\tfmt.Println("Hello, Go!")\n}' },
-        { id: 'sql', name: 'SQL', icon: '🗄️', requiresInput: false, inputMode: 'none', defaultCode: '-- Create table\nCREATE TABLE users (id INT, name TEXT);\n\n-- Insert data\nINSERT INTO users VALUES (1, "Alice"), (2, "Bob");\n\n-- Query data\nSELECT * FROM users;' }
+        { id: 'c', name: 'C', description: 'Systems programming and fundamentals', color: '#00599C', icon: '<svg viewBox="0 0 128 128" width="40" height="40" xmlns="http://www.w3.org/2000/svg"><path fill="#00599C" d="M117.5 33.5l-44.1-25.5c-5.8-3.3-13-3.3-18.8 0L10.5 33.5c-5.8 3.3-9.4 9.6-9.4 16.3v51c0 6.7 3.6 13 9.4 16.3l44.1 25.5c5.8 3.3 13 3.3 18.8 0l44.1-25.5c5.8-3.3 9.4-9.6 9.4-16.3v-51c0-6.7-3.6-13-9.4-16.3z"/><path fill="#fff" d="M82.3 88.5c-5.1 5.4-11.8 8.1-20.1 8.1-8.5 0-15.6-3.1-21.2-9.4-5.6-6.3-8.5-14.7-8.5-25.3s2.8-19.1 8.5-25.3c5.6-6.3 12.7-9.4 21.2-9.4 8 0 14.6 2.6 19.8 7.9 3.5 3.5 5.7 7.7 6.6 12.4h-15.2c-1.3-3.6-3.8-6.1-7.6-7.5-1.1-.4-2.4-.6-3.8-.6-4.2 0-7.7 1.5-10.4 4.5-3.5 4-5.3 10-5.3 18.1 0 8.1 1.7 14.1 5.2 18.1 2.8 3.1 6.3 4.7 10.6 4.7 3.8 0 7.2-1.3 10.1-4 2-1.9 3.4-4.5 4.3-8h15.2c-1.2 5.2-4.4 10.5-9.4 15.7z"/></svg>', requiresInput: true, inputMode: 'stdin', defaultCode: '#include <stdio.h>\n\nint main() {\n    printf("Hello, C!\\n");\n    return 0;\n}' },
+        { id: 'cpp', name: 'C++', description: 'Performance, algorithms and problem solving', color: '#00599C', icon: '<svg viewBox="0 0 128 128" width="40" height="40" xmlns="http://www.w3.org/2000/svg"><path fill="#00599C" d="M117.5 33.5l-44.1-25.5c-5.8-3.3-13-3.3-18.8 0L10.5 33.5c-5.8 3.3-9.4 9.6-9.4 16.3v51c0 6.7 3.6 13 9.4 16.3l44.1 25.5c5.8 3.3 13 3.3 18.8 0l44.1-25.5c5.8-3.3 9.4-9.6 9.4-16.3v-51c0-6.7-3.6-13-9.4-16.3z"/><path fill="#fff" d="M64 88.5c-5.1 5.4-11.8 8.1-20.1 8.1-8.5 0-15.6-3.1-21.2-9.4-5.6-6.3-8.5-14.7-8.5-25.3s2.8-19.1 8.5-25.3c5.6-6.3 12.7-9.4 21.2-9.4 8 0 14.6 2.6 19.8 7.9 3.5 3.5 5.7 7.7 6.6 12.4H55.1c-1.3-3.6-3.8-6.1-7.6-7.5-1.1-.4-2.4-.6-3.8-.6-4.2 0-7.7 1.5-10.4 4.5-3.5 4-5.3 10-5.3 18.1 0 8.1 1.7 14.1 5.2 18.1 2.8 3.1 6.3 4.7 10.6 4.7 3.8 0 7.2-1.3 10.1-4 2-1.9 3.4-4.5 4.3-8h15.2c-1.2 5.2-4.4 10.5-9.4 15.7zM97 66h-7v7h-5v-7h-7v-5h7v-7h5v7h7v5zm22 0h-7v7h-5v-7h-7v-5h7v-7h5v7h7v5z"/></svg>', requiresInput: true, inputMode: 'stdin', defaultCode: '#include <iostream>\n\nint main() {\n    std::cout << "Hello, C++!" << std::endl;\n    return 0;\n}' },
+        { id: 'java', name: 'Java', description: 'Object-oriented applications and backend systems', color: '#EA2D2E', icon: '<svg viewBox="0 0 128 128" width="40" height="40" xmlns="http://www.w3.org/2000/svg"><path fill="#EA2D2E" d="M83.4 92.5c-11.5 5.1-33.8 5.7-44.3 1.2-4.6-2-5.7-3.9-3.6-6.4 1.3-1.6 3.1-2.1 6.1-1.6 16.9 2.5 33.1.2 45-6.5 1.5-.9 3.3-.9 5.3 0 1.9.9 2 2.5.3 4.5-1.8 2.3-5 5.1-8.8 8.8zM92.2 78.4c-8.9 7.6-27.1 11.2-45.6 9-6.3-.7-6.2-2.1 1.3-3.6 15.7-3.2 32.1-4.7 46.1-4.2 3.8.1 4.7 2 .8 5.4-1.3 1.1-2.2 1.6-2.6 2.2-2.6-2.9-2.6-2.9 0-8.8z"/><path fill="#5382A1" d="M53.1 23.3c3.6 11.5-10.1 21.6-11.2 30.6-1.1 9 10.5 15.6 10.5 15.6s-16.7-5.5-13-17.7c3.4-11.2 10.8-19.1 13.7-28.5zm19 12.8c-1.6 8.5-13.8 14.6-16.2 23.1-2.3 8.1 7.1 14.2 7.1 14.2s-14.8-5-13-14.8c1.8-9.8 15.1-14.2 17.5-21 2.3-6.6 4.6-12.8 4.6-12.8s1.6 2.8 0 11.3zM45 44c.4 8.7-9.4 14.2-9 22.2.4 7.6 11.2 11.7 11.2 11.7S35.4 72.8 34.6 63c-.8-9.6 10-12.4 10.4-19z"/></svg>', requiresInput: true, inputMode: 'stdin', defaultCode: 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, Java!");\n    }\n}' },
+        { id: 'python', name: 'Python', description: 'Automation, data and rapid development', color: '#3776AB', icon: '<svg viewBox="0 0 128 128" width="40" height="40" xmlns="http://www.w3.org/2000/svg"><path fill="#3776AB" d="M64 7.9c-27.3 0-25.9 11.8-25.9 11.8l.1 12.3h26.4v3.7H36.9s-12.7-1.4-12.7 17.7C24.2 72.5 32 73.1 32 73.1h7.8V61.5s-.1-11.3 11.5-11.3H72s11-.2 11-10.7V20.1s1.3-12.2-19-12.2zm-12.2 8.6c2.4 0 4.4 2 4.4 4.4s-2 4.4-4.4 4.4-4.4-2-4.4-4.4 2-4.4 4.4-4.4z"/><path fill="#FFD43B" d="M64.6 119.8c27.3 0 25.9-11.8 25.9-11.8l-.1-12.3H64v-3.7h27.8s12.7 1.4 12.7-17.7c0-19.1-7.8-19.7-7.8-19.7h-7.8v11.6s.1 11.3-11.5 11.3H56.5s-11 .2-11 10.7V108s-1.3 12.2 19 12.2zm12.2-8.6c-2.4 0-4.4-2-4.4-4.4s2-4.4 4.4-4.4 4.4 2 4.4 4.4-2 4.4-4.4 4.4z"/></svg>', requiresInput: true, inputMode: 'stdin', defaultCode: 'print("Hello, Python!")' },
+        { id: 'javascript', name: 'JavaScript', description: 'Web applications and interactive interfaces', color: '#F7DF1E', icon: '<svg viewBox="0 0 128 128" width="40" height="40" xmlns="http://www.w3.org/2000/svg"><path fill="#F7DF1E" d="M0 0h128v128H0z"/><path fill="#000000" d="M84.7 93.6c-4.4-3-6.6-7-6.8-12.8h11.9c.2 3.1 1.1 5.3 2.9 6.6 1.8 1.3 4.2 2 7.3 2 3.4 0 5.8-.6 7.4-1.9 1.6-1.3 2.4-3.1 2.4-5.5 0-2-.7-3.7-2.1-4.8-1.4-1.1-4.7-2.3-9.8-3.6-6.4-1.6-11.1-3.6-14-5.9-4.5-3.6-6.7-8.7-6.7-15.3 0-5.7 2.1-10.4 6.4-13.8s9.9-5.1 16.9-5.1c7 0 12.5 1.7 16.5 5 4 3.3 6.3 8.1 6.8 14.5H112c-.2-3.6-1.3-6.2-3.2-7.8-1.9-1.6-4.6-2.4-8.3-2.4-3 0-5.4.6-7 1.8-1.6 1.2-2.4 2.8-2.4 5 0 2 .7 3.5 2 4.6 1.3 1.1 4.7 2.3 10.1 3.7 6.4 1.7 11.2 3.7 14.3 6 4.6 3.4 6.9 8.6 6.9 15.4 0 6.1-2.2 11-6.6 14.7-4.4 3.7-10.3 5.5-17.7 5.5-8.1 0-14.3-1.9-18.7-5zm-39.7.2c-5.7-4.1-8.5-10.6-8.7-19.4h11.9c.1 4.7 1.2 8 3.1 9.9 1.9 1.9 4.6 2.9 8 2.9 3 0 5.3-.8 6.9-2.3 1.6-1.5 2.4-4 2.4-7.5v-33h12.5v33.4c0 7.6-2 13.3-5.9 17.2-3.9 3.9-9.2 5.8-15.9 5.8-6.1.1-10.9-1.3-14.3-4z"/></svg>', requiresInput: true, inputMode: 'stdin', defaultCode: 'console.log("Hello, JavaScript!");' },
+        { id: 'typescript', name: 'TypeScript', description: 'Typed application development for the web', color: '#3178C6', icon: '<svg viewBox="0 0 128 128" width="40" height="40" xmlns="http://www.w3.org/2000/svg"><path fill="#3178C6" d="M0 0h128v128H0z"/><path fill="#FFFFFF" d="M68.5 75.3v-4.4h-21V61h31.2v9.9h-10v35.3H58.5V75.3h10zm46.5 21.6c0 3.7-1.3 6.6-4 8.7-2.6 2.1-6.2 3.1-10.8 3.1-4.7 0-8.2-.8-10.5-2.5-2.3-1.7-3.9-4-4.8-7h10.4c.5 1.5 1.4 2.6 2.7 3.4 1.3.7 3 .1 3 1 1 0 1.9-.3 2.6-.9s1.1-1.3 1.1-2.2c0-1.1-.4-2-1.3-2.6-.9-.6-3-1.4-6.3-2.4-4.6-1.4-7.9-3.2-10-5.4-2.1-2.2-3.1-5.1-3.1-8.7 0-3.4 1.2-6.1 3.7-8.3s5.8-3.2 10.1-3.2c4.4 0 7.9.9 10.5 2.7 2.6 1.8 4 4.5 4.3 8h-9.9c-.3-1.4-1.1-2.4-2.2-3.1-1.1-.6-2.5-1-4.1-1-1.4 0-2.6.3-3.4.8-.8.5-1.2 1.2-1.2 2 0 1 .4 1.7 1.1 2.3.7.6 2.8 1.4 6.1 2.4 4.7 1.4 8.1 3.1 10.1 5.3 2 2.3 3 5.3 3 8.8z"/></svg>', requiresInput: true, inputMode: 'stdin', defaultCode: 'const message: string = "Hello, TypeScript!";\nconsole.log(message);' },
+        { id: 'go', name: 'Go', description: 'Concurrent services and backend development', color: '#00ADD8', icon: '<svg viewBox="0 0 128 128" width="40" height="40" xmlns="http://www.w3.org/2000/svg"><path fill="#00ADD8" d="M52.3 75.3c0 7.7-6 13.5-14.8 13.5C28.4 88.8 21 82 21 70.4V58.6c0-11.6 7.4-18.4 16.5-18.4 8.8 0 14.8 5.8 14.8 13.5v3.1H39.2v-2.9c0-2.8-1.7-4.7-4.6-4.7-3.4 0-5 2.9-5 9.1v12c0 6.2 1.6 9.1 5 9.1 2.9 0 4.6-1.9 4.6-4.7V67H28.4v-8.4h23.9v16.7zm54.7-16.7c0 11.6-7.4 18.4-16.5 18.4-9.1 0-16.5-6.8-16.5-18.4V58.6c0-11.6 7.4-18.4 16.5-18.4 9.1 0 16.5 6.8 16.5 18.4v16.7zm-13.1 0V58.6c0-6.2-1.6-9.1-5-9.1-3.4 0-5 2.9-5 9.1v16.7c0 6.2 1.6 9.1 5 9.1 3.4 0 5-2.9 5-9.1z"/></svg>', requiresInput: true, inputMode: 'stdin', defaultCode: 'package main\n\nimport "fmt"\n\nfunc main() {\n\tfmt.Println("Hello, Go!")\n}' },
+        { id: 'sql', name: 'SQL', description: 'Queries, relational data and database design', color: '#8b5cf6', icon: '<svg viewBox="0 0 128 128" width="40" height="40" xmlns="http://www.w3.org/2000/svg"><path fill="#8b5cf6" d="M64 24c24.3 0 44 8.1 44 18s-19.7 18-44 18-44-8.1-44-18 19.7-18 44-18zm44 32v16c0 9.9-19.7 18-44 18S20 81.9 20 72V56c0 9.9 19.7 18 44 18s44-8.1 44-18zm0 32v16c0 9.9-19.7 18-44 18S20 113.9 20 104V88c0 9.9 19.7 18 44 18s44-8.1 44-18z"/></svg>', requiresInput: false, inputMode: 'none', defaultCode: '-- Create table\nCREATE TABLE users (id INT, name TEXT);\n\n-- Insert data\nINSERT INTO users VALUES (1, "Alice"), (2, "Bob");\n\n-- Query data\nSELECT * FROM users;' }
     ];
 
     const grid = document.getElementById('practiceGrid');
@@ -57,14 +65,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!grid || !detailView || !modeSelect || !tierSelect || !challengeListSection) return;
 
-    // Inject containers before editor
-    if (editorContainer && editorContainer.parentNode) {
-        editorContainer.parentNode.insertBefore(questionContainer, editorContainer);
-        editorContainer.parentNode.insertBefore(examplesContainer, editorContainer);
+    const problemContainer = document.getElementById('practiceProblemContainer');
+    if (problemContainer) {
+        problemContainer.appendChild(questionContainer);
+        problemContainer.appendChild(examplesContainer);
     }
 
     // --- NEW: Execution Status UI ---
-    let currentExecutionState = 'starting'; 
+    let globalExecutionStatus = 'starting'; 
     const executionStatusContainer = document.createElement('div');
     executionStatusContainer.id = 'executionStatusContainer';
     executionStatusContainer.style.display = 'flex';
@@ -78,31 +86,42 @@ document.addEventListener('DOMContentLoaded', () => {
         terminal.parentNode.insertBefore(executionStatusContainer, terminal);
     }
 
-    function updateExecutionUI(state) {
-        currentExecutionState = state;
-        if (state === 'ready') {
-            executionStatusContainer.innerHTML = '<span style="color: #10b981;">●</span> Execution Ready';
-            if (runBtn) {
-                runBtn.disabled = getUserRole() === 'anonymous';
+    function updateExecutionUI() {
+        const key = getWorkspaceKey();
+        const wsState = key && workspaceStates[key] ? workspaceStates[key].executionState : 'ready';
+
+        if (globalExecutionStatus === 'ready') {
+            if (wsState === 'running') {
+                executionStatusContainer.innerHTML = '<span style="color: #f59e0b;">◌</span> Running...';
+                if (runBtn) {
+                    runBtn.disabled = true;
+                    runBtn.innerHTML = '<svg class="run-spinner" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-dasharray="31.4 31.4" stroke-linecap="round"/></svg> Running\u2026';
+                }
+            } else {
+                executionStatusContainer.innerHTML = '<span style="color: #10b981;">●</span> Execution Ready';
+                if (runBtn) {
+                    runBtn.disabled = getUserRole() === 'anonymous';
+                    runBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 3L19 12L5 21V3Z" fill="currentColor" /></svg> Run';
+                }
             }
-        } else if (state === 'starting') {
-            executionStatusContainer.innerHTML = '<span style="color: #f59e0b;">◌</span> Starting execution service...';
+        } else if (globalExecutionStatus === 'starting') {
+            executionStatusContainer.innerHTML = '<span style="color: #f59e0b;">◌</span> Starting Execution Service...';
+            if (runBtn) {
+                runBtn.disabled = true;
+                runBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 3L19 12L5 21V3Z" fill="currentColor" /></svg> Run';
+            }
         } else {
-            executionStatusContainer.innerHTML = '<span style="color: #ef4444;">●</span> Execution Service Offline';
+            executionStatusContainer.innerHTML = '<span style="color: #ef4444;">●</span> Execution Service Error';
+            if (runBtn) {
+                runBtn.disabled = true;
+                runBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 3L19 12L5 21V3Z" fill="currentColor" /></svg> Run';
+            }
         }
     }
     
-    updateExecutionUI('starting');
+    updateExecutionUI();
 
     // --- NEW: Dynamic Challenge Database ---
-    let challenges = {
-        Foundation: [],
-        Momentum: [],
-        Mastery: []
-    };
-    let currentChallenge = null;
-    let currentTier = null;
-    let isLoadingProblems = false;
 
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || (['localhost', '127.0.0.1'].includes(window.location.hostname)
         ? 'http://localhost:5000'
@@ -116,17 +135,32 @@ document.addEventListener('DOMContentLoaded', () => {
             if (res.ok) {
                 const data = await res.json();
                 if (data.execution === 'ready') {
-                    if (currentExecutionState !== 'ready') updateExecutionUI('ready');
+                    if (globalExecutionStatus !== 'ready') {
+                        globalExecutionStatus = 'ready';
+                        updateExecutionUI();
+                    }
                 } else if (data.execution === 'starting' || data.docker === 'starting') {
-                    if (currentExecutionState !== 'starting') updateExecutionUI('starting');
+                    if (globalExecutionStatus !== 'starting') {
+                        globalExecutionStatus = 'starting';
+                        updateExecutionUI();
+                    }
                 } else {
-                    if (currentExecutionState !== 'unavailable') updateExecutionUI('unavailable');
+                    if (globalExecutionStatus !== 'unavailable') {
+                        globalExecutionStatus = 'unavailable';
+                        updateExecutionUI();
+                    }
                 }
             } else {
-                if (currentExecutionState !== 'unavailable') updateExecutionUI('unavailable');
+                if (globalExecutionStatus !== 'unavailable') {
+                    globalExecutionStatus = 'unavailable';
+                    updateExecutionUI();
+                }
             }
         } catch (e) {
-            if (currentExecutionState !== 'unavailable') updateExecutionUI('unavailable');
+            if (globalExecutionStatus !== 'unavailable') {
+                globalExecutionStatus = 'unavailable';
+                updateExecutionUI();
+            }
         }
         setTimeout(pollExecutionHealth, 3000);
     }
@@ -169,21 +203,14 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchProblems(languageId) {
         if (getUserRole() === 'anonymous') return;
         isLoadingProblems = true;
-        updateTierProgressUI(true); // Show loading state in tiers
+        updateTierProgressUI(true); 
 
         try {
-            const { getCodingProblems } = await import('./services/database/contentService.js');
-            const allProblems = await getCodingProblems();
+            const response = await fetch(`${BACKEND_URL}/api/problems?language=${languageId}`);
+            if (!response.ok) throw new Error('Failed to fetch problems from database');
             
-            // Map DB format to old API format
-            const data = allProblems.map(p => ({
-                problemId: p.id,
-                keywordTitle: p.title,
-                difficultyTier: p.difficulty_tier,
-                mode: 'practice'
-            }));
-
-            // Group problems by tier
+            const data = await response.json();
+            
             challenges = { Foundation: [], Momentum: [], Mastery: [] };
             data.forEach(p => {
                 if (challenges[p.difficultyTier]) {
@@ -191,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            console.log(`Fetched ${data.length} problems for ${languageId} from Supabase`);
+            console.log(`Fetched ${data.length} problems for ${languageId} from database`);
         } catch (error) {
             console.error('Error fetching problems:', error);
         } finally {
@@ -211,9 +238,74 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- MONACO EDITOR SETUP ---
+    // --- MONACO EDITOR SETUP & ISOLATED STATE ---
     let monacoEditor = null;
     let isMonacoLoaded = false;
+    
+    // Maintain independent states per language/challenge
+    const workspaceStates = {};
+
+    function getWorkspaceKey() {
+        if (currentChallenge) return `challenge_${currentChallenge.problemId}`;
+        if (currentLanguage) return `freestyle_${currentLanguage.id}`;
+        return null;
+    }
+
+    function switchWorkspace(defaultCode, languageId) {
+        const key = getWorkspaceKey();
+        if (!key) return;
+
+        const mappedLang = (languageId === 'c' || languageId === 'cpp') ? 'cpp' : languageId;
+        
+        // Initialize state if it doesn't exist
+        if (!workspaceStates[key]) {
+            workspaceStates[key] = {
+                model: isMonacoLoaded ? monaco.editor.createModel(defaultCode, mappedLang) : null,
+                pendingCode: defaultCode,
+                input: '',
+                terminalHtml: 'Click "Run" to execute your code.',
+                terminalClass: 'execution-terminal empty',
+                executionState: 'ready'
+            };
+        }
+
+        const state = workspaceStates[key];
+
+        // Ensure model is created if monaco loaded after initialization
+        if (!state.model && isMonacoLoaded) {
+            state.model = monaco.editor.createModel(state.pendingCode, mappedLang);
+        }
+
+        // Restore Editor State
+        if (monacoEditor && state.model) {
+            monacoEditor.setModel(state.model);
+        }
+
+        // Restore Input State
+        if (inputArea) {
+            inputArea.value = state.input || '';
+        }
+
+        // Restore Terminal State
+        if (terminal) {
+            terminal.innerHTML = state.terminalHtml;
+            terminal.className = state.terminalClass;
+        }
+
+        // Restore Execution Status
+        updateExecutionUI();
+    }
+
+    function saveCurrentWorkspaceInput() {
+        const key = getWorkspaceKey();
+        if (key && workspaceStates[key] && inputArea) {
+            workspaceStates[key].input = inputArea.value;
+        }
+    }
+
+    if (inputArea) {
+        inputArea.addEventListener('input', saveCurrentWorkspaceInput);
+    }
 
     // We assume loader.js is loaded from HTML earlier
     if (window.require) {
@@ -257,8 +349,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (editorContainer) {
                 const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
                 monacoEditor = monaco.editor.create(editorContainer, {
-                    value: '',
-                    language: 'python',
                     theme: isDark ? 'vs-dark' : 'vs-light',
                     automaticLayout: true,
                     minimap: { enabled: false },
@@ -268,6 +358,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     roundedSelection: false,
                     padding: { top: 10, bottom: 10 }
                 });
+
+                // Attach current workspace model if user already selected a language
+                const key = getWorkspaceKey();
+                if (key && workspaceStates[key]) {
+                    const state = workspaceStates[key];
+                    if (!state.model) {
+                        const langId = currentLanguage ? currentLanguage.id : 'javascript';
+                        const mappedLang = (langId === 'c' || langId === 'cpp') ? 'cpp' : langId;
+                        state.model = monaco.editor.createModel(state.pendingCode, mappedLang);
+                    }
+                    monacoEditor.setModel(state.model);
+                }
 
                 // Listen to theme toggle changes from script.js
                 const themeBtn = document.getElementById('themeToggle');
@@ -285,29 +387,39 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // ---------------------------
 
-    // Render Language Grid
-    languages.forEach(lang => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.style.cursor = getUserRole() === 'anonymous' ? 'not-allowed' : 'pointer';
-        card.style.transition = 'transform 0.15s ease, box-shadow 0.15s ease';
-        card.style.display = 'flex';
-        card.style.alignItems = 'center';
-        card.style.gap = '0.75rem';
+    // Render Language Grid (Initial)
+    function renderLanguages(filterText = '') {
+        grid.innerHTML = '';
+        const filteredLangs = languages.filter(lang => 
+            lang.name.toLowerCase().includes(filterText.toLowerCase()) || 
+            lang.description.toLowerCase().includes(filterText.toLowerCase())
+        );
+
+        if (filteredLangs.length === 0) {
+            grid.innerHTML = '<p class="task-hint" style="grid-column: 1 / -1;">No languages found matching your search.</p>';
+            return;
+        }
+
+        filteredLangs.forEach(lang => {
+            const card = document.createElement('div');
+            card.className = 'lang-card';
+        if (getUserRole() === 'anonymous') {
+            card.classList.add('disabled');
+        }
 
         card.innerHTML = `
-      <div style="font-size: 1.8rem; line-height: 1;">${lang.icon}</div>
-      <h3 style="margin: 0; font-size: 1.1rem;">${lang.name}</h3>
-    `;
-
-        card.addEventListener('mouseover', () => {
-            card.style.transform = 'translateY(-2px)';
-            card.style.boxShadow = 'var(--shadow-soft)';
-        });
-        card.addEventListener('mouseout', () => {
-            card.style.transform = 'translateY(0)';
-            card.style.boxShadow = 'none';
-        });
+            <div class="lang-mark-container" style="--lang-color: ${lang.color};">
+                ${lang.icon}
+            </div>
+            <div class="lang-info">
+                <h3 class="lang-name">${lang.name}</h3>
+                <div class="lang-description">${lang.description}</div>
+            </div>
+            <div class="lang-action">
+                <span>Explore ${lang.name}</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </div>
+        `;
 
         card.addEventListener('click', () => {
             if (getUserRole() === 'anonymous') return;
@@ -316,11 +428,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // --- ROUTE TO MODE SELECT ---
             modeSelect.style.display = 'block';
-            modeSelectTitle.innerHTML = `${lang.icon} ${lang.name}`;
+            modeSelectTitle.innerHTML = `<span class="lang-mark-inline-svg">${lang.icon}</span> ${lang.name}`;
         });
 
         grid.appendChild(card);
-    });
+        });
+    }
+
+    renderLanguages();
+
+    // Setup Search
+    const langSearch = document.getElementById('langSearch');
+    if (langSearch) {
+        langSearch.addEventListener('input', (e) => {
+            renderLanguages(e.target.value);
+            applyAuthGating();
+        });
+    }
 
     // --- MODE SELECT ROUTING LOGIC ---
     if (backFromModeSelectBtn) {
@@ -337,6 +461,9 @@ document.addEventListener('DOMContentLoaded', () => {
             currentChallenge = null;
             modeSelect.style.display = 'none';
             detailView.style.display = 'block';
+            if (document.getElementById('practiceProblemContainer')) {
+                document.getElementById('practiceProblemContainer').style.display = 'none';
+            }
             title.innerHTML = `${currentLanguage.icon} ${currentLanguage.name} Freestyle`;
 
             // Toggle Terminal Input Container
@@ -344,17 +471,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 inputContainer.style.display = currentLanguage.requiresInput ? 'block' : 'none';
             }
 
-            // Reset workspace freely
-            if (monacoEditor) {
-                const model = monacoEditor.getModel();
-                monaco.editor.setModelLanguage(model, currentLanguage.id === 'c' || currentLanguage.id === 'cpp' ? 'cpp' : currentLanguage.id);
-                monacoEditor.setValue(currentLanguage.defaultCode);
-            }
-
-            if (terminal) {
-                terminal.innerHTML = 'Click "Run" to execute your code.';
-                terminal.className = 'execution-terminal empty';
-            }
+            // Restore isolated workspace state for this language
+            switchWorkspace(currentLanguage.defaultCode, currentLanguage.id);
         });
     }
 
@@ -487,6 +605,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentChallenge = details;
                 challengeListSection.style.display = 'none';
                 detailView.style.display = 'block';
+                if (document.getElementById('practiceProblemContainer')) {
+                    document.getElementById('practiceProblemContainer').style.display = 'block';
+                }
                 title.innerHTML = `${currentLanguage.icon} ${currentChallenge.keywordTitle}`;
 
                 // Render Content
@@ -498,18 +619,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     inputContainer.style.display = currentLanguage.requiresInput ? 'block' : 'none';
                 }
 
-                // Populate Monaco with Challenge Starter Code natively
-                if (monacoEditor) {
-                    const model = monacoEditor.getModel();
-                    monaco.editor.setModelLanguage(model, currentLanguage.id === 'c' || currentLanguage.id === 'cpp' ? 'cpp' : currentLanguage.id);
-                    // Use detailed statement and starter code from backend
-                    const defaultCode = details.starterCode || currentLanguage.defaultCode;
-                    monacoEditor.setValue(defaultCode);
-                }
-
-                if (terminal) {
-                    terminal.innerHTML = `<strong>${details.keywordTitle}</strong>\n\n${details.fullProblemStatement}\n\n<span class="term-sys">Click "Run" to execute your code.</span>`;
-                    terminal.className = 'execution-terminal';
+                // Restore isolated workspace state for this challenge
+                const defaultCode = details.starterCode || currentLanguage.defaultCode;
+                switchWorkspace(defaultCode, currentLanguage.id);
+                
+                // If it's a first-time initialization for this challenge, set up the terminal header
+                const key = getWorkspaceKey();
+                if (workspaceStates[key] && workspaceStates[key].terminalHtml === 'Click "Run" to execute your code.') {
+                    workspaceStates[key].terminalHtml = `<strong>${details.keywordTitle}</strong>\n\n${details.fullProblemStatement}\n\n<span class="term-sys">Click "Run" to execute your code.</span>`;
+                    workspaceStates[key].terminalClass = 'execution-terminal';
+                    if (terminal) {
+                        terminal.innerHTML = workspaceStates[key].terminalHtml;
+                        terminal.className = workspaceStates[key].terminalClass;
+                    }
                 }
             });
 
@@ -584,51 +706,72 @@ document.addEventListener('DOMContentLoaded', () => {
     // UI Resets
     if (clearCodeBtn && editorContainer) {
         clearCodeBtn.addEventListener('click', () => {
-            if (monacoEditor) monacoEditor.setValue('');
+            const key = getWorkspaceKey();
+            if (key && workspaceStates[key]) {
+                const defaultCode = currentChallenge ? (currentChallenge.starterCode || currentLanguage.defaultCode) : currentLanguage.defaultCode;
+                if (workspaceStates[key].model) {
+                    workspaceStates[key].model.setValue(defaultCode);
+                }
+            }
         });
     }
     if (clearTermBtn && terminal) {
         clearTermBtn.addEventListener('click', () => {
-            terminal.innerHTML = 'Console cleared.';
-            terminal.className = 'execution-terminal empty';
+            const key = getWorkspaceKey();
+            if (key && workspaceStates[key]) {
+                workspaceStates[key].terminalHtml = 'Console cleared.';
+                workspaceStates[key].terminalClass = 'execution-terminal empty';
+                terminal.innerHTML = workspaceStates[key].terminalHtml;
+                terminal.className = workspaceStates[key].terminalClass;
+            }
         });
     }
 
     // Code Execution Logic
     if (runBtn && editorContainer && terminal) {
-        const originalBtnHtml = runBtn.innerHTML;
-
         runBtn.addEventListener('click', async () => {
             if (getUserRole() === 'anonymous') return;
             
-            if (currentExecutionState === 'unavailable') {
-                alert("Code execution is unavailable. Please start LearnTrace using START_LEARNTRACE.bat.");
-                if (terminal) terminal.innerHTML = '<span class="term-error">Code execution is unavailable. Please start LearnTrace using START_LEARNTRACE.bat.</span>';
+            if (globalExecutionStatus === 'unavailable') {
+                if (terminal) terminal.innerHTML = '<span class="term-error">Execution service is currently unavailable. Ensure backend and Docker are running.</span>';
                 return;
-            } else if (currentExecutionState === 'starting') {
+            } else if (globalExecutionStatus === 'starting') {
                 if (terminal) terminal.innerHTML = '<span class="term-sys">Starting execution environment...</span>';
                 return;
             }
 
-            const code = monacoEditor ? monacoEditor.getValue().trim() : '';
+            const executionKey = getWorkspaceKey();
+            if (!executionKey || !workspaceStates[executionKey]) return;
+
+            if (workspaceStates[executionKey].executionState === 'running') return;
+
+            const code = workspaceStates[executionKey].model ? workspaceStates[executionKey].model.getValue().trim() : '';
             if (!code || !currentLanguage) return;
 
-            // 1. DISABLE BUTTON + SHOW SPINNER
-            runBtn.disabled = true;
-            runBtn.innerHTML = '<svg class="run-spinner" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-dasharray="31.4 31.4" stroke-linecap="round"/></svg> Running\u2026';
-            terminal.className = 'execution-terminal';
-            terminal.innerHTML = `<span class="term-sys">&gt; Executing ${currentLanguage.name}\u2026</span>\n`;
+            workspaceStates[executionKey].executionState = 'running';
+            if (getWorkspaceKey() === executionKey) {
+                updateExecutionUI();
+            }
+            
+            const startingHtml = `<span class="term-sys">&gt; Executing ${currentLanguage.name}\u2026</span>\n`;
+            workspaceStates[executionKey].terminalClass = 'execution-terminal';
+            workspaceStates[executionKey].terminalHtml = startingHtml;
+
+            if (getWorkspaceKey() === executionKey) {
+                terminal.className = 'execution-terminal';
+                terminal.innerHTML = startingHtml;
+            }
 
             const payload = {
                 language: currentLanguage.id,
                 code: code,
-                input: inputArea ? inputArea.value : "",
+                input: workspaceStates[executionKey].input || "",
                 profileId: getUserId() !== 'anonymous' ? getUserId() : null,
                 problemId: currentChallenge ? currentChallenge.problemId : null
             };
 
-            // 2. FETCH WITH 25-SECOND TIMEOUT (Judge0 may take a moment)
             const controller = new AbortController();
+            workspaceStates[executionKey].abortController = controller;
             const timeoutId = setTimeout(() => controller.abort(), 25000);
 
             try {
@@ -647,15 +790,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error(`Server returned invalid response: ${response.status}`);
                 }
 
-                terminal.innerHTML = ''; // Start clean
+                let finalHtml = '';
 
                 if (!response.ok || (result.exitCode !== 0 && !result.stdout)) {
-                    // 3. ERROR DISPLAY
                     let errorMsg = result.stderr || "Execution Failed";
                     let statusLabel = result.status || "Error";
-                    terminal.innerHTML = `<span class="term-error">&gt; ${statusLabel}</span><br><br><span class="term-error">${errorMsg.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>`;
+                    finalHtml = `<span class="term-error">&gt; ${statusLabel}</span><br><br><span class="term-error">${errorMsg.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>`;
                 } else {
-                    // 4. SUCCESS OUTPUT
                     let outHtml = '';
                     let statusLabel = result.status || "Success";
 
@@ -676,7 +817,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         outHtml += `\n\n<span class="term-sys">[Finished with exit code ${result.exitCode || 0}]</span>`;
                     }
 
-                    // Add execution metrics
                     let metrics = [];
                     if (result.time !== undefined && result.time !== null) {
                         metrics.push(`${(result.time / 1000).toFixed(2)}s`);
@@ -689,19 +829,41 @@ document.addEventListener('DOMContentLoaded', () => {
                         outHtml += `\n<span class="term-sys" style="font-size: 0.8em; opacity: 0.6;">\n[Metrics: ${metrics.join(' | ')}]</span>`;
                     }
 
-                    terminal.innerHTML = outHtml;
+                    finalHtml = outHtml;
 
-                    // CHALLENGE TRACKING
                     if (result.exitCode === 0 && currentChallenge) {
                         const key = getStorageKey('problem', currentChallenge.problemId);
                         if (localStorage.getItem(key) !== 'solved') {
                             localStorage.setItem(key, 'solved');
-                            terminal.innerHTML += `\n<span style="color: #10b981; font-weight: bold; margin-top: 0.5rem; display: block;">\uD83C\uDFC6 Challenge Solved!</span>`;
+                            finalHtml += `\n<span style="color: #10b981; font-weight: bold; margin-top: 0.5rem; display: block;">\uD83C\uDFC6 Challenge Solved!</span>`;
                             updateTierProgressUI();
+
+                            // Save a session for the profile page
+                            try {
+                                const { saveSession } = await import('./storage.js');
+                                saveSession({
+                                    userId: getUserId(),
+                                    timestamp: Date.now(),
+                                    taskType: 'Coding Challenge',
+                                    taskId: currentChallenge.problemId,
+                                    pattern: 'Mastery',
+                                    sessionLabel: 'Coding Practice',
+                                    metrics: {
+                                        edits: 50,
+                                        durationSeconds: result.time ? Math.round(result.time / 1000) : 120,
+                                        retries: 1
+                                    }
+                                });
+                            } catch (e) {
+                                console.error('Failed to save session for profile:', e);
+                            }
                         }
                     }
+                }
 
-                    terminal.innerHTML = outHtml;
+                workspaceStates[executionKey].terminalHtml = finalHtml;
+                if (getWorkspaceKey() === executionKey) {
+                    terminal.innerHTML = finalHtml;
                 }
             } catch (e) {
                 clearTimeout(timeoutId);
@@ -713,11 +875,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     message = "&gt; Execution server unavailable. Please try again.";
                 }
-                terminal.innerHTML = `<span class="term-error">${message}</span>`;
+                
+                const errorHtml = `<span class="term-error">${message}</span>`;
+                workspaceStates[executionKey].terminalHtml = errorHtml;
+                if (getWorkspaceKey() === executionKey) {
+                    terminal.innerHTML = errorHtml;
+                }
             } finally {
-                runBtn.disabled = false;
-                runBtn.innerHTML = originalBtnHtml;
-                terminal.scroll({ top: terminal.scrollHeight, behavior: 'smooth' });
+                workspaceStates[executionKey].executionState = 'ready';
+                workspaceStates[executionKey].abortController = null;
+                if (getWorkspaceKey() === executionKey) {
+                    updateExecutionUI();
+                    terminal.scroll({ top: terminal.scrollHeight, behavior: 'smooth' });
+                }
             }
         });
     }
